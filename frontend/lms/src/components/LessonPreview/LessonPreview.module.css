@@ -1,0 +1,201 @@
+.PreviewBackground {
+  /* border: 1px solid red; */
+  height: 100dvh;
+  width: 100dvw;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  position: fixed;
+  background-color: hsla(0, 0%, 45%, 0.3);
+}
+
+.previewDiv {
+  width: 80%;
+  height: 90dvh;
+  max-height: 90dvh;
+  background-color: white;
+  opacity: 100%;
+  z-index: 100;
+  margin-top: 5%;
+  margin-left: 12%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1% 5% 2%;
+  /* border: 1px solid red; */
+  overflow: auto;
+}
+
+.previewDiv::-webkit-scrollbar {
+  display: none;
+}
+
+.EditbtnDiv {
+  /* border: 1px solid red; */
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.btn {
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  color: white;
+  background-color: rgb(180, 211, 59);
+}
+
+.Titlediv {
+  width: 100%;
+  /* border: 1px solid red; */
+  height: auto;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-size: cover;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 1%;
+}
+
+.TitleHeadingDiv {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  /* border: 1px solid rgb(255, 0, 0); */
+  justify-content: center;
+}
+
+.deleteIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+ 
+}
+
+.paradiv {
+  /* border: 1px solid blue; */
+  height: auto;
+  width: 100%;
+  padding: 2%;
+}
+
+.textDiv {
+  /* border: 1px solid red; */
+  display: flex;
+}
+
+.paragraph {
+  width: 97%;
+  height: auto;
+  /* border: 1px solid blue; */
+  text-align: justify;
+  text-justify: auto;
+  padding: 5px;
+  max-width: 100%;
+  text-wrap: wrap;
+  margin-right: 20px;
+}
+
+.OtherContentDiv{
+    width: 100%;
+    height: auto;
+    /* border: 1px solid red; */
+    margin-top: 2%;
+}
+
+.PPTDiv {
+  /* border: 1px solid red; */
+  height: auto;
+  width: 100%;
+  height: 500px;
+  padding: 0px 20px;
+  display: flex;
+  margin-top: 50px;
+}
+
+.PPTiframe {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+
+.ImagesDiv{
+    margin: 40px 0px;
+    width: 100%;
+    padding: 0px 20px;
+}
+
+.ImageGrid{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: auto;
+    row-gap: 40px;
+    column-gap: 40px;
+    padding: 20px ;
+    border-radius: 10px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.ImageGridItem{
+    height: 200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+}
+
+.images{
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    /* border: 1px solid red; */
+}
+
+.imgdeleteIcon{
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.VideoDiv{
+  /* border:  1px solid red; */
+  height: auto;
+  width: 100%;
+  padding: 1% 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reactplayerDiv{
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0px;
+}
+
+.reactPlayer{
+  /* border: 1px solid blue; */
+  margin-top: 30px;
+  border-radius: 5px;
+}
+
+.gdriveDiv{
+  /* border: 1px solid red; */
+  height: 500px;
+  width: 100%;
+  padding: 2%;
+}
+
+.driveVideo{
+  height: 100%;
+  width: 100%;  
+  /* border: 1px solid red; */
+}

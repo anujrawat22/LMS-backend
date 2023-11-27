@@ -1,0 +1,119 @@
+.EditableTitleDiv {
+  width: 100%;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  box-sizing: border-box;
+  row-gap: 5%;
+}
+
+.TextField {
+  margin: 0% 2%;
+}
+
+.TitleDiv {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+/* 
+.TextField {
+  font-size: 18px;
+  border: 2px solid #ccc;
+  padding: 10px;
+  width: 100%;
+}
+
+.TextField:focus {
+  border-color: #007bff; 
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.TextField {
+  font-size: 18px;
+  border: 2px solid #ccc;
+  padding: 10px;
+  width: 100%;
+}
+
+.TextField:focus {
+  border-color: #007bff; 
+}
+
+
+.TextField.animate {
+  animation: fadeIn 0.5s ease-in-out forwards;
+} */
+
+.imageDiv {
+  width: 80%;
+  display: flex;
+  align-items: center;
+  padding: 0px 0px 0px 10%;
+  display: flex;
+justify-content: space-around;
+}
+
+.desDiv {
+  /* border : 1px solid red; */
+  display: flex;
+  align-items: center;
+  margin: 40px 0px 0px 0px;
+  width: 100%;
+  justify-content: space-around;
+  padding: 0px 5%;
+}
+
+.descriptionDiv {
+  /* border: 1px solid red; */
+  width: 50%;
+  display: flex;
+  align-items: center;
+}
+
+.currencyDiv {
+  width: 50%;
+  /* border: 1px solid blue; */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.descriptionTextarea {
+  width: 90%;
+  height: 70px;
+  padding: 10px 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+}
+
+.descriptionTextarea:focus {
+  outline: none !important;
+  border: 2px solid rgb(25, 118, 210);
+}
+
+
+.LogoDiv{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-left: 20%;
+}
+
+.LogoUrlDiv{
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}

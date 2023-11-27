@@ -1,0 +1,138 @@
+.coursedetailsdiv {
+  margin-top: 100px;
+  box-sizing: border-box;
+}
+
+.coursesectionssidenavbar {
+  overflow: auto;
+  max-height: 75vh;
+  height: 75vh;
+  overflow-x: hidden;
+}
+
+.main-content {
+  padding: 0px 5px;
+  overflow-y: auto;
+  max-height: 85vh;
+  box-sizing: border-box;
+}
+
+.main-content::-webkit-scrollbar {
+  width: 5px; /* Set the width of the scrollbar */
+}
+/* For WebKit based browsers (like Chrome and Safari) */
+.main-content::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scrollbar thumb */
+  border-radius: 100px;
+}
+/* For Firefox */
+.main-content {
+  scrollbar-width: thin; /* Set the scrollbar width to thin */
+}
+/* For Firefox */
+.main-content::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scrollbar thumb */
+}
+.main-content::-webkit-scrollbar {
+  width: 5px; /* Set the width of the scrollbar */
+}
+/* For WebKit based browsers (like Chrome and Safari) */
+.main-content::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scrollbar thumb */
+  border-radius: 100px;
+}
+/* For Firefox */
+.main-content {
+  scrollbar-width: thin; /* Set the scrollbar width to thin */
+}
+/* For Firefox */
+.main-content::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scrollbar thumb */
+}
+
+.course-sections-sidenavbar::-webkit-scrollbar {
+  width: 5px; /* Set the width of the scrollbar */
+}
+/* For WebKit based browsers (like Chrome and Safari) */
+.course-sections-sidenavbar::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scrollbar thumb */
+  border-radius: 100px;
+}
+/* For Firefox */
+.course-sections-sidenavbar {
+  scrollbar-width: thin; /* Set the scrollbar width to thin */
+}
+/* For Firefox */
+.course-sections-sidenavbar::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scrollbar thumb */
+}
+.course-sections-sidenavbar::-webkit-scrollbar {
+  width: 5px; /* Set the width of the scrollbar */
+}
+/* For WebKit based browsers (like Chrome and Safari) */
+.course-sections-sidenavbar::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scrollbar thumb */
+  border-radius: 100px;
+}
+/* For Firefox */
+.course-sections-sidenavbar {
+  scrollbar-width: thin; /* Set the scrollbar width to thin */
+}
+/* For Firefox */
+.course-sections-sidenavbar::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scrollbar thumb */
+}
+
+/* Add CSS to hide/show the sidebar based on mobile view and toggle button */
+@media (max-width: 900px) {
+  .course-sections-sidenavbar {
+    display: none;
+  }
+  .course-sections-sidenavbar.open {
+    display: block;
+  }
+  .menu-icon {
+    display: block;
+  }
+}
+
+.videoresponsiveiframe {
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  height: 500px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 700px) {
+  .video-responsive-iframe {
+    width: 100%;
+    margin-top: 30px;
+    margin-bottom: 90px;
+    box-sizing: border-box;
+    height: 300px;
+    box-sizing: border-box;
+  }
+  .course-details-div {
+    margin-top: 170px;
+  }
+}
+
+.LessonAccordance {
+  /* border: 1px solid red; */
+  width: 100%;
+  height: auto;
+  padding: 3px 5px;
+  margin: 10px 0px;
+}
+
+.LessonAccordance:hover {
+  background-color: rgb(180, 211, 59);
+  color: white;
+  transform: scale(1.03);
+  transition: 400ms;
+}
+
+.css-5on91j-MuiPaper-root-MuiAccordion-root {
+  box-shadow: 1px 1px 1px 1px #ced2d6 !important;
+}

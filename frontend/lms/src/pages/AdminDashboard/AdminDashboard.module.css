@@ -1,0 +1,14 @@
+.dashboardsidebar {
+  /* border : 1px solid red; */
+  height: 100%;
+  width: 20%;
+}
+
+.HeadingDiv {
+  /* border: 1px solid red; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+

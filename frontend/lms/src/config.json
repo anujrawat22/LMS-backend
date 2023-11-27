@@ -1,0 +1,44 @@
+{
+  "recurring": {
+    "domainUrl": "http://localhost:8080/api",
+    "post": {
+      "login": "users/login",
+      "verifyOtp": "users/verify-otp",
+      "forgetPassword": "users/forget-password",
+      "resetPassword": "users/reset-password",
+      "signup": "users/signup",
+      "upload": "media/upload",
+      "sendEmail": "users/sendEmail",
+      "approvalRequest": "users",
+      "addCourse": "courses/create",
+      "autoLogin": "users/autoLogin",
+      "assignCourse": "usercourses/assign",
+      "addstudentsCSV": "users/addstudents/importCsv",
+      "addstudentManually": "users/addstudent",
+      "addSection": "courses/addSection"
+    },
+    "get": {
+      "allstudents": "users/all",
+      "studentdetail": "users/detail",
+      "csvDownload": "users/download",
+      "courseData": "courses/all",
+      "adminDetails": "users/admin/details",
+      "courseDetail": "courses",
+      "checkUserCourses": "users/check/UserCourse"
+    },
+    "delete": {
+      "unassignCourse": "usercourses/unassign",
+      "deleteUser": "users/delete",
+      "deleteCourse": "courses/delete",
+      "deleteSection": "courses/delete/section",
+      "deleteLesson": "courses/delete/lesson"
+    },
+    "update": {
+      "user_role_update": "users/update/role",
+      "updateLesson": "courses/update"
+    },
+    "put": {
+      "updateCourse": "courses/update"
+    }
+  }
+}

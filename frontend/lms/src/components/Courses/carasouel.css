@@ -1,0 +1,33 @@
+.iframeFullScreen,
+.imageFullScreen {
+  width: 100%;
+  height: 100vh;
+}
+
+.iframeNotFullScreen,
+.imageNotFullScreen {
+  width: 100%;
+  height: 10vh;
+}
+
+.image-gallery-thumbnails-wrapper {
+  display: none;
+}
+
+.image-gallery-content .image-gallery-slide .image-gallery-image {
+  height: 400px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+  .image-gallery-content .image-gallery-slide .image-gallery-image {
+    height: auto;
+  }
+}
+
+.MainContainer:hover {
+  border: 1px solid #bad900;
+  color: #bad900 !important;
+  box-shadow: 0px 1px 5px 0px #bad900;
+}

@@ -1,0 +1,274 @@
+.AddCourseModal {
+  position: fixed;
+  width: 95dvw;
+  height: 100dvh;
+  /* border: 10px solid red; */
+  top: 10%;
+  left: 5%;
+  background-color: #fff;
+  z-index: 10;
+  box-sizing: border-box;
+  padding: 1% 1%;
+  overflow: scroll;
+}
+
+.TitleDiv {
+  /* border: 1px solid red; */
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.backButton {
+  border: 1px solid rgb(180, 211, 59);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 30px;
+  border-radius: 5px;
+  background-color: rgb(180, 211, 59);
+  color: white;
+  cursor: pointer;
+}
+
+.backButton:hover {
+  transform: scale(1.05);
+  transition: 200ms;
+}
+
+.Title {
+  /* border: 1px solid red; */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.PreviewDiv {
+  /* border: 1px solid red; */
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: rgb(180,211,59);
+  color: white;
+}
+
+.Container {
+  /* border: 1px solid red; */
+  height: auto;
+  width: 100%;
+  margin-bottom: 50px;
+  display: flex;
+  padding: 50px;
+}
+
+.ContentDiv {
+  height: auto;
+  width: 75%;
+  /* border: 1px solid blue; */
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  padding: 20px;
+}
+
+.LessonTitleDiv {
+  /* border: 1px solid red; */
+  display: flex;
+  align-items: center;
+  padding: 0px 10px;
+  justify-content: space-between;
+}
+
+.TitlesubDiv {
+  display: flex;
+  align-items: center;
+}
+
+.SwitchDiv {
+  width: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.contentfuncDiv {
+  width: 100%;
+  height: auto;
+  margin: 50px 0px;
+  padding: 0px 10px;
+}
+
+.TextDiv {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+}
+
+.text {
+  width: 90%;
+  margin-right: 20px;
+  font-size: 1.2rem;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.text:focus {
+  outline: none !important;
+  border: 2px solid rgb(25, 118, 210);
+}
+
+.videoDiv {
+  width: 100%;
+
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.videoBtn {
+  border: 2px dashed gray;
+  width: 45%;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.videoUrlDiv {
+  border: 2px dashed gray;
+  width: 45%;
+  height: 150px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0px 10px;
+}
+
+.videoTextfield {
+  width: 90%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0px 10px;
+}
+
+.AddContentBtnDiv {
+  height: auto;
+  width: 25%;
+  /* border: 1px solid green; */
+}
+
+.AddImageDiv {
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.UploadImgDiv {
+  border: 2px dashed gray;
+  height: 100px;
+  width: 45%;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ImageUrl {
+  border: 2px dashed gray;
+  width: 45%;
+  height: 100px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0px 10px;
+}
+
+.bannerimage {
+  /* border: 1px solid red; */
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.Uploadbgimg {
+  border: 2px dashed gray;
+  height: 100px;
+  width: 45%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.UploadbgimgUrl {
+  width: 45%;
+  height: auto;
+  border: 2px dashed gray;
+  height: 100px;
+  border-radius: 10px;
+  padding: 0px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.EmbedMediDiv {
+  /* border: 1px solid red; */
+  width: 100%;
+  height: auto;
+  display: flex;
+  padding: 20px 40px;
+  align-items: center;
+}
+
+.PPTdiv {
+  /* border: 1px solid red; */
+  width: 100%;
+  height: auto;
+  display: flex;
+  padding: 20px 40px;
+  align-items: center;
+}
+
+.AddContentdiv {
+  /* border: 1px solid blue; */
+  width: 100%;
+  height: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 80px);
+  row-gap: 20px;
+  column-gap: 20px;
+  padding: 10px 20px;
+}
+
+.addContentBtn {
+  border: 1px solid rgb(123, 123, 123);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.addContentBtn:hover {
+  transform: scale(1.05);
+  transition: 400ms;
+  cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+.AddLessonbtnDiv {
+  /* border: 1px solid red; */
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

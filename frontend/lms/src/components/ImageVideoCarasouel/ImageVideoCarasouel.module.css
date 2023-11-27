@@ -1,0 +1,46 @@
+.playIcon {
+    background-image: url("https://w7.pngwing.com/pngs/566/248/png-transparent-computer-icons-youtube-play-button-button-angle-text-triangle.png");
+    background-size: cover;
+    width: 10px;
+    height: 10px;
+  }
+  
+  .simpleIcon {
+    /* background-image: url("../../public/assets/icons8-round-24.png"); */
+    background-size: cover;
+    width: 10px;
+    height: 10px;
+  }
+  
+  .image-gallery-bullets .image-gallery-bullet {
+    padding: 5px !important;
+  }
+  
+  .image-gallery-thumbnails-wrapper {
+    display: none;
+  }
+  
+  .image-gallery-bullets .image-gallery-bullet.active {
+    background: " !important";
+  }
+  
+  .iframeFullScreen,
+  .imageFullScreen {
+    width: 100%;
+    height: 100vh;
+  }
+  
+  .iframeNotFullScreen,
+  .imageNotFullScreen {
+    width: 100%;
+    height: 60vh;
+  }
+  
+  .image-gallery-left-nav,
+  .image-gallery-right-nav {
+    padding: 0px 20px;
+  }
+  
+  .image-gallery-svg {
+    height: 72px !important;
+  }
