@@ -5,6 +5,6 @@ const URL = config.recurring.domainUrl
 const endPoints = config.recurring.post.verifyOtp
 const api = `${URL}/${endPoints}`
 
-export const verifyOtp = (payload) => {
+export const VerifyOtp = (payload) => {
     return httpservice.post(api, payload)
 }

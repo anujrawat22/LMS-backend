@@ -87,12 +87,17 @@ exports.forgetPassword = async (req, res) => {
     const text = `Your OTP for password reset is : ${otp}`
     try {
         const user = await User.findOne({ email })
-        console.log(user)
         if (!user) {
             return res.status(404).send({ error: "User dosen't exist" })
         }
         await sendEmail(email, subject, text)
-        res.status(200).send({ msg: "Otp sent to the email Id" })
+
+        setTimeout(() => {
+            delete otps[email];
+            console.log(`Deleted OTP for email: ${email}`);
+        }, 600000);
+
+        res.status(200).send({ msg: `Otp sent to ${email}` })
     } catch (error) {
         console.log("Error sending OTP to email:", error)
         res.status(500).send({ error: "Server error" })
@@ -117,6 +122,7 @@ exports.verifyOTP = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
     const { email, newPassword } = req.body;
+    console.log(email, newPassword)
     try {
         const user = await User.findOne({ email })
         if (!user) {
@@ -430,10 +436,10 @@ exports.userdetailsbyId = async (req, res) => {
 
 
 exports.sendEmail = async (req, res) => {
-    const { studentIds, subject, content } = req.body;
+    const { studentIds, subject, body } = req.body;
     try {
         const users = Object.keys(studentIds)
-        if (users.length === 0 || (subject === '' || null) || (content === '' || null)) {
+        if (users.length === 0 || (subject === '' || null) || (body === '' || null)) {
             return res.status(400).send({ error: "Enter required fields" })
         }
         const selectedUserIds = users.filter(userId => studentIds[userId]);
@@ -443,7 +449,7 @@ exports.sendEmail = async (req, res) => {
         console.log(emails)
 
         for (const user of emails) {
-            await sendEmail(user.email, subject, content)
+            await sendEmail(user.email, subject, body)
         }
         res.status(200).send({ msg: "Email sent succesfully" })
     } catch (error) {

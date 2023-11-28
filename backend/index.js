@@ -15,18 +15,13 @@ app.use(express.json())
 app.use(cors({
     origin: "*"
 }))
-
-
-app.get("/", (req, res) => {
-    res.send("<h1>Welcome to lms backend</h1>")
-})
 app.use("/api/users", UserRouter)
 
 app.use("/api/courses", CourseRouter)
 
 app.use("/api/media", MediaRouter)
 
-app.use("/api/usercourses", Authenticate, Authorize(['admin', 'superadmin']), UserCourseRouter)
+app.use("/api/usercourses",Authenticate , Authorize(['admin','superadmin']), UserCourseRouter)
 
 app.listen(port, async () => {
     try {

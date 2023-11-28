@@ -3,9 +3,9 @@ import httpservice from './httpservice';
 
 
 const URL = config.recurring.domainUrl;
-const endPoints = config.recurring.post.forgetPassword
+const endPoints = config.recurring.post.resetPassword
 const api = `${URL}/${endPoints}`
 
-export const resetPassword = (payload) => {
+export const ResetPassword = (payload) => {
     return httpservice.post(api, payload)
 }

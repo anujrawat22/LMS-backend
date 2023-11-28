@@ -206,12 +206,12 @@ export default function UserLoginform() {
                                                     </Grid>
                                                     <Grid container item xs={12} sx={{ display: "flex" }}>
                                                         <Grid item xs={12} sm={12} md={6} lg={6} sx={{ display: "flex", ml: "2em", mr: "2em" }} >
-                                                            Not registered yet?
+                                                            Not registered yet? <Link href="#" variant="body2" to="/signup" style={{ color: "white" , marginLeft : '10px' }} >
+                                                                {"Sign Up"}
+                                                            </Link>
                                                         </Grid>
                                                         <Grid item xs={12} sm={12} md={6} lg={6} sx={{ display: "flex", ml: "2em", mr: "2em", mt: "1em" }}>
-                                                            <Link href="#" variant="body2" to="/signup" style={{ color: "white" }} >
-                                                                {"Don't have an account? Sign Up"}
-                                                            </Link>
+                                                           
                                                         </Grid>
                                                     </Grid>
                                                 </Grid>

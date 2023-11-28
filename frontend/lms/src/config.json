@@ -1,6 +1,6 @@
 {
   "recurring": {
-    "domainUrl": "https://busy-ruby-dibbler-vest.cyclic.app/api",
+    "domainUrl": "http://localhost:8080/api",
     "post": {
       "login": "users/login",
       "verifyOtp": "users/verify-otp",

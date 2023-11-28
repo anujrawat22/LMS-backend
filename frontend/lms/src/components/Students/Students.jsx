@@ -58,7 +58,6 @@ const Students = () => {
     const [filter, setFilter] = useState({ name: '', email: '' })
     const [checkedUsers, setCheckedUsers] = useState({});
     const [open, setOpen] = useState(false)
-    const [emailContent, setEmailContent] = useState({ subject: '', content: '' });
     const [selectedRowId, setSelectedRowId] = useState(null);
     const [role, setRole] = useState('');
     const [columns, setColumns] = useState([]);
@@ -119,18 +118,17 @@ const Students = () => {
 
 
 
-    const handlesendEmail = async (subject, body) => {
+    const handlesendEmail = async (mailData) => {
         try {
-            if ((subject === '' || null) || (body === '' || null)) {
+            if ((mailData.subject === '' || null) || (mailData.body === '' || null)) {
                 return toast.error("Enter required fields")
             }
-            const payload = { subject, body, studentIds: checkedUsers }
+            const payload = { ...mailData, studentIds: checkedUsers }
             setOpen(false)
             const loadingToast = toast.loading("Sending emails to selected users")
-            const response = await sendEmail(payload)
+            const response = await sendEmail(payload, token)
             toast.dismiss(loadingToast)
             toast.success("Emails sent successfully")
-            setEmailContent({ subject: '', content: '' })
             setCheckedUsers({})
         } catch (error) {
         }
@@ -292,7 +290,26 @@ const Students = () => {
 
 
     const handleSelectionModelChange = (newSelection) => {
+        console.log(newSelection)
+
         setRowSelectionModel(newSelection);
+        const selectedIds = newSelection
+
+
+        setCheckedUsers((prevCheckedUsers) => {
+
+            const newCheckedUsers = { ...prevCheckedUsers };
+
+            selectedIds.forEach((id) => {
+                if (!newCheckedUsers[id]) {
+                    newCheckedUsers[id] = true; // Add to the array if not already present
+                } else {
+                    delete newCheckedUsers[id]; // Remove from the array if already present
+                }
+            });
+            return newCheckedUsers;
+        });
+
     };
 
     useEffect(() => {
