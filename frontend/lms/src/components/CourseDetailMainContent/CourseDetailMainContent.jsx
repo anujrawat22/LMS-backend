@@ -9,6 +9,7 @@ import { CheckUserCourses } from '../../services/checkUserCourse.service';
 import ImageVideoCarasouel from '../ImageVideoCarasouel/ImageVideoCarasouel';
 import ReactPlayer from 'react-player';
 const CourseDetailMainContent = ({ data }) => {
+    console.log(data)
     const { id } = useParams()
     const { userdata } = useAuth()
     const role = userdata.role
@@ -74,6 +75,19 @@ const CourseDetailMainContent = ({ data }) => {
                                 </Typography>
                             </div>
                         }) : null
+                }
+                {
+                    data.embedMedia &&
+                    <div style={{
+                        width: '100%',
+                        height: '400px',
+                        padding: '0px 20%'
+                    }}>
+                        <iframe src={data.embedMedia} title='embedmedia' style={{
+                            width: '100%',
+                            height: "100%"
+                        }}></iframe>
+                    </div>
                 }
             </ >
         )

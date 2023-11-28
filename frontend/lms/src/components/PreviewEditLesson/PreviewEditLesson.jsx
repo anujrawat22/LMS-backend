@@ -62,7 +62,7 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData }) => {
                                     <Tooltip title='Delete'>
                                         <IconButton onClick={handleDeleteTitle}>
                                             <DeleteIcon sx={{
-                                                color: 'white'
+                                                color: 'rgb(77,135,51)'
                                             }} />
                                         </IconButton>
                                     </Tooltip>
@@ -84,7 +84,7 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData }) => {
                                     <Tooltip title='Delete'>
                                         <IconButton onClick={handleDeletetext}>
                                             <DeleteIcon sx={{
-                                                color: 'white'
+                                                color: 'rgb(77,135,51)'
                                             }} />
                                         </IconButton>
                                     </Tooltip>
@@ -114,7 +114,9 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData }) => {
                                         {isEditing &&
                                             <Tooltip title='Delete video'>
                                                 <IconButton onClick={() => handleDeleteVideo(video.url)}>
-                                                    <DeleteIcon />
+                                                    <DeleteIcon sx={{
+                                                        color: "rgb(77, 135, 51)"
+                                                    }} />
                                                 </IconButton>
                                             </Tooltip>
                                         }
@@ -130,7 +132,9 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData }) => {
                             {isEditing &&
                                 <Tooltip title='Delete PPT'>
                                     <IconButton onClick={handleDeleteppt}>
-                                        <DeleteIcon />
+                                        <DeleteIcon sx={{
+                                            color: "rgb(77, 135, 51)"
+                                        }} />
                                     </IconButton>
                                 </Tooltip>
                             }
@@ -143,7 +147,9 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData }) => {
                             {isEditing &&
                                 <Tooltip title='Delete Video'>
                                     <IconButton onClick={handleDeletevideo}>
-                                        <DeleteIcon />
+                                        <DeleteIcon sx={{
+                                            color: "rgb(77, 135, 51)"
+                                        }} />
                                     </IconButton>
                                 </Tooltip>
                             }

@@ -179,7 +179,9 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
                                     {thumbnailType ? <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}
                                         sx={{
                                             fontSize: '.8rem',
-                                            marginLeft: "10px"
+                                            marginLeft: "10px",
+                                            backgroundColor : 'rgb(77,135,51)',
+                                            border : '1px solid rgb(77,135,51)'
                                         }}>
                                         Upload Thumbnail
                                         <VisuallyHiddenInput type="file" onChange={handleImageUpload}
@@ -188,7 +190,9 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
                                         <div className={styles.LogoUrlDiv}>
                                             <TextField label='Logo Url' value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} />
                                             <Button variant='outlined' sx={{
-                                                marginLeft: '20px'
+                                                marginLeft: '20px',
+                                                color : 'rgb(77,135,51)',
+                                                border : '1px solid rgb(77,135,51)'
                                             }} onClick={handleLogoUrl}>Add</Button>
                                         </div>
                                     }
@@ -208,7 +212,9 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
                         {isEditing ? <>
                             <textarea className={styles.descriptionTextarea} name="" id="" cols="30" rows="5" placeholder='Enter Short Description' value={Description} onChange={handleDescriptionChange}></textarea>
                             <Button variant='outlined' sx={{
-                                marginLeft: '20px'
+                                marginLeft: '20px',
+                                border : '1px solid rgb(77,135,51)',
+                                color : 'rgb(77,135,51)'
                             }} onClick={handleSaveTitledes}>Save</Button>
                         </> : <>
                             <Typography variant='h6' className={styles.TextField}

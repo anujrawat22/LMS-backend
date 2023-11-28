@@ -163,7 +163,7 @@ const UserDetails = () => {
                                                     width: '90%'
                                                 }}>{course.title}</Typography>
                                                 <Button sx={{
-                                                    color: 'rgb(180,211,59)'
+                                                    color: "rgb(77, 135, 51)"
                                                 }} onClick={() => handleUnassignCourse(course._id)}><DeleteOutlineIcon /></Button></div>
                                         })
                                             :

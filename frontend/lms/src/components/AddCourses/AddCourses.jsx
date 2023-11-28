@@ -39,55 +39,32 @@ const AddCourses = () => {
 
     const handleOnDragEnd = (results) => {
         const { destination, type, source } = results;
+        console.log(destination.droppableId, source.droppableId)
         if (!results.destination) {
             return; // Not a valid drop target
         }
         if (
             source.droppableId === destination.droppableId &&
             source.index === destination.index
-        )  return;
+        ) return;
         if (type === 'group') {
             const updatedSections = [...sections];
             const [movedSection] = updatedSections.splice(results.source.index, 1);
             updatedSections.splice(results.destination.index, 0, movedSection);
             return setSections(updatedSections);
         }
-        const lessonSourceIndex = source.index;
-        const lessonDestinationIndex = destination.index;
 
-        const storeSourceIndex = sections.findIndex(
-            (Lesson) => Lesson.LessonId === source.draggableId
-        )
+        if (results.type === 'item') {
+            const sourceSectionIndex = sections.findIndex(section => section.sectionid === source.droppableId);
+            const destinationSectionIndex = sections.findIndex(section => section.sectionid === destination.droppableId);
 
-        const storeDestinationIndex = sections.findIndex(
-            (Lesson) => Lesson.LessonId === destination.droppableId
-        )
-
-        // console.log(lessonSourceIndex , lessonDestinationIndex , storeSourceIndex , storeDestinationIndex)
-
-        // const newLessonItem = [...sections[storeSourceIndex].subsections]
-
-        // const newLessonDestination =
-        //     source.droppableId !== destination.droppableId
-        //         ? [...sections[storeDestinationIndex].subsections]
-        //         : newLessonItem
-
-        // const [deleteLesson] = newLessonItem.splice(lessonSourceIndex, 1);
-        // newLessonDestination.splice(lessonDestinationIndex, 0, deleteLesson);
-
-        // const newSections = [...sections];
-
-        // newSections[lessonSourceIndex] = {
-        //     ...sections[lessonSourceIndex],
-        //     subsections: newLessonItem
-        // }
-
-        // newSections[storeDestinationIndex] = {
-        //     ...sections[storeDestinationIndex],
-        //     subsections: newLessonDestination,
-        // }
-
-        // setSections(newSections)
+            if (sourceSectionIndex !== -1 && destinationSectionIndex !== -1) {
+                const updatedSections = [...sections];
+                const [movedLesson] = updatedSections[sourceSectionIndex].subsections.splice(source.index, 1);
+                updatedSections[destinationSectionIndex].subsections.splice(destination.index, 0, movedLesson);
+                setSections(updatedSections);
+            }
+        }
     }
 
     const generateSectionId = () => {
@@ -258,7 +235,7 @@ const AddCourses = () => {
                                     <div className={styles.DroppableDiv}>
                                         {
                                             sections.length > 0 && sections.map((section, index) => {
-                                                return <Droppable droppableId={section.sectionid} type="group">
+                                                return <Droppable droppableId={section.sectionid} type="group" key={section.sectionid}>
                                                     {(provided) => (
                                                         <div className={styles.SectionsDiv} {...provided.droppableProps} ref={provided.innerRef}>
                                                             <Draggable key={section.sectionid} draggableId={section.sectionid} index={index}>
@@ -285,7 +262,10 @@ const AddCourses = () => {
                                                                                                     marginLeft: '20px',
                                                                                                 }}
                                                                                             />
-                                                                                            <Button onClick={() => handleEditTitle(section.sectionid, false)}>Save</Button>
+                                                                                            <Button onClick={() => handleEditTitle(section.sectionid, false)} sx={{
+                                                                                                color: 'rgb(77,135,51)',
+                                                                                                border: '1px solid rgb(77,135,51)'
+                                                                                            }}>Save</Button>
                                                                                         </>
                                                                                     ) : (
                                                                                         <>
@@ -303,7 +283,7 @@ const AddCourses = () => {
                                                                             {section.subsections.length > 0 &&
                                                                                 section.subsections.map((subsection, index) => {
                                                                                     return (
-                                                                                        <Droppable key={subsection.LessonId} droppableId={subsection.LessonId}>
+                                                                                        <Droppable key={subsection.LessonId} droppableId={subsection.LessonId} type='item'>
                                                                                             {
                                                                                                 (provided) => (
                                                                                                     <div
@@ -314,10 +294,10 @@ const AddCourses = () => {
                                                                                                                 (provided) => (
                                                                                                                     <div ref={provided.innerRef}
                                                                                                                         {...provided.draggableProps}
-                                                                                                                        {...provided.dragHandleProps} className={styles.subsections}>
-                                                                                                                        <div>
-                                                                                                                            <DragIndicatorIcon className={styles.DragIndicatorIcon} />
-                                                                                                                        </div>
+                                                                                                                        {...provided.dragHandleProps} className={styles.subsections} style={{
+                                                                                                                            borderBottom: '1px solid rgb(230,230,230)'
+                                                                                                                        }}>
+
                                                                                                                         <div className={styles.subsectionInfo}>
                                                                                                                             <Typography variant="h6">{subsection.Title}</Typography>
                                                                                                                             <div className={styles.LessonSwitchDiv}>
@@ -347,7 +327,9 @@ const AddCourses = () => {
                                                                                 )
                                                                             }
                                                                             <div className={styles.ButtonDiv}>
-                                                                                <Button startIcon={<AddCircleOutlineIcon />} onClick={() => handleNewLesson(section.sectionid)}>
+                                                                                <Button startIcon={<AddCircleOutlineIcon />} onClick={() => handleNewLesson(section.sectionid)} sx={{
+                                                                                    color: 'rgb(77,135,51)'
+                                                                                }}>
                                                                                     New lesson
                                                                                 </Button>
                                                                             </div>
@@ -369,12 +351,18 @@ const AddCourses = () => {
                                 </div>
                             </DragDropContext>
                             <div className={styles.addnewSectionDiv}>
-                                <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddnewSection}>
+                                <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddnewSection} sx={{
+                                    border: '1px solid rgb(77,135,51)',
+                                    color: 'rgb(77,135,51)'
+                                }}>
                                     New Section
                                 </Button>
                             </div>
 
-                            <Button style={{ marginTop: '2%' }} variant="contained" onClick={() => handleAddCourse()}>
+                            <Button style={{ marginTop: '2%' }} variant="contained" onClick={() => handleAddCourse()} sx={{
+                              backgroundColor : 'rgb(77,135,51)',
+                              border : '1px solid rgb(77,135,51)'
+                            }}>
                                 Finish Adding Course
                             </Button>
                         </Paper>

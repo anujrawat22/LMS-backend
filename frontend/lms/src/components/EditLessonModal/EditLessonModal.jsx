@@ -182,29 +182,24 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
 
 
     const embedUrl = (url) => {
-        const parts = url.split('?'); // Split the URL at the question mark
-
-        // Check if the split resulted in two parts (indicating a valid URL with a query string)
+        const parts = url.split('?'); 
         if (parts.length === 2) {
             const baseUrl = parts[0];
             const query = parts[1];
 
-            // Create the new URL by replacing '/pub' with '/embed' in the base URL
+           
             const newBaseUrl = baseUrl.replace('/pub', '/embed');
             const newUrl = `${newBaseUrl}?${query}`;
-
-            // Validate the new URL using the URL constructor
             try {
                 new URL(newUrl);
-                // If the URL is valid, update the slideUrl state with the new URL
+               
                 return newUrl
             } catch (error) {
-                // Handle invalid URL (e.g., show an error message)
+               
                 console.log(error)
                 toast.error('Invalid URL');
             }
         } else {
-            // Handle invalid URL (e.g., show an error message)
             toast.error('Invalid URL');
         }
     }

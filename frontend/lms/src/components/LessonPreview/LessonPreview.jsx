@@ -6,7 +6,6 @@ import toast from 'react-hot-toast';
 import ReactPlayer from 'react-player';
 import ImageVideoCarasouel from '../ImageVideoCarasouel/ImageVideoCarasouel';
 const LessonPreview = ({ LessonContent, setLessonContent, setPreviewOpen }) => {
-    console.log(LessonContent)
     const [isEditing, setEditing] = useState(false)
     const handlePreviewClick = (e) => {
         e.stopPropagation();

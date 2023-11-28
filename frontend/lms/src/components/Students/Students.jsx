@@ -290,7 +290,6 @@ const Students = () => {
 
 
     const handleSelectionModelChange = (newSelection) => {
-        console.log(newSelection)
 
         setRowSelectionModel(newSelection);
         const selectedIds = newSelection

@@ -406,7 +406,7 @@ export default function CourseChapters() {
                                             }}>
 
                                                 {userHasCourse && <button style={{
-                                                    backgroundColor: "rgb(77,135,51)",
+                                                    backgroundColor: "rgb(77, 135, 51)",
                                                     border: "1px solid rgb(77,135,51)",
                                                     borderRadius: "4px",
                                                     color: "#fff",
@@ -528,15 +528,9 @@ export default function CourseChapters() {
                                                                 return <Droppable droppableId={lesson._id} key={lesson._id} index={lessonindex}>
                                                                     {(provided) => (<div {...provided.droppableProps} ref={provided.innerRef} className='lessonDropDiv'>
 
-                                                                        <div key={lesson._id} ref={provided.innerRef}
-                                                                            {...provided.draggableProps}
+                                                                        <div key={lesson._id}
                                                                             className='lessonDiv'>
                                                                             <div className='lessonTitleDiv'>
-                                                                                <Tooltip title='Drag section'>
-                                                                                    <IconButton {...provided.dragHandleProps}>
-                                                                                        <DragIndicatorIcon className='dragIcon' />
-                                                                                    </IconButton>
-                                                                                </Tooltip>
                                                                                 <Typography>{lesson.Title}</Typography>
                                                                             </div>
                                                                             <div className='lessonControlDiv'>
@@ -553,7 +547,7 @@ export default function CourseChapters() {
                                                                                             backgroundColor: 'rgb(77, 135, 51)',
                                                                                             opacity: 0.5,
                                                                                         },
-                                                                                    }} key={lesson._id}/>
+                                                                                    }} key={lesson._id} />
                                                                                 </div>
                                                                                 <Tooltip  >
                                                                                     <IconButton onClick={(e) => { handleLessonMenuOpen(e, sectionindex, lessonindex, section._id, lesson._id) }}>
@@ -667,8 +661,8 @@ export default function CourseChapters() {
                                         }}>
                                             {lesson.isfree ?
                                                 <button style={{
-                                                    backgroundColor: "#bad900",
-                                                    border: "1px solid #bad900",
+                                                    backgroundColor: "rgb(77, 135, 51)",
+                                                    border: "1px solid rgb(77, 135, 51)",
                                                     borderRadius: "4px",
                                                     color: "#fff",
                                                     cursor: "pointer",
@@ -685,7 +679,7 @@ export default function CourseChapters() {
                                                 </button>
                                                 :
                                                 <button style={{
-                                                    backgroundColor: "hsl(72.24,63.33%,52.94%,0.5)",
+                                                    backgroundColor: "hsl(101.43,45.16%,36.47%,0.5)",
                                                     border: "none",
                                                     borderRadius: "4px",
                                                     color: "#fff",

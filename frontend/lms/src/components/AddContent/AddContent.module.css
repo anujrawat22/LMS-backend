@@ -21,14 +21,14 @@
 }
 
 .backButton {
-  border: 1px solid rgb(180, 211, 59);
+  border: 1px solid rgb(77,135,51);
   display: flex;
   align-items: center;
   justify-content: center;
   width: 50px;
   height: 30px;
   border-radius: 5px;
-  background-color: rgb(180, 211, 59);
+  background-color: rgb(77,135,51);
   color: white;
   cursor: pointer;
 }
@@ -51,7 +51,7 @@
   padding: 10px 20px;
   cursor: pointer;
   border-radius: 5px;
-  background-color: rgb(180,211,59);
+  background-color: rgb(77,135,51);
   color: white;
 }
 

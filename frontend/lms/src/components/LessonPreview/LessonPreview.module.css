@@ -44,7 +44,7 @@
   font-size: 1rem;
   border: none;
   color: white;
-  background-color: rgb(180, 211, 59);
+  background-color: rgb(77, 135, 51);
 }
 
 .Titlediv {
@@ -72,7 +72,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
- 
+  color: rgb(77, 135, 51);
 }
 
 .paradiv {
@@ -99,11 +99,11 @@
   margin-right: 20px;
 }
 
-.OtherContentDiv{
-    width: 100%;
-    height: auto;
-    /* border: 1px solid red; */
-    margin-top: 2%;
+.OtherContentDiv {
+  width: 100%;
+  height: auto;
+  /* border: 1px solid red; */
+  margin-top: 2%;
 }
 
 .PPTDiv {
@@ -122,48 +122,48 @@
   border-radius: 10px;
 }
 
-
-.ImagesDiv{
-    margin: 40px 0px;
-    width: 100%;
-    padding: 0px 20px;
+.ImagesDiv {
+  margin: 40px 0px;
+  width: 100%;
+  padding: 0px 20px;
 }
 
-.ImageGrid{
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    grid-template-rows: auto;
-    row-gap: 40px;
-    column-gap: 40px;
-    padding: 20px ;
-    border-radius: 10px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+.ImageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto;
+  row-gap: 40px;
+  column-gap: 40px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
-.ImageGridItem{
-    height: 200px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px;
-    box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+.ImageGridItem {
+  height: 200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
 }
 
-.images{
-    height: 100%;
-    width: 100%;
-    object-fit: contain;
-    /* border: 1px solid red; */
+.images {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  /* border: 1px solid red; */
 }
 
-.imgdeleteIcon{
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.imgdeleteIcon {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.VideoDiv{
+.VideoDiv {
   /* border:  1px solid red; */
   height: auto;
   width: 100%;
@@ -173,29 +173,28 @@
   align-items: center;
 }
 
-.reactplayerDiv{
-  
+.reactplayerDiv {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 20px 0px;
 }
 
-.reactPlayer{
+.reactPlayer {
   /* border: 1px solid blue; */
   margin-top: 30px;
   border-radius: 5px;
 }
 
-.gdriveDiv{
+.gdriveDiv {
   /* border: 1px solid red; */
   height: 500px;
   width: 100%;
   padding: 2%;
 }
 
-.driveVideo{
+.driveVideo {
   height: 100%;
-  width: 100%;  
+  width: 100%;
   /* border: 1px solid red; */
 }

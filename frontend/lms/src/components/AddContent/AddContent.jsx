@@ -257,14 +257,18 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                             {isEditingTitle ?
                                 <>
                                     <TextField id="standard-basic" label="Title" variant="standard" value={LessonContent.Title} onChange={handletitleChange} />
-                                    <Button onClick={handleSaveTitle}>
+                                    <Button onClick={handleSaveTitle} sx={{
+                                        color: 'rgb(77,135,51)'
+                                    }}>
                                         <CheckCircleIcon />
                                     </Button>
                                 </>
                                 :
                                 <>
                                     <Typography variant='h5'>Title - {LessonContent.Title}</Typography>
-                                    <Button onClick={() => setisEditingTitle(true)}><ModeEditIcon /></Button>
+                                    <Button onClick={() => setisEditingTitle(true)} sx={{
+                                        color: "rgb(77,135,51)"
+                                    }}><ModeEditIcon /></Button>
                                 </>}
                         </div>
                         <div className={styles.SwitchDiv}>
@@ -278,7 +282,10 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                             <>
                                 <div className={styles.TextDiv}>
                                     <textarea name="text" id="text" rows="3" value={text} onChange={(e) => setText(e.target.value)} className={styles.text} placeholder='Enter text'></textarea>
-                                    <Button variant='outlined' onClick={handleTextAdd}>Add</Button>
+                                    <Button variant='outlined' onClick={handleTextAdd} sx={{
+                                        color: 'rgb(77,135,51)',
+                                        border: '1px solid rgb(77,135,51)'
+                                    }}>Add</Button>
                                 </div>
                             </>
                         }
@@ -287,7 +294,9 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                             <>
                                 <div className={styles.videoDiv}>
                                     <div className={styles.videoBtn}>
-                                        <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+                                        <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} sx={{
+                                            backgroundColor: 'rgb(77,135,51)',
+                                        }}>
                                             Upload Video
                                             <VisuallyHiddenInput type="file" accept='video/*' onChange={handleAddVideo} />
                                         </Button>
@@ -317,7 +326,10 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                                                 onChange={handlevideourlChange}
                                             />
                                         </div>
-                                        <Button variant='outlined' onClick={handleAddVideoUrl}>Add</Button>
+                                        <Button variant='outlined' onClick={handleAddVideoUrl} sx={{
+                                            border: '1px solid rgb(77,135,51)',
+                                            color: 'rgb(77,135,51)'
+                                        }}>Add</Button>
                                     </div>
                                 </div>
                             </>
@@ -326,7 +338,9 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                             contentType === 'image' &&
                             <div className={styles.AddImageDiv}>
                                 <div className={styles.UploadImgDiv}>
-                                    <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+                                    <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} sx={{
+                                        backgroundColor: 'rgb(77,135,51)'
+                                    }}>
                                         Upload Image
                                         <VisuallyHiddenInput type="file" onChange={handleImage} accept='image/*' />
                                     </Button>
@@ -340,7 +354,10 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                                         fullWidth sx={{
                                             marginRight: '20px'
                                         }} value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} />
-                                    <Button variant='outlined' onClick={handleImageUrl}>Add</Button>
+                                    <Button variant='outlined' onClick={handleImageUrl} sx={{
+                                        color: 'rgb(77,135,51)',
+                                        border: '1px solid rgb(77,135,51)'
+                                    }}>Add</Button>
                                 </div>
                             </div>
                         }
@@ -348,7 +365,9 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                             contentType === 'background' &&
                             <div className={styles.bannerimage}>
                                 <div className={styles.Uploadbgimg}>
-                                    <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+                                    <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} sx={{
+                                        backgroundColor: 'rgb(77,135,51)'
+                                    }}>
                                         Upload BannerImage
                                         <VisuallyHiddenInput type="file" onChange={handlebannerImageUpload} accept='image/*' />
                                     </Button>
@@ -361,7 +380,10 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                                         size="small" fullWidth sx={{
                                             paddingRight: '20px'
                                         }} value={bannerimageUrl} onChange={(e) => setBannerImgUrl(e.target.value)}></TextField>
-                                    <Button variant='outlined' onClick={handlebannerimgurl}>Add</Button>
+                                    <Button variant='outlined' onClick={handlebannerimgurl} sx={{
+                                        border : '1px solid rgb(77,135,51)',
+                                        color : 'rgb(77,135,51)'
+                                    }}>Add</Button>
                                 </div>
                             </div>
                         }
@@ -374,7 +396,7 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                                         marginRight: '30px'
                                     }} value={embedMediaUrl} onChange={(e) => setEmbedMediaUrl(e.target.value)}></TextField>
                                 <Button variant='contained' sx={{
-                                    width: '100px'
+                                    width: '100px', backgroundColor: 'rgb(77,135,51)'
                                 }} onClick={handleEmbedMedia}>Add</Button>
                             </div>
                         }
@@ -387,7 +409,8 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                                         marginRight: '30px'
                                     }} value={PPTurl} onChange={(e) => setPPturl(e.target.value)}></TextField>
                                 <Button variant='contained' sx={{
-                                    width: '100px'
+                                    width: '100px',
+                                    backgroundColor: 'rgb(77,135,51)'
                                 }} onClick={handlePPTURL}>Add</Button>
                             </div>
                         }
@@ -398,27 +421,39 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                         textAlign: 'center'
                     }} variant='h6'>Add Content</Typography>
                     <div className={styles.AddContentdiv}>
-                        <div className={styles.addContentBtn} onClick={() => setContentType('text')}>
+                        <div className={styles.addContentBtn} onClick={() => setContentType('text')} style={{
+                            color: 'rgb(77,135,51)'
+                        }}>
                             <NotesIcon />
                             <Typography>Text</Typography>
                         </div>
-                        <div className={styles.addContentBtn} onClick={() => setContentType('video')}>
+                        <div className={styles.addContentBtn} onClick={() => setContentType('video')} style={{
+                            color: 'rgb(77,135,51)'
+                        }}>
                             <OndemandVideoIcon />
                             <Typography>Videos</Typography>
                         </div>
-                        <div className={styles.addContentBtn} onClick={() => setContentType('image')}>
+                        <div className={styles.addContentBtn} onClick={() => setContentType('image')} style={{
+                            color: 'rgb(77,135,51)'
+                        }}>
                             <ImageIcon />
                             <Typography>Images</Typography>
                         </div>
-                        <div className={styles.addContentBtn} onClick={() => setContentType('background')}>
+                        <div className={styles.addContentBtn} onClick={() => setContentType('background')} style={{
+                            color: 'rgb(77,135,51)'
+                        }}>
                             <WallpaperIcon />
                             <Typography>Banner Image</Typography>
                         </div>
-                        <div className={styles.addContentBtn} onClick={() => setContentType('embed')}>
+                        <div className={styles.addContentBtn} onClick={() => setContentType('embed')} style={{
+                            color: 'rgb(77,135,51)'
+                        }}>
                             <VideoLibraryIcon />
                             <Typography>Gdrive Video</Typography>
                         </div>
-                        <div className={styles.addContentBtn} onClick={() => setContentType('PPT')}>
+                        <div className={styles.addContentBtn} onClick={() => setContentType('PPT')} style={{
+                            color: 'rgb(77,135,51)'
+                        }}>
                             <AddToDriveIcon />
                             <Typography>PPT</Typography>
                         </div>
@@ -426,7 +461,10 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                 </div>
             </div>
             <div className={styles.AddLessonbtnDiv}>
-                <Button variant='outlined' onClick={handleAddlesson}>Add Lesson</Button>
+                <Button variant='outlined' onClick={handleAddlesson} sx={{
+                    border: '1px solid rgb(77,135,51)',
+                    color: 'rgb(77,135,51)'
+                }}>Add Lesson</Button>
             </div>
             {
                 ispreviewOpen && <LessonPreview LessonContent={LessonContent} setLessonContent={setLessonContent} setPreviewOpen={setPreviewOpen} />
