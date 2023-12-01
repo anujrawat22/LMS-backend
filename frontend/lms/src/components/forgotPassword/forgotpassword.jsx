@@ -63,7 +63,7 @@ export default function ForgetPassword() {
     const [userEmail, setUserEmail] = useState('')
     const navigate = useNavigate();
     const [isOtpSend, setIssendOtp] = useState(false)
-    const [isotpverified, setIsotpverified] = useState(true)
+    const [isotpverified, setIsotpverified] = useState(false)
     const [Password, setpassword] = useState({
         newPassword: '',
         confirmPassword: ''
