@@ -351,7 +351,7 @@ const Students = () => {
                             color: "rgb(77, 135, 51)",
                             border: '1px solid rgb(77, 135, 51)'
                         }}>
-                            Eamil
+                            Email
                         </Button>
                         <Button startIcon={<AddIcon />} onClick={handleAddStudentDialogOpen} variant='outlined' size='small' sx={{
                             color: "rgb(77, 135, 51)",
