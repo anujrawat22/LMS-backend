@@ -9,12 +9,13 @@ import { CheckUserCourses } from '../../services/checkUserCourse.service';
 import ImageVideoCarasouel from '../ImageVideoCarasouel/ImageVideoCarasouel';
 import ReactPlayer from 'react-player';
 const CourseDetailMainContent = ({ data }) => {
-    console.log(data)
+
     const { id } = useParams()
     const { userdata } = useAuth()
     const role = userdata.role
     const { token } = userdata;
     const [userHasCourse, setUserHasCourse] = useState(false)
+    const isMobile = window.innerWidth <= 480;
     const checkforUserCourse = async () => {
         try {
             const response = await CheckUserCourses(id, token)
@@ -26,27 +27,18 @@ const CourseDetailMainContent = ({ data }) => {
     useEffect(() => {
         checkforUserCourse()
     }, [])
-    if (data.isfree || userHasCourse || role === 'admin' || role === 'superadmin') {
+    if (data.isfree || userHasCourse) {
         return (
             <>
                 {data.Title ? <div className={styles.TitleDiv} style={{
                     backgroundImage: data.bannerimage ? `url(${data.bannerimage})` : 'none',
                     color: data.bannerimage ? 'white' : 'black'
                 }}>
+                    <h1 className={styles.DataTitle}>{data.Title}</h1>
 
-                    <Typography sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        <h1>{data.Title}</h1>
-                    </Typography>
                     {
                         data.text.length > 0 && data.text.map((text, index) => {
-                            return <Typography key={index} sx={{
-                                borderRadius: "20px",
-                                marginBottom: "20px",
-                                padding: "36px",
-                                backgroundSize: "cover",
-                                fontFamily: "roboto",
-                                backgroundPosition: "center"
-                            }}>{text}</Typography>
+                            return <p key={index} className={styles.text}>{text}</p>
                         })
                     }
                 </div>
@@ -69,7 +61,8 @@ const CourseDetailMainContent = ({ data }) => {
                     data.videos.length > 0 ?
                         data.videos.map((video) => {
                             return <div className={styles.VideoDiv}>
-                                <ReactPlayer url={video.url} />
+                                <ReactPlayer width={isMobile ? '100%' : '60%'} 
+                                    height={isMobile ? '230px' : '400px'} url={video.url} className={styles.ReactPlayer} />
                                 <Typography variant='h6'>
                                     {video.name}
                                 </Typography>
@@ -78,14 +71,10 @@ const CourseDetailMainContent = ({ data }) => {
                 }
                 {
                     data.embedMedia &&
-                    <div style={{
-                        width: '100%',
-                        height: '400px',
-                        padding: '0px 20%'
-                    }}>
+                    <div className={styles.gdriveMedia} >
                         <iframe src={data.embedMedia} title='embedmedia' style={{
                             width: '100%',
-                            height: "100%"
+                            height: '100%'
                         }}></iframe>
                     </div>
                 }

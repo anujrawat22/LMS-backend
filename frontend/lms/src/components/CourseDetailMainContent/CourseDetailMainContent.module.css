@@ -1,38 +1,87 @@
 .TitleDiv {
-  /* border: 1px solid red; */
-  margin: 20px  20px;
+  margin: 20px 20px;
   border-radius: 10px;
-  box-sizing: border-box  ;
+  box-sizing: border-box;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.DataTitle {
+  text-align: center;
+  padding: 20px 0px;
 }
 
 .PPTDiv {
   /* border: 1px solid blue; */
   width: 100%;
-  height: 600px;
+  height: 440px;
+  padding: 0px 20%;
 }
 
-.PPTiframe{
-    width: 100%;
-    height: 100%;
+.PPTiframe {
+  width: 100%;
+  height: 100%;
 }
 
-.EnrollMsgDiv{
-    /* border: 1px solid red; */
-width: 100%;
-height: 80dvh;
-display: flex;
-justify-content: center;
-align-items: center;
-flex-direction: column;
+.EnrollMsgDiv {
+  /* border: 1px solid red; */
+  width: 100%;
+  height: 80dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
-.VideoDiv{
+.VideoDiv {
   /* border : 1px solid red; */
   height: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin:  20px 0px;
+  margin: 20px 0px;
+}
+
+.text {
+  padding: 10px 30px;
+}
+
+.gdriveMedia{
+  width: 100%;
+  height: 400px;
+  padding: 0px 21%;
+}
+
+@media screen and (max-width: 480px) {
+  .TitleDiv {
+    margin: auto;
+    width: 95%;
+    margin-bottom: 40px;
+  }
+  .PPTDiv {
+    height: 280px;
+    width: 100%;
+    padding: 20px 10px;
+  }
+
+  .DataTitle {
+    font-size: 20px;
+  }
+
+  .text {
+    padding: 10px 10px;
+    font-size: 15px;
+  }
+
+  .VideoDiv {
+    width: 98%;
+    margin: auto;
+    margin-top: 30px;
+    height: 280px;
+  }
+
+  .gdriveMedia{
+    padding: 20px 10px;
+    height: 300px;
+  }
 }

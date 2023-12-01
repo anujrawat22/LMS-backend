@@ -25,6 +25,7 @@ import { DeleteUserService } from '../../services/deleteUser.service';
 import EmailIcon from '@mui/icons-material/Email';
 import Swal from 'sweetalert2';
 import Slide from '@mui/material/Slide';
+import Backdrop from '@mui/material/Backdrop';
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -322,6 +323,7 @@ const Students = () => {
                 position="top-right"
                 reverseOrder={false}
             />
+
             <Grid
                 container
                 spacing={1}
@@ -362,23 +364,37 @@ const Students = () => {
                     </Grid>
                 </div>
                 <Grid item xs={12} sm={12} md={11.5}>
-                    <Paper elevation={10} sx={{ padding: "10px" }}>
-                        <DataGrid
-                            disableSelectionOnClick={true}
-                            rows={rows}
-                            columns={columns}
-                            pageSize={5}
-                            slots={{
-                                toolbar: CustomToolbar
-                            }}
-                            stickyHeader
-                            checkboxSelection
-                            onRowSelectionModelChange={(newRowSelectionModel) => {
-                                handleSelectionModelChange(newRowSelectionModel)
-                            }}
-                            rowSelectionModel={rowSelectionModel}
-                        />
-                    </Paper>
+                    {isLoading ? <Backdrop
+                        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                        open={isLoading}
+                    >
+                        <CircularProgress color="inherit" />
+                    </Backdrop> :
+                        <Paper elevation={10} sx={{ padding: "10px" }}>
+                            <DataGrid
+                                loading={studentList.length === 0}
+                                disableSelectionOnClick={true}
+                                rows={rows}
+                                pagination
+                                columns={columns}
+                                page={page}
+                                pageSize={limit}
+                                paginationMode='server'
+                                onPaginationModelChange={(newPage) => setPage(newPage)}
+                                slots={{
+                                    toolbar: CustomToolbar
+                                }}
+                                rowsPerPageOptions={[5, 10, 20, 50, 100]}
+                                stickyHeader
+                                checkboxSelection
+                                onRowSelectionModelChange={(newRowSelectionModel) => {
+                                    handleSelectionModelChange(newRowSelectionModel)
+                                }}
+                                rowSelectionModel={rowSelectionModel}
+                            />
+                        </Paper>
+                    }
+
                 </Grid>
             </Grid>
             {
@@ -690,7 +706,7 @@ const SendMailDialogSlide = ({ open, setOpen, handlesendEmail }) => {
                 }}
             >
                 <DialogTitle>{"Send Email to selected students"}</DialogTitle>
-                <DialogContent  className={styles.EmailDialogContent}>
+                <DialogContent className={styles.EmailDialogContent}>
                     <DialogContentText id="alert-dialog-slide-description">
                         <TextField variant='standard' label='Subject' fullWidth name='subject' value={mailData.subject} onChange={handleSetMailData}></TextField>
                         <textarea className={styles.EmailBodyTextarea} placeholder='Email Body' name='body' onChange={handleSetMailData}></textarea>
