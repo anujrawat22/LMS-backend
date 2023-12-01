@@ -1,0 +1,33 @@
+.Logo {
+  border: "1px solid red";
+  height: 50px;
+  width: 57px;
+}
+
+.Usernavigations {
+  width: 15%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  color: white;
+}
+
+.UserNavs {
+  display: none;
+}
+
+@media screen and (max-width: 1020px) {
+  .Usernavigations {
+    width: 25%;
+  }
+}
+
+@media screen and (max-width: 720px) {
+  .Usernavigations {
+    display: none;
+  }
+
+  .UserNavs {
+    display: block;
+  }
+}

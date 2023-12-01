@@ -52,14 +52,14 @@ function App() {
   }, [])
   return (
     <>
-      <Grid container sx={{ margin: 0, padding: 0 }}>
-        <Grid item sm={1.2} xs={1.4} lg={.5} md={.9} sx={{ margin: 0, padding: 0}}>
-          <AdminSideNavBar />
-        </Grid>
-        <Grid item sm={10.6} xs={10.6} lg={11.5} md={11.1} sx={{ margin: 0, padding: 0, overflow: 'scroll', overflowX: "hidden", height: '100dvh'}}>
-          <AllRoutes />
-        </Grid>
-      </Grid>
+      <div style={{
+        height : '100dvh',
+        width : '100dvw',
+        overflow : 'scroll',
+      }}>
+       <AdminSideNavBar />
+       <AllRoutes/>
+      </div>
     </>
   );
 }

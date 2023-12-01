@@ -147,3 +147,86 @@
   margin-bottom: 10px;
   align-items: center;
 }
+
+.UserInfoDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+}
+
+.Grid {
+  width: 100dvw;
+  height: auto;
+  box-sizing: border-box;
+  margin-top: 80px;
+  justify-content: space-between;
+}
+
+.UserImage {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.Username {
+  font-size: 25px;
+  font-weight: 900;
+  text-align: center;
+}
+
+@media screen and (max-width: 480px) {
+  .UserInfoDiv {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 20px;
+  }
+
+  .UserImage {
+    width: 50px;
+    height: 50px;
+  }
+
+  .Username {
+    font-size: 20px;
+    padding-left: 20px;
+  }
+
+  .userEnrollments {
+    flex-direction: column;
+  }
+
+  .enrollmentinfo {
+    width: 100%;
+  }
+
+  .enrollmentinfo > h3 {
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .enrollmentinfo > p {
+    font-size: 13px;
+  }
+
+  .selcoursesecondDiv {
+    width: 100%;
+  }
+
+  .userEnrollments {
+    margin-top: 10px;
+  }
+
+  .unenrollDiv {
+    width: 100%;
+    margin-bottom: 50px;
+    padding:10px 0;
+  }
+
+  .CourseUnassignDiv{
+    width: 100%;
+    padding: 0px 10px;
+  }
+}

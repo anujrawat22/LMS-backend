@@ -28,6 +28,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRef } from "react";
 import { VerifyOtp } from "../../services/verifyOtp.service";
 import { forgetPassword } from "../../services/forgetPassword.service";
+import styles from './forgotpassword.module.css'
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -45,18 +46,7 @@ const darkTheme = createTheme({
     },
 });
 
-const boxstyle = {
-    position: "absolute",
-    top: "56%",
-    left: "52.5%",
-    transform: "translate(-50%, -50%)",
-    width: "75%",
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    color: "#fff",
-    display: "flex",
-    justifyContent: "center"
-};
+
 
 const center = {
     position: "relative",
@@ -73,7 +63,7 @@ export default function ForgetPassword() {
     const [userEmail, setUserEmail] = useState('')
     const navigate = useNavigate();
     const [isOtpSend, setIssendOtp] = useState(false)
-    const [isotpverified, setIsotpverified] = useState(false)
+    const [isotpverified, setIsotpverified] = useState(true)
     const [Password, setpassword] = useState({
         newPassword: '',
         confirmPassword: ''
@@ -96,7 +86,6 @@ export default function ForgetPassword() {
         }
         try {
             const response = await forgetPassword({ email: userEmail })
-            console.log(response.data.msg)
             toast.dismiss(loader)
             toast.success(response.data.msg)
             setOpen(true)
@@ -170,6 +159,7 @@ export default function ForgetPassword() {
                 reverseOrder={false}
             />
             <div
+                className={styles.MainContainer}
                 style={{
                     backgroundImage: `url(${bgimg})`,
                     backgroundSize: "cover",
@@ -178,7 +168,7 @@ export default function ForgetPassword() {
                     overflow: 'auto',
                 }}
             >
-                <Box sx={boxstyle}>
+                <Box className={styles.Box}>
                     <Grid container sx={{
                         backgroundColor: 'rgb(59,51,213)'
                     }}>
@@ -206,98 +196,106 @@ export default function ForgetPassword() {
                                     }}
                                 >
                                     <ThemeProvider theme={darkTheme}>
-                                        <Container>
-                                            <Box height={35} />
-                                            <Box sx={center}>
+                                        <Container className={styles.SendotpContainer}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: '100%'
+                                            }}>
                                                 <Avatar
-                                                    sx={{ mb: "4px", bgcolor: "#ffffff" }}
+                                                    sx={{ bgcolor: "#ffffff" }}
                                                 >
                                                     <LockOutlinedIcon />
                                                 </Avatar>
-                                                <Typography component="h1" variant="h4">
+                                                <Typography component="h1" variant="h4" textAlign={center} sx={{
+                                                    padding: '10px'
+                                                }}>
                                                     Change Password
                                                 </Typography>
                                             </Box>
-                                            <Box
-                                                sx={{ mt: 2 }}
-                                            >
-                                                <Grid container spacing={1}>
-                                                    <Grid item xs={12} sx={{ ml: "3em", mr: "3em" }}>
-                                                        <FormControl sx={{ m: 1, width: '100%' }} variant="outlined">
-                                                            <InputLabel htmlFor="outlined-adornment-password">New Password</InputLabel>
-                                                            <OutlinedInput
-                                                                id="outlined-adornment-password"
-                                                                type={showPassword.newPassword ? 'text' : 'password'}
-                                                                value={Password.newPassword} onChange={handlePasswordChange}
-                                                                name="newPassword"
-                                                                endAdornment={
-                                                                    <InputAdornment position="end">
-                                                                        <IconButton
-                                                                            aria-label="toggle password visibility"
-                                                                            edge="end"
-                                                                            onClick={() => changeVisibility('newPassword')}
-                                                                        >
-                                                                            {showPassword.newPassword ? <Visibility /> : <VisibilityOff />}
-                                                                        </IconButton>
-                                                                    </InputAdornment>
-                                                                }
-                                                                label="Password"
-                                                            />
-                                                        </FormControl>
-                                                        <FormControl sx={{ m: 1, width: '100%' }} variant="outlined">
-                                                            <InputLabel htmlFor="outlined-adornment-password">Confirm Password</InputLabel>
-                                                            <OutlinedInput
-                                                                id="outlined-adornment-password"
-                                                                type={showPassword.confirmPassword ? 'text' : 'password'}
-                                                                value={Password.confirmPassword} onChange={handlePasswordChange}
-                                                                name="confirmPassword"
-                                                                endAdornment={
-                                                                    <InputAdornment position="end">
-                                                                        <IconButton
-                                                                            aria-label="toggle password visibility"
-                                                                            onClick={() => changeVisibility('confirmPassword')}
-                                                                            edge="end"
-                                                                        >
-                                                                            {showPassword.confirmPassword ? <Visibility /> : <VisibilityOff />}
-                                                                        </IconButton>
-                                                                    </InputAdornment>
-                                                                }
-                                                                label="Password"
-                                                            />
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item xs={12} sx={{ ml: "5em", mr: "5em" }}>
-                                                        <Button
-                                                            variant="contained"
-                                                            fullWidth="true"
-                                                            size="large"
-                                                            sx={{
-                                                                mt: "15px",
-                                                                mr: "20px",
-                                                                borderRadius: 28,
-                                                                color: "#ffffff",
-                                                                minWidth: "170px",
-                                                                backgroundColor: "#FF9A01",
-                                                            }}
-                                                            disabled={passwordBtn}
-                                                            onClick={handleChangePassword}
-                                                        >
-                                                            Change Password
-                                                        </Button>
-                                                    </Grid>
-                                                    <Grid item xs={12} sx={{ ml: "3em", mr: "3em" }}>
-                                                        <Grid item xs={12} sx={{ ml: "3em", mr: "3em" }}>
-                                                            <Grid container justifyContent="flex-end">
-                                                                <Grid item>
-                                                                    <Link href="#" variant="body2" to="/login" style={{ color: "white" }}>
-                                                                        Login to your Account. Sign In
-                                                                    </Link>
-                                                                </Grid>
-                                                            </Grid>
+                                            <Grid container className={styles.inputGrid}>
+                                                <Grid item xs={12} sx={{
+                                                    padding: '10px 0px'
+                                                }}>
+                                                    <FormControl sx={{ width: '100%', marginBottom: '10px' }} variant="outlined">
+                                                        <InputLabel htmlFor="outlined-adornment-password">New Password</InputLabel>
+                                                        <OutlinedInput
+                                                            id="outlined-adornment-password"
+                                                            type={showPassword.newPassword ? 'text' : 'password'}
+                                                            value={Password.newPassword} onChange={handlePasswordChange}
+                                                            name="newPassword"
+                                                            endAdornment={
+                                                                <InputAdornment position="end">
+                                                                    <IconButton
+                                                                        aria-label="toggle password visibility"
+                                                                        edge="end"
+                                                                        onClick={() => changeVisibility('newPassword')}
+                                                                    >
+                                                                        {showPassword.newPassword ? <Visibility /> : <VisibilityOff />}
+                                                                    </IconButton>
+                                                                </InputAdornment>
+                                                            }
+                                                            label="Password"
+                                                        />
+                                                    </FormControl>
+                                                    <FormControl sx={{ width: '100%' }} variant="outlined">
+                                                        <InputLabel htmlFor="outlined-adornment-password">Confirm Password</InputLabel>
+                                                        <OutlinedInput
+                                                            id="outlined-adornment-password"
+                                                            type={showPassword.confirmPassword ? 'text' : 'password'}
+                                                            value={Password.confirmPassword} onChange={handlePasswordChange}
+                                                            name="confirmPassword"
+                                                            endAdornment={
+                                                                <InputAdornment position="end">
+                                                                    <IconButton
+                                                                        aria-label="toggle password visibility"
+                                                                        onClick={() => changeVisibility('confirmPassword')}
+                                                                        edge="end"
+                                                                    >
+                                                                        {showPassword.confirmPassword ? <Visibility /> : <VisibilityOff />}
+                                                                    </IconButton>
+                                                                </InputAdornment>
+                                                            }
+                                                            label="Password"
+                                                        />
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12} sx={{
+                                                    fontSize: '13px',
+                                                    padding: '10px 10px'
+                                                }}>
+                                                    Login to your Account.
+                                                    <Link href="#" variant="body2" to="/login" style={{ color: "white" }}>
+                                                        Sign In
+                                                    </Link>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <Button
+                                                        variant="contained"
+                                                        fullWidth="true"
+                                                        size="large"
+                                                        sx={{
+                                                            borderRadius: 28,
+                                                            color: "#ffffff",
+                                                            minWidth: "170px",
+                                                            backgroundColor: "#FF9A01",
+                                                        }}
+                                                        disabled={passwordBtn}
+                                                        onClick={handleChangePassword}
+                                                    >
+                                                        Change Password
+                                                    </Button>
+                                                </Grid>
+                                                <Grid item xs={12} >
+                                                    <Grid item xs={12} >
+                                                        <Grid container justifyContent="flex-end">
+
                                                         </Grid>
                                                     </Grid>
                                                 </Grid>
-                                            </Box>
+                                            </Grid>
                                         </Container>
                                     </ThemeProvider>
                                 </Box>
@@ -312,73 +310,75 @@ export default function ForgetPassword() {
                                     }}
                                 >
                                     <ThemeProvider theme={darkTheme}>
-                                        <Container>
-                                            <Box height={35} />
-                                            <Box sx={center}>
+                                        <Container className={styles.SendotpContainer} >
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: '100%'
+                                            }}>
                                                 <Avatar
-                                                    sx={{ mb: "4px", bgcolor: "#ffffff" }}
+                                                    sx={{ bgcolor: "#ffffff" }}
                                                 >
                                                     <LockOutlinedIcon />
                                                 </Avatar>
-                                                <Typography component="h1" variant="h4">
+                                                <Typography component="h1" variant="h4" textAlign={center} sx={{
+                                                    padding: '10px'
+                                                }}>
                                                     Reset Password
                                                 </Typography>
                                             </Box>
-                                            <Box
-                                                sx={{ mt: 2 }}
-                                            >
-                                                <Grid container spacing={1}>
-                                                    <Grid item xs={12} sx={{ ml: "3em", mr: "3em" }}>
-                                                        <TextField
-                                                            required
-                                                            fullWidth
-                                                            id="email"
-                                                            label="Email"
-                                                            name="email"
-                                                            autoComplete="email"
-                                                            value={userEmail}
-                                                            onChange={handleEmailChange}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item xs={12} sx={{ ml: "5em", mr: "5em" }}>
-                                                        <Button
-                                                            onClick={handleSubmit}
-                                                            variant="contained"
-                                                            fullWidth="true"
-                                                            size="large"
-                                                            sx={{
-                                                                mt: "15px",
-                                                                mr: "20px",
-                                                                borderRadius: 28,
-                                                                color: "#ffffff",
-                                                                minWidth: "170px",
-                                                                backgroundColor: "#FF9A01",
-                                                            }}
-                                                            disabled={isOtpSend}
-                                                        >
-                                                            Send OTP
-                                                        </Button>
-                                                    </Grid>
-                                                    <Grid item xs={12} sx={{ ml: "3em", mr: "3em" }}>
-                                                        <Grid item xs={12} sx={{ ml: "3em", mr: "3em" }}>
-                                                            <Grid container justifyContent="flex-end">
-                                                                <Grid item>
-                                                                    <Link href="#" variant="body2" to="/login" style={{ color: "white" }}>
-                                                                        Login to your Account. Sign In
-                                                                    </Link>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Grid>
+                                            <Grid container className={styles.inputGrid}>
+                                                <Grid item xs={12} sx={{
+                                                    padding: '10px 0px'
+                                                }}>
+                                                    <TextField
+                                                        required
+                                                        fullWidth
+                                                        id="email"
+                                                        label="Email"
+                                                        name="email"
+                                                        autoComplete="email"
+                                                        value={userEmail}
+                                                        onChange={handleEmailChange}
+                                                    />
                                                 </Grid>
-                                            </Box>
+                                                <Grid item xs={12} sx={{
+                                                    fontSize: '11px',
+                                                    padding: '10px'
+                                                }}>
+                                                    Already have an account ?
+                                                    <Link href="#" variant="body2" to="/login" style={{ color: "white", fontSize: '14px', marginLeft: '10px' }}>
+                                                        Sign In
+                                                    </Link>
+                                                </Grid>
+
+                                                <Grid item xs={12} >
+                                                    <Button
+                                                        onClick={handleSubmit}
+                                                        variant="contained"
+                                                        fullWidth="true"
+                                                        size="large"
+                                                        sx={{
+                                                            borderRadius: 28,
+                                                            color: "#ffffff",
+                                                            minWidth: "170px",
+                                                            backgroundColor: "#FF9A01",
+                                                        }}
+                                                        disabled={isOtpSend}
+                                                    >
+                                                        Send OTP
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
                                         </Container>
                                     </ThemeProvider>
                                 </Box>
                             </Grid>}
                     </Grid>
                 </Box>
-            </div>
+            </div >
             {
                 open && < OTPDialog open={open} setOpen={setOpen} setIssendOtp={setIssendOtp} Otpverification={Otpverification} />
             }

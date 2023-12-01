@@ -227,8 +227,7 @@ button:hover {
   margin-top: -15px !important;
 }
 
-
-.EmailBodyTextarea{
+.EmailBodyTextarea {
   width: 100%;
   margin: 30px 0px;
   height: 150px;
@@ -239,3 +238,57 @@ button:hover {
   font-size: 1rem;
 }
 
+
+
+.BtnDiv {
+  display: flex;
+  justify-content: space-around;
+}
+
+.BtnDivfor520px {
+  display: none;
+}
+
+.Title {
+  margin: auto;
+  padding: 0;
+  color: rgb(77, 135, 51);
+}
+
+.EmailDialogContent{
+  width: 600px;
+}
+
+@media screen and (max-width: 720px){
+  .EmailDialogContent{
+    width: 500px;
+  }
+}
+
+@media screen and (max-width: 540px) {
+  .BtnDiv {
+    display: none;
+  }
+
+  .Title{
+    padding-left: 30px;
+  }
+
+  .BtnDivfor520px {
+    display: flex;
+    justify-content: space-around;
+  }
+
+.EmailDialogContent{
+  width: 380px;
+}
+}
+
+
+
+
+@media screen and (max-width: 420px){
+  .EmailDialogContent{
+    width: 320px;
+  }
+}

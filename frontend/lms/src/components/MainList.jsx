@@ -4,14 +4,11 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import PeopleIcon from '@mui/icons-material/People';
 import { List, ListItem } from '@mui/material';
 // import { Link } from 'react-router-dom';
 import { Link as RouterLink } from 'react-router-dom'; // If you're using React Router
 import { useAuth } from '../Contexts/AuthContext';
-import VerifiedIcon from '@mui/icons-material/Verified';
+
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 
 const MainList = () => {

@@ -3,7 +3,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import React, { useEffect, useState } from 'react';
 import styles from './Students.module.css';
 import { studentsData } from '../../services/studentdata.service';
-import { Autocomplete, Box, Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, Grid, IconButton, MenuItem, Paper, Select, TextField, Typography, DialogContentText } from '@mui/material';
+import { Autocomplete, Box, Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, Grid, IconButton, MenuItem, Paper, Select, TextField, Typography, DialogContentText, Tooltip } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { CSVDownload } from '../../services/csvDownload.service';
 import { sendEmail } from '../../services/sendEmail.service';
@@ -25,6 +25,7 @@ import { DeleteUserService } from '../../services/deleteUser.service';
 import EmailIcon from '@mui/icons-material/Email';
 import Swal from 'sweetalert2';
 import Slide from '@mui/material/Slide';
+
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -326,18 +327,15 @@ const Students = () => {
                 spacing={1}
                 sx={{ mt: 2, }}
             >
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
-                    <Grid item xs={6} sm={6} md={10} lg={8}>
-                        <h1 style={{ margin: "auto", padding: 0, color: '#4d8733' }}>
-                            Students
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }} className={styles.TitleDiv}>
+                    <Grid item xs={6} sm={6} md={11} lg={8}>
+                        <h1 className={styles.Title}>
+                            Users
                         </h1>
                     </Grid>
-                    <Grid item xs={6} sm={6} md={1.5} lg={3} sx={{
-                        display: 'flex'
-                        , justifyContent: 'space-around'
-                    }}>
+                    <Grid item xs={6} sm={6} md={1.5} lg={3} className={styles.BtnDiv}>
                         <Button variant="contained"
-                            style={{ backgroundColor: 'Green', color: 'white' }}
+                            style={{ backgroundColor: 'Green', color: 'white', fontSize: '.8rem' }}
                             size="large" onClick={handleEmailDialogOpen}>Send Email</Button>
                         <Button
                             variant="contained"
@@ -346,6 +344,20 @@ const Students = () => {
                             onClick={handleAddStudentDialogOpen}
                         >
                             Add Student
+                        </Button>
+                    </Grid>
+                    <Grid item xs={6} sm={6} md={1.5} lg={3} className={styles.BtnDivfor520px}>
+                        <Button startIcon={<EmailIcon />} onClick={handleEmailDialogOpen} variant='outlined' size='small' sx={{
+                            color: "rgb(77, 135, 51)",
+                            border: '1px solid rgb(77, 135, 51)'
+                        }}>
+                            Eamil
+                        </Button>
+                        <Button startIcon={<AddIcon />} onClick={handleAddStudentDialogOpen} variant='outlined' size='small' sx={{
+                            color: "rgb(77, 135, 51)",
+                            border: '1px solid rgb(77, 135, 51)'
+                        }}>
+                            Add
                         </Button>
                     </Grid>
                 </div>
@@ -678,9 +690,7 @@ const SendMailDialogSlide = ({ open, setOpen, handlesendEmail }) => {
                 }}
             >
                 <DialogTitle>{"Send Email to selected students"}</DialogTitle>
-                <DialogContent sx={{
-                    width: '600px'
-                }}>
+                <DialogContent  className={styles.EmailDialogContent}>
                     <DialogContentText id="alert-dialog-slide-description">
                         <TextField variant='standard' label='Subject' fullWidth name='subject' value={mailData.subject} onChange={handleSetMailData}></TextField>
                         <textarea className={styles.EmailBodyTextarea} placeholder='Email Body' name='body' onChange={handleSetMailData}></textarea>

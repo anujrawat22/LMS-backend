@@ -1,0 +1,26 @@
+.SignupMainContainer {
+  background-image: url(../../assets/bgimg.jpg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  height: 100dvh;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+}
+
+@media screen and (max-width: 480px) {
+  .SignupMainContainer {
+    padding: 0px 2.5%;
+  }
+
+  .SignupDiv {
+    width: 95%;
+    height: auto;
+  }
+ 
+  .SingupFields{
+    padding: 20px 0px;
+  }
+}

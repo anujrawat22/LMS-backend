@@ -310,7 +310,7 @@ export default function CourseChapters() {
 
     const handleOnDragEnd = (results) => {
         const { destination, type, source } = results;
-        console.log(destination, source, type)
+
 
         if (!destination) {
             return; // Not a valid drop target
@@ -325,6 +325,8 @@ export default function CourseChapters() {
             const [movedSection] = updatedSections.splice(source.index, 1);
             updatedSections.splice(destination.index, 0, movedSection)
             return setCourseData({ ...courseData, sections: updatedSections })
+        } else {
+            console.log(destination, source, type)
         }
 
     }
@@ -359,7 +361,7 @@ export default function CourseChapters() {
                 position="top-right"
                 reverseOrder={false}
             />
-            <div style={{ marginTop: "120px", width: "70%", marginLeft: "auto", marginRight: "auto" }}>
+            <div  className='SectionsMainContainer'>
                 <div className='backbuttonDiv'>
                     <div>
                         <Tooltip title="Go back to courses page" arrow placement="right">
@@ -443,7 +445,7 @@ export default function CourseChapters() {
                 position="top-right"
                 reverseOrder={false}
             />
-            <div style={{ marginTop: "120px", width: "70%", marginLeft: "auto", marginRight: "auto" }}>
+            <div  className='SectionMainDiv'>
                 <div className='backbuttonDiv'>
                     <div>
                         <Tooltip title="Go back to courses page" arrow placement="right">
@@ -453,7 +455,7 @@ export default function CourseChapters() {
                         </Tooltip>
                     </div>
                     <div className='EditDeleteBtns'>
-                        <Button startIcon={<AddIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }} className='Courseeditbtn' onClick={handleAddnewSection}>New Section</Button>
+                        <Button  startIcon={<AddIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }} className='Courseeditbtn' onClick={handleAddnewSection}>New Section</Button>
                         <Button startIcon={<DeleteOutlineIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }}
                             onClick={handleCourseDelete}>Delete</Button>
                     </div>
@@ -464,8 +466,8 @@ export default function CourseChapters() {
                             courseData.sections.length > 0 && courseData.sections.map((section, sectionindex) => {
                                 return <Droppable droppableId={section._id} type='group' key={section._id} index={sectionindex}>
                                     {
-                                        (provided) => (
-                                            <div {...provided.droppableProps} ref={provided.innerRef} className='droppableDiv'>
+                                        (provided, snapshot) => (
+                                            <div {...provided.droppableProps} ref={provided.innerRef} className='droppableDiv' style={{ backgroundColor: snapshot.isDraggingOver ? 'hsl(209.84,78.72%,46.08%, 0.15)' : 'white' }}>
                                                 <Draggable key={section._id} draggableId={section._id} index={sectionindex} type='group'>
                                                     {(provided) => (<div key={section._id} ref={provided.innerRef}
                                                         {...provided.draggableProps} >
@@ -525,12 +527,19 @@ export default function CourseChapters() {
                                                         </div>
                                                         {
                                                             section.subsections.length > 0 && section.subsections.map((lesson, lessonindex) => {
-                                                                return <Droppable droppableId={lesson._id} key={lesson._id} index={lessonindex}>
-                                                                    {(provided) => (<div {...provided.droppableProps} ref={provided.innerRef} className='lessonDropDiv'>
-
+                                                                return <Draggable draggableId={lesson._id} key={lesson._id} index={lessonindex} type='item'>
+                                                                    {(provided, snapshot) => (<div ref={provided.innerRef}
+                                                                        {...provided.draggableProps} className='lessonDropDiv' {...provided.dragHandleProps} style={{
+                                                                            backgroundColor: snapshot.isDragging ? 'hsl(209.84,78.72%,46.08%, 0.1)' : 'white',
+                                                                        }}>
                                                                         <div key={lesson._id}
                                                                             className='lessonDiv'>
                                                                             <div className='lessonTitleDiv'>
+                                                                                <Tooltip title="Drag lesson">
+                                                                                    <IconButton>
+                                                                                        <DragIndicatorIcon className='dragIcon' />
+                                                                                    </IconButton>
+                                                                                </Tooltip>
                                                                                 <Typography>{lesson.Title}</Typography>
                                                                             </div>
                                                                             <div className='lessonControlDiv'>
@@ -580,9 +589,9 @@ export default function CourseChapters() {
 
 
                                                                         </div>
-
+                                                                        {provided.placeholder}
                                                                     </div>)}
-                                                                </Droppable>
+                                                                </Draggable>
                                                             })
                                                         }
                                                         <div className='newLessonDiv'>
@@ -592,10 +601,10 @@ export default function CourseChapters() {
                                                                 onClick={() => handleAddnewLesson(section._id, section)}
                                                             >New Lesson</Button>
                                                         </div>
-
+                                                        {provided.placeholder}
                                                     </div>)}
                                                 </Draggable>
-                                                {provided.placeholder}
+                                                
                                             </div>)
                                     }
                                 </Droppable>
@@ -618,7 +627,7 @@ export default function CourseChapters() {
     }
 
     return (
-        <div style={{ marginTop: "120px", width: "70%", marginLeft: "auto", marginRight: "auto" }}>
+        <div  className='SectionsMainContainer'>
             <Tooltip title="Go back to courses page" arrow placement="right">
                 <Link to="/courses">
                     <IconButton>

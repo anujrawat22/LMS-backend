@@ -2,24 +2,29 @@
 import * as React from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
-import MainList from '../MainList';
 import { Avatar, Menu, MenuItem, Tooltip } from '@mui/material';
 import { useAuth } from '../../Contexts/AuthContext';
 import { Link } from 'react-router-dom';
-
+import Drawer from '@mui/material/Drawer';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AddIcon from '@mui/icons-material/Add';
+import { Link as RouterLink } from 'react-router-dom';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import styles from './sidenavbar.module.css';
+import LoginIcon from '@mui/icons-material/Login';
 const drawerWidth = 240;
+
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -39,109 +44,61 @@ const AppBar = styled(MuiAppBar, {
     }),
 }));
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-    ({ theme, open }) => ({
-        '& .MuiDrawer-paper': {
-            position: 'relative',
-            whiteSpace: 'nowrap',
-            width: drawerWidth,
-            transition: theme.transitions.create('width', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-            }),
-            boxSizing: 'border-box',
-            ...(!open && {
-                overflowX: 'hidden',
-                transition: theme.transitions.create('width', {
-                    easing: theme.transitions.easing.sharp,
-                    duration: theme.transitions.duration.leavingScreen,
-                }),
-                width: theme.spacing(7),
-                [theme.breakpoints.up('sm')]: {
-                    width: theme.spacing(9),
-                },
-            }),
-        },
-    }),
-);
-
 const defaultTheme = createTheme();
 const settings = ['Profile', 'Logout'];
+
 
 export default function AdminSideNavBar() {
     const { userdata, logout } = useAuth()
     const name = userdata.username
     const [open, setOpen] = React.useState(false);
-    const toggleDrawer = () => {
-        setOpen(!open);
-    };
-    const [dialogDashboardCards, setDialogDashboardCards] = React.useState(false);
-    const dialogTheme = useTheme();
-    const fullScreen = useMediaQuery(dialogTheme.breakpoints.down('md'));
-
-    const handleClickOpen = () => {
-        setDialogDashboardCards(true);
-    };
-    const handleClickClose = () => {
-        setDialogDashboardCards(false);
-    };
-
-
-    const [anchorElNav, setAnchorElNav] = React.useState(null);
+    const [guestDrawer, setguestDrawer] = React.useState(false)
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
     };
 
-    const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
-    };
+
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
+
     return (
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{ display: 'flex' }}>
                 <CssBaseline />
-                <AppBar position="absolute" open={open} sx={{ backgroundColor: "#282c34" }}>
+                <AppBar position="absolute" sx={{ backgroundColor: "#282c34" }}>
                     <Toolbar
-                        sx={{
-                            pr: '24px', // keep right padding when drawer closed
-                        }}
                     >
                         {userdata.role === 'admin' || userdata.role === 'superadmin' ? <IconButton
                             edge="start"
                             color="inherit"
                             aria-label="open drawer"
-                            onClick={toggleDrawer}
-                            sx={{
-                                marginRight: '36px',
-                                ...(open && { display: 'none' }),
-                            }}
                         >
-                            <MenuIcon />
+                            <MenuIcon onClick={() => setOpen(!open)} />
                         </IconButton> : null}
                         <Typography>
                             <img
-                                style={{ width: "70px" }}
+                                className={styles.Logo}
                                 src='https://drive.google.com/uc?export=view&id=1WEptUger6Bqs1OHLN9znAqtF06x9OJRk'
                                 alt="CEOITBOX"
                             />
                         </Typography>
                         <Typography
                             component="h1"
-                            variant="h6"
+                            variant='h6'
                             color="inherit"
                             noWrap
                             sx={{ flexGrow: 1, textAlign: "center" }}
+                            className={styles.WebsiteTitle}
                         >
-                            Learning Mangement System
+                            LMS
                         </Typography>
                         {
                             userdata.isAuthenticated ?
-                                <Box sx={{ flexGrow: 0 , display : 'flex' , alignItems : 'center'}}>
-                                   {userdata.role === 'user' && <Box marginRight={'15px'}>
+                                <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+                                    {userdata.role === 'user' && <Box marginRight={'15px'}>
                                         <Link to={'/courses'} style={{ color: 'white', textDecoration: 'none' }}>My Courses</Link>
                                     </Box>}
                                     <Tooltip title="Open settings">
@@ -180,55 +137,147 @@ export default function AdminSideNavBar() {
                                         ))}
                                     </Menu>
                                 </Box> :
-                                <Box sx={{
-                                    width: '15%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-around',
-                                    color: 'white'
-                                }}>
-                                    <Link to={'/courses'} style={{ color: 'white', textDecoration: 'none' }}>All Courses</Link>
-                                    <Link to={'/login'} style={{ color: 'white', textDecoration: 'none' }}>Login</Link>
-                                    <Link to={'/signup'} style={{ color: 'white', textDecoration: 'none' }}>Signup</Link>
-                                </Box>
+                                <>
+
+                                    <Box
+                                        className={styles.Usernavigations}>
+                                        <Link to={'/courses'} style={{ color: 'white', textDecoration: 'none' }}>All Courses</Link>
+                                        <Link to={'/login'} style={{ color: 'white', textDecoration: 'none' }}>Login</Link>
+                                        <Link to={'/signup'} style={{ color: 'white', textDecoration: 'none' }}>Signup</Link>
+                                    </Box>
+                                    <Box className={styles.UserNavs}>
+                                        <IconButton sx={{
+                                            color: 'white'
+                                        }}
+                                            onClick={() => setguestDrawer(!guestDrawer)}>
+                                            <MenuIcon fontSize='small'/>
+                                        </IconButton>
+                                    </Box>
+                                    {
+                                        guestDrawer ? <GuestDrawer open={guestDrawer} setOpen={setguestDrawer} /> : null
+                                    }
+                                </>
                         }
                     </Toolbar>
                 </AppBar>
-                {userdata.role === 'admin' || userdata.role === 'superadmin' ? <Drawer variant="permanent" open={open} >
-                    <Toolbar
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            px: [1],
-                        }}
-                    >
-                        <IconButton onClick={toggleDrawer}>
-                            <ChevronLeftIcon />
-                        </IconButton>
-                    </Toolbar>
-                    <Divider />
-                    <List component="nav">
-                        <MainList />
-                        <Divider sx={{ my: 1 }} />
-                    </List>
-                </Drawer> : null}
-                <Box
-                    component="main"
-                    sx={{
-                        backgroundColor: (theme) =>
-                            theme.palette.mode === 'light'
-                                ? theme.palette.grey[100]
-                                : theme.palette.grey[900],
-                        flexGrow: 1,
-                        height: '100vh',
-                        overflow: 'auto',
-                    }}
-                >
-                    <Toolbar />
-
-                </Box>
             </Box>
+            {open ? <TemporaryDrawer open={open} setOpen={setOpen} /> : null}
+
         </ThemeProvider>
+    );
+}
+
+
+
+
+function TemporaryDrawer({ open, setOpen }) {
+    const { userdata } = useAuth()
+    const { role, isAuthenticated } = userdata;
+    const list = () => (
+        <Box sx={{
+            padding: '80px 0px'
+        }}>
+            {isAuthenticated && <List component={"div"} disablePadding>
+                <ListItem
+                    component={RouterLink} to={'/courses'}
+                    disablePadding sx={{ display: 'block' }}
+                >
+                    <ListItemButton onClick={handleCloseDrawer}>
+                        <ListItemIcon>
+                            <LibraryBooksIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Courses" sx={{ color: "#444" }} />
+                    </ListItemButton>
+                </ListItem>
+                {(role === 'superadmin' || role === 'admin') &&
+                    <>
+                        <ListItem
+                            component={RouterLink} to={'/admin/dashboard'}
+                            disablePadding sx={{ display: 'block' }}
+                        >
+                            <ListItemButton onClick={handleCloseDrawer}>
+                                <ListItemIcon>
+                                    <DashboardIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="Dashboard" sx={{ color: "#444" }} />
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem
+                            disablePadding sx={{ display: 'block' }}
+                            component={RouterLink} to={'/admin/Addcourse'}
+                        >
+                            <ListItemButton onClick={handleCloseDrawer}>
+                                <ListItemIcon>
+                                    <AddIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="Add New Course" sx={{ color: "#444" }} />
+                            </ListItemButton>
+                        </ListItem>
+                    </>
+                }
+            </List>}
+        </Box>
+    );
+
+    const handleCloseDrawer = () => {
+        setOpen(false);
+    };
+
+    return (
+        <div>
+
+            <Drawer open={open} anchor="left" onClose={handleCloseDrawer} >
+                {list()}
+            </Drawer>
+        </div>
+    );
+}
+
+function GuestDrawer({ open, setOpen }) {
+    const { userdata } = useAuth()
+    const { role, isAuthenticated } = userdata;
+    const list = () => (
+        <Box sx={{
+            padding: '60px 0px',
+        }}>
+            <List component={"div"} disablePadding>
+                <ListItem
+                    component={RouterLink} to={'/courses'}
+                    disablePadding sx={{ display: 'block' }}
+                >
+                    <ListItemButton onClick={handleCloseDrawer}>
+                        <ListItemText primary="All Courses" sx={{ color: "#444" }} />
+                    </ListItemButton>
+                </ListItem>
+
+                <ListItem
+                    component={RouterLink} to={'/login'}
+                    disablePadding sx={{ display: 'block' }}
+                >
+                    <ListItemButton onClick={handleCloseDrawer}>
+                        <ListItemText primary="Login" sx={{ color: "#444" }} />
+                    </ListItemButton>
+                </ListItem>
+                <ListItem
+                    disablePadding sx={{ display: 'block' }}
+                    component={RouterLink} to={'/signup'}
+                >
+                    <ListItemButton onClick={handleCloseDrawer}>
+                        <ListItemText primary="Signup" sx={{ color: "#444" }} />
+                    </ListItemButton>
+                </ListItem>
+            </List>
+        </Box>
+    );
+
+    const handleCloseDrawer = () => {
+        setOpen(false);
+    };
+    return (
+        <Drawer open={open} anchor="right" onClose={handleCloseDrawer} sx={{
+            position: 'absolute'
+        }}>
+            {list()}
+        </Drawer>
     );
 }
