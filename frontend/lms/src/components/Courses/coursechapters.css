@@ -57,7 +57,6 @@
   display: flex;
   justify-content: space-around;
   width: auto;
-
 }
 
 .TitleSwitchDiv {
@@ -98,6 +97,7 @@
   height: 50px;
   display: flex;
   justify-content: space-between;
+  background-color: white;
 }
 
 .lessonDiv {
@@ -134,12 +134,22 @@
   margin-right: auto;
 }
 
+.sectionDataDiv {
+  background-color: white;
+}
+
+.lessonMainContainer {
+  width: 100%;
+  min-height: 10px;
+  height: auto;
+}
+
+
 @media screen and (max-width: 720px) {
   .SectionMainDiv {
     width: 85%;
     margin-top: 80px;
   }
-
 }
 
 @media screen and (max-width: 480px) {
@@ -147,16 +157,15 @@
     width: 95%;
   }
 
-  .SectionsMainContainer{
+  .SectionsMainContainer {
     width: 90%;
   }
 
-  .sectionMoreoptionsDiv{
+  .sectionMoreoptionsDiv {
     width: 32%;
   }
 
-
-  .TitleSwitchDiv>h6{
+  .TitleSwitchDiv > h6 {
     font-size: 15px;
   }
 }

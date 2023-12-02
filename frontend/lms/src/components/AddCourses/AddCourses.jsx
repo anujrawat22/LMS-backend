@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import styles from './AddCourses.module.css'
 import EditableTitle from '../EditableTitle/EditableTitle';
 import toast, { Toaster } from 'react-hot-toast';
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { AddCourse } from '../../services/addCourse.service';
 import { useAuth } from '../../Contexts/AuthContext';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -235,115 +235,102 @@ const AddCourses = () => {
                                     <div className={styles.DroppableDiv}>
                                         {
                                             sections.length > 0 && sections.map((section, index) => {
-                                                return <Droppable droppableId={section.sectionid} type="group" key={section.sectionid}>
-                                                    {(provided) => (
-                                                        <div className={styles.SectionsDiv} {...provided.droppableProps} ref={provided.innerRef}>
-                                                            <Draggable key={section.sectionid} draggableId={section.sectionid} index={index}>
-                                                                {(provided) => (
-                                                                    <div className={styles.DraggableSection} ref={provided.innerRef}
-                                                                        {...provided.draggableProps}
-                                                                        {...provided.dragHandleProps} key={section.sectionid}>
-                                                                        <div
-                                                                            className={styles.DraggableDiv}
+                                                return <div className={styles.SectionsDiv} >
 
-                                                                        >
-                                                                            <div className={styles.TitleDiv}>
-                                                                                <div className={styles.SectionTitle}>
-                                                                                    <DragIndicatorIcon className={styles.DragIndicatorIcon} />
-                                                                                    {section.editTitle ? (
-                                                                                        <>
-                                                                                            <TextField
-                                                                                                id="standard-basic"
-                                                                                                label="Title"
-                                                                                                variant="standard"
-                                                                                                value={section.sectionTitle}
-                                                                                                onChange={(e) => handleSectionTitleChange(e, section.sectionid)}
-                                                                                                sx={{
-                                                                                                    marginLeft: '20px',
-                                                                                                }}
-                                                                                            />
-                                                                                            <Button onClick={() => handleEditTitle(section.sectionid, false)} sx={{
-                                                                                                color: 'rgb(77,135,51)',
-                                                                                                border: '1px solid rgb(77,135,51)'
-                                                                                            }}>Save</Button>
-                                                                                        </>
-                                                                                    ) : (
-                                                                                        <>
-                                                                                            <Typography variant="h5" sx={{ marginLeft: '20px' }}>
-                                                                                                {section.sectionTitle}
-                                                                                            </Typography>
-                                                                                            <EditIcon fontSize="small" onClick={() => handleEditTitle(section.sectionid, true)} sx={{ marginLeft: '10px' }} />
-                                                                                        </>
-                                                                                    )}
-                                                                                </div>
-                                                                                <div>
-                                                                                    <DeleteIcon className={styles.DeleteIcon} onClick={() => handleRemoveSection(section.sectionid)} />
-                                                                                </div>
-                                                                            </div>
-                                                                            {section.subsections.length > 0 &&
-                                                                                section.subsections.map((subsection, index) => {
-                                                                                    return (
-                                                                                        <Droppable key={subsection.LessonId} droppableId={subsection.LessonId} type='item'>
+                                                    <div className={styles.DraggableSection} key={section.sectionid}>
+                                                        <div
+                                                            className={styles.DraggableDiv}>
+                                                            <div className={styles.TitleDiv}>
+                                                                <div className={styles.SectionTitle}>
+                                                                    <DragIndicatorIcon className={styles.DragIndicatorIcon} />
+                                                                    {section.editTitle ? (
+                                                                        <>
+                                                                            <TextField
+                                                                                id="standard-basic"
+                                                                                label="Title"
+                                                                                variant="standard"
+                                                                                value={section.sectionTitle}
+                                                                                onChange={(e) => handleSectionTitleChange(e, section.sectionid)}
+                                                                                sx={{
+                                                                                    marginLeft: '20px',
+                                                                                }}
+                                                                            />
+                                                                            <Button onClick={() => handleEditTitle(section.sectionid, false)} sx={{
+                                                                                color: 'rgb(77,135,51)',
+                                                                                border: '1px solid rgb(77,135,51)'
+                                                                            }}>Save</Button>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Typography variant="h5" sx={{ marginLeft: '20px' }}>
+                                                                                {section.sectionTitle}
+                                                                            </Typography>
+                                                                            <EditIcon fontSize="small" onClick={() => handleEditTitle(section.sectionid, true)} sx={{ marginLeft: '10px' }} />
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    <DeleteIcon className={styles.DeleteIcon} onClick={() => handleRemoveSection(section.sectionid)} />
+                                                                </div>
+                                                            </div>
+                                                            {section.subsections.length > 0 &&
+                                                                section.subsections.map((subsection, index) => {
+                                                                    return (
+                                                                        <Droppable key={subsection.LessonId} droppableId={subsection.LessonId} type='item'>
+                                                                            {
+                                                                                (provided) => (
+                                                                                    <div
+
+                                                                                        {...provided.droppableProps} ref={provided.innerRef}>
+                                                                                        <Draggable key={subsection.LessonId} draggableId={subsection.LessonId} index={index}>
                                                                                             {
                                                                                                 (provided) => (
-                                                                                                    <div
+                                                                                                    <div ref={provided.innerRef}
+                                                                                                        {...provided.draggableProps}
+                                                                                                        {...provided.dragHandleProps} className={styles.subsections} style={{
+                                                                                                            borderBottom: '1px solid rgb(230,230,230)'
+                                                                                                        }}>
 
-                                                                                                        {...provided.droppableProps} ref={provided.innerRef}>
-                                                                                                        <Draggable key={subsection.LessonId} draggableId={subsection.LessonId} index={index}>
-                                                                                                            {
-                                                                                                                (provided) => (
-                                                                                                                    <div ref={provided.innerRef}
-                                                                                                                        {...provided.draggableProps}
-                                                                                                                        {...provided.dragHandleProps} className={styles.subsections} style={{
-                                                                                                                            borderBottom: '1px solid rgb(230,230,230)'
-                                                                                                                        }}>
-
-                                                                                                                        <div className={styles.subsectionInfo}>
-                                                                                                                            <Typography variant="h6">{subsection.Title}</Typography>
-                                                                                                                            <div className={styles.LessonSwitchDiv}>
-                                                                                                                                <Typography>Free</Typography>
-                                                                                                                                <Switch checked={subsection.isfree} onChange={() => handleLessonTypeChange(section.sectionid, index)} />
-                                                                                                                            </div>
-                                                                                                                        </div>
-                                                                                                                        <div className={styles.EditLesson}>
-                                                                                                                            <EditIcon onClick={() => handleEditLessonData(subsection)} />
-                                                                                                                        </div>
-                                                                                                                        <div className={styles.DeleteLessonDiv}>
-                                                                                                                            <DeleteIcon onClick={() => handleDeleteLessson(section.sectionid, index)} />
-                                                                                                                        </div>
-                                                                                                                    </div>
-                                                                                                                )
-                                                                                                            }
-
-                                                                                                        </Draggable>
-                                                                                                        {provided.placeholder}
+                                                                                                        <div className={styles.subsectionInfo}>
+                                                                                                            <Typography variant="h6">{subsection.Title}</Typography>
+                                                                                                            <div className={styles.LessonSwitchDiv}>
+                                                                                                                <Typography>Free</Typography>
+                                                                                                                <Switch checked={subsection.isfree} onChange={() => handleLessonTypeChange(section.sectionid, index)} />
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <div className={styles.EditLesson}>
+                                                                                                            <EditIcon onClick={() => handleEditLessonData(subsection)} />
+                                                                                                        </div>
+                                                                                                        <div className={styles.DeleteLessonDiv}>
+                                                                                                            <DeleteIcon onClick={() => handleDeleteLessson(section.sectionid, index)} />
+                                                                                                        </div>
                                                                                                     </div>
                                                                                                 )
                                                                                             }
 
-                                                                                        </Droppable>
-                                                                                    )
-                                                                                }
+                                                                                        </Draggable>
+                                                                                        {provided.placeholder}
+                                                                                    </div>
                                                                                 )
                                                                             }
-                                                                            <div className={styles.ButtonDiv}>
-                                                                                <Button startIcon={<AddCircleOutlineIcon />} onClick={() => handleNewLesson(section.sectionid)} sx={{
-                                                                                    color: 'rgb(77,135,51)'
-                                                                                }}>
-                                                                                    New lesson
-                                                                                </Button>
-                                                                            </div>
-                                                                        </div>
 
-                                                                    </div>
-
-                                                                )}
-                                                            </Draggable>
-                                                            {provided.placeholder}
+                                                                        </Droppable>
+                                                                    )
+                                                                }
+                                                                )
+                                                            }
+                                                            <div className={styles.ButtonDiv}>
+                                                                <Button startIcon={<AddCircleOutlineIcon />} onClick={() => handleNewLesson(section.sectionid)} sx={{
+                                                                    color: 'rgb(77,135,51)'
+                                                                }}>
+                                                                    New lesson
+                                                                </Button>
+                                                            </div>
                                                         </div>
 
-                                                    )}
-                                                </Droppable>
+                                                    </div>
+                                                </div>
+
                                             })
                                         }
 
@@ -360,8 +347,8 @@ const AddCourses = () => {
                             </div>
 
                             <Button style={{ marginTop: '2%' }} variant="contained" onClick={() => handleAddCourse()} sx={{
-                              backgroundColor : 'rgb(77,135,51)',
-                              border : '1px solid rgb(77,135,51)'
+                                backgroundColor: 'rgb(77,135,51)',
+                                border: '1px solid rgb(77,135,51)'
                             }}>
                                 Finish Adding Course
                             </Button>

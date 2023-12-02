@@ -337,11 +337,11 @@ const Students = () => {
                     </Grid>
                     <Grid item xs={6} sm={6} md={1.5} lg={3} className={styles.BtnDiv}>
                         <Button variant="contained"
-                            style={{ backgroundColor: 'Green', color: 'white', fontSize: '.8rem' }}
+                            style={{ backgroundColor: 'Green', color: 'white', fontSize: '.9rem' }}
                             size="large" onClick={handleEmailDialogOpen}>Send Email</Button>
                         <Button
                             variant="contained"
-                            style={{ backgroundColor: 'Green', color: 'white' }}
+                            style={{ backgroundColor: 'Green', color: 'white',fontSize: '.9rem' }}
                             size="large"
                             onClick={handleAddStudentDialogOpen}
                         >

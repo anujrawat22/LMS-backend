@@ -20,7 +20,6 @@ import toast, { Toaster } from 'react-hot-toast';
 import AddIcon from '@mui/icons-material/Add';
 import EditLessonModal from '../EditLessonModal/EditLessonModal';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { UpdateCourse } from '../../services/updateCourse.service';
@@ -30,6 +29,9 @@ import config from '../../config.json';
 import { DeleteSection } from '../../services/deleteSection.service';
 import { DeleteLesson } from '../../services/deleteLesson.service';
 import Fade from '@mui/material/Fade';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { debounce } from 'lodash';
+import { useCallback } from 'react';
 
 
 export default function CourseChapters() {
@@ -58,8 +60,8 @@ export default function CourseChapters() {
     const [selectedSectionID, setSelectedSectionID] = useState(null)
     const [selectedLessonID, setSelectedLessonID] = useState(null)
     const [selectedLessonIndex, setSelectedLessonIndex] = useState(null);
-
-
+    const [debouncedTitle, setDebouncedTitle] = useState('');
+    const [isTitleChanged, setIsTitleChanged] = useState(false);
     const handleMenuOpen = (event, sectionindex, sectionId) => {
         setAnchorEl(event.currentTarget);
         setSelectedSectionIndex(sectionindex);
@@ -73,7 +75,6 @@ export default function CourseChapters() {
     };
 
     const handleLessonMenuOpen = (event, sectionindex, lessonindex, sectionId, lessonId) => {
-
         setLessonMenuAnchorEl(event.currentTarget);
         setSelectedSectionIndex(sectionindex);
         setSelectedLessonIndex(lessonindex);
@@ -176,6 +177,31 @@ export default function CourseChapters() {
         });
     }
 
+    const handleUpdateCourse = async (id, data, token) => {
+        try {
+            const response = await UpdateCourse(id, data, token)
+            toast.success(response.data.msg)
+        } catch (error) {
+            toast.error("Error updating course")
+            setHasChanges(true)
+        }
+    }
+
+    const UpdateCourseData = () => {
+        handleUpdateCourse(id, courseData, token)
+    }
+
+    const debouncedNetworkRequest = useCallback(
+        debounce((title) => {
+
+            if (isTitleChanged) {
+                UpdateCourseData()
+            }
+        }, 1000), // Adjust the delay (in milliseconds) as needed
+        [isTitleChanged]
+    );
+
+
     const handleSectionTitleChange = (e, i) => {
         const newtitle = e.target.value;
         setCourseData({
@@ -187,26 +213,30 @@ export default function CourseChapters() {
                 return section
             })
         })
-        setHasChanges(true)
+        setDebouncedTitle(newtitle);
+        setIsTitleChanged(true);
     }
 
     const handleLessonTypeChange = (sectionindex, lessonindex) => {
-        setCourseData({
-            ...courseData, sections: courseData.sections.map((section, index) => {
-                if (index === sectionindex) {
-                    return {
-                        ...section, subsections: section.subsections.map((lesson, index) => {
-                            if (index === lessonindex) {
-                                return { ...lesson, isfree: !lesson.isfree }
-                            }
-                            return lesson;
-                        })
-                    }
+        const SectionData = [...courseData.sections]
+        const updateSectionData = SectionData.map((section, index) => {
+            if (index === sectionindex) {
+                return {
+                    ...section, subsections: section.subsections.map((lesson, index) => {
+                        if (index === lessonindex) {
+                            return { ...lesson, isfree: !lesson.isfree }
+                        }
+                        return lesson;
+                    })
                 }
-                return section
-            })
+            }
+            return section
         })
-        setHasChanges(true)
+        console.log(updateSectionData)
+        setCourseData({
+            ...courseData, sections: updateSectionData
+        })
+        handleUpdateCourse(id, { ...courseData, sections: updateSectionData }, token)
     }
 
     const handleAddnewLesson = (id, section) => {
@@ -252,7 +282,6 @@ export default function CourseChapters() {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        console.log(id, selectedSectionID)
                         const response = await DeleteSection(id, selectedSectionID, token)
                         setCourseData(response.data.data)
                         toast.success(response.data.msg)
@@ -266,28 +295,8 @@ export default function CourseChapters() {
 
     }
 
-    const handleUpdateCourse = () => {
-        Swal.fire({
-            title: "Update course",
-            text: "Are you sure you want to update course content?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "rgb(77,135,51)",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Update"
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                setHasChanges(false)
-                try {
-                    const response = await UpdateCourse(id, courseData, token)
-                    toast.success(response.data.msg)
-                } catch (error) {
-                    toast.error("Error updating course")
-                    setHasChanges(true)
-                }
-            }
-        });
-    }
+
+
 
     const handlebackbuttonClick = () => {
         if (hasChanges) {
@@ -308,6 +317,14 @@ export default function CourseChapters() {
         }
     }
 
+    const reorder = (list, startIndex, endIndex) => {
+        const result = list;
+        const [removed] = result.splice(startIndex, 1)
+        result.splice(endIndex, 0, removed)
+        return result
+    }
+
+
     const handleOnDragEnd = (results) => {
         const { destination, type, source } = results;
 
@@ -315,18 +332,57 @@ export default function CourseChapters() {
         if (!destination) {
             return; // Not a valid drop target
         }
+
+        // if dropped in same position 
         if (
             source.droppableId === destination.droppableId &&
             source.index === destination.index
         ) return;
-        if (type === 'group') {
-            setHasChanges(true)
+        if (type === 'sections') {
+            const SectionsData = [...courseData.sections];
+            const reorderdsections = reorder(SectionsData, source.index, destination.index)
+            setCourseData({ ...courseData, sections: reorderdsections })
+            handleUpdateCourse(id, courseData, token)
+        }
+
+        if (type === 'lesson') {
             const updatedSections = [...courseData.sections];
-            const [movedSection] = updatedSections.splice(source.index, 1);
-            updatedSections.splice(destination.index, 0, movedSection)
-            return setCourseData({ ...courseData, sections: updatedSections })
-        } else {
-            console.log(destination, source, type)
+            const sourcesection = updatedSections.find(section => section._id === source.droppableId)
+            const destinationSection = updatedSections.find(section => section._id === destination.droppableId)
+
+            if (!sourcesection || !destinationSection) {
+                return;
+            }
+
+            if (!sourcesection.subsections) {
+                sourcesection.subsections = []
+            }
+
+            if (!destinationSection.subsections) {
+                destinationSection.subsections = []
+            }
+
+
+
+            //movig the lesson in the same section
+            if (source.droppableId === destination.droppableId) {
+                const reorderdLessons = reorder(sourcesection.subsections, source.index, destination.index)
+                sourcesection.subsections = reorderdLessons;
+                setCourseData({ ...courseData, sections: updatedSections })
+                handleUpdateCourse(id, courseData, token)
+            } else {
+                // lesson moved to other section
+
+                // remove the lesson from the section
+                const [movedLesson] = sourcesection.subsections.splice(source.index, 1);
+
+                // Move the lesson to new section
+
+                destinationSection.subsections.splice(destination.index, 0, movedLesson)
+                setCourseData({ ...courseData, sections: updatedSections })
+                handleUpdateCourse(id, courseData, token)
+            }
+
         }
 
     }
@@ -347,8 +403,11 @@ export default function CourseChapters() {
 
         // Update the state with the modified sections
         setCourseData({ ...courseData, sections: updatedSections });
-        setHasChanges(true)
+        handleUpdateCourse(id, { ...courseData, sections: updatedSections }, token)
     }
+    useEffect(() => {
+        debouncedNetworkRequest(debouncedTitle);
+    }, [debouncedTitle, debouncedNetworkRequest]);
 
     useEffect(() => {
         checkforUserCourse()
@@ -361,7 +420,7 @@ export default function CourseChapters() {
                 position="top-right"
                 reverseOrder={false}
             />
-            <div  className='SectionsMainContainer'>
+            <div className='SectionsMainContainer'>
                 <div className='backbuttonDiv'>
                     <div>
                         <Tooltip title="Go back to courses page" arrow placement="right">
@@ -445,7 +504,7 @@ export default function CourseChapters() {
                 position="top-right"
                 reverseOrder={false}
             />
-            <div  className='SectionMainDiv'>
+            <div className='SectionMainDiv'>
                 <div className='backbuttonDiv'>
                     <div>
                         <Tooltip title="Go back to courses page" arrow placement="right">
@@ -455,171 +514,27 @@ export default function CourseChapters() {
                         </Tooltip>
                     </div>
                     <div className='EditDeleteBtns'>
-                        <Button  startIcon={<AddIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }} className='Courseeditbtn' onClick={handleAddnewSection}>New Section</Button>
+                        <Button startIcon={<AddIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }} className='Courseeditbtn' onClick={handleAddnewSection}>New Section</Button>
                         <Button startIcon={<DeleteOutlineIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }}
                             onClick={handleCourseDelete}>Delete</Button>
                     </div>
                 </div>
                 <DragDropContext onDragEnd={handleOnDragEnd}>
-                    <div className='sectionDataDiv' >
-                        {
-                            courseData.sections.length > 0 && courseData.sections.map((section, sectionindex) => {
-                                return <Droppable droppableId={section._id} type='group' key={section._id} index={sectionindex}>
-                                    {
-                                        (provided, snapshot) => (
-                                            <div {...provided.droppableProps} ref={provided.innerRef} className='droppableDiv' style={{ backgroundColor: snapshot.isDraggingOver ? 'hsl(209.84,78.72%,46.08%, 0.15)' : 'white' }}>
-                                                <Draggable key={section._id} draggableId={section._id} index={sectionindex} type='group'>
-                                                    {(provided) => (<div key={section._id} ref={provided.innerRef}
-                                                        {...provided.draggableProps} >
-                                                        <div className='sectionTitle'>
-                                                            <div className='sectionTitleField'>
-                                                                <Tooltip title='Drag section'>
-                                                                    <IconButton {...provided.dragHandleProps}>
-                                                                        <DragIndicatorIcon className='dragIcon' />
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                                <TextField variant='standard' value={section.sectionTitle} onChange={(e) => handleSectionTitleChange(e, sectionindex)} />
-                                                            </div>
-                                                            <div className='sectionMoreoptionsDiv'>
-                                                                <div className='TitleSwitchDiv'>
-                                                                    <Typography variant='h6'>Free</Typography>
-                                                                    <Switch size='small' sx={{
-                                                                        '& .MuiSwitch-thumb': {
-                                                                            marginTop: '-16px',
-                                                                            color: 'rgb(77, 135, 51)',
-                                                                        },
-                                                                        '& .Mui-checked': {
-                                                                            color: 'rgb(77, 135, 51)',
-                                                                        },
-                                                                        '& .Mui-checked + .MuiSwitch-track': {
-                                                                            backgroundColor: 'rgb(77, 135, 51)',
-                                                                            opacity: 0.5,
-                                                                        },
-                                                                    }} onChange={(e) => {
-                                                                        handleSectionTypeChange(section._id, e.target.checked)
-                                                                    }} key={section._id}></Switch>
-                                                                </div>
-                                                                <Tooltip  >
-                                                                    <IconButton onClick={(e) => handleMenuOpen(e, sectionindex, section._id)}>
-                                                                        <MoreVertIcon className='deleteIcon' fontSize='small' />
-                                                                    </IconButton>
-                                                                    <Menu
-                                                                        key={section._id}
-                                                                        anchorEl={anchorEl}
-                                                                        open={Boolean(anchorEl)}
-                                                                        onClose={handleMenuClose}
-                                                                        PaperProps={{
-                                                                            elevation: 4,
-                                                                            style: {
-                                                                                boxShadow: 'rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(17, 17, 26, 0.1) 0px 0px 8px',
-                                                                            },
-                                                                        }}
-                                                                    >
-                                                                        {selectedSectionIndex !== null && (
-                                                                            [<MenuItem onClick={() => handleDeleteSection()} sx={{
-                                                                                color: 'red'
-                                                                            }}>Delete</MenuItem>]
-                                                                        )}
-                                                                    </Menu>
-                                                                </Tooltip>
-                                                            </div>
+                    <Droppable droppableId='sections' type='sections' >
+                        {(provided) => (
+                            <div className='sectionDataDiv' {...provided.droppableProps} ref={provided.innerRef}>
+                                {
+                                    courseData.sections.length > 0 && courseData.sections.map((section, sectionindex) => {
+                                        return <Sections key={section._id} section={section} handleSectionTitleChange={handleSectionTitleChange} sectionindex={sectionindex} handleSectionTypeChange={handleSectionTypeChange} handleMenuOpen={handleMenuOpen} handleMenuClose={handleMenuClose} anchorEl={anchorEl} selectedSectionIndex={selectedSectionIndex} handleDeleteSection={handleDeleteSection} handleLessonTypeChange={handleLessonTypeChange} handleLessonMenuOpen={handleLessonMenuOpen} handleLessonMenuClose={handleLessonMenuClose} lessonMenuAnchorEl={lessonMenuAnchorEl} selectedLessonIndex={selectedLessonIndex} handleEditLesson={handleEditLesson} handleDeleteLesson={handleDeleteLesson} handleAddnewLesson={handleAddnewLesson} />
+                                    })}
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
 
-                                                        </div>
-                                                        {
-                                                            section.subsections.length > 0 && section.subsections.map((lesson, lessonindex) => {
-                                                                return <Draggable draggableId={lesson._id} key={lesson._id} index={lessonindex} type='item'>
-                                                                    {(provided, snapshot) => (<div ref={provided.innerRef}
-                                                                        {...provided.draggableProps} className='lessonDropDiv' {...provided.dragHandleProps} style={{
-                                                                            backgroundColor: snapshot.isDragging ? 'hsl(209.84,78.72%,46.08%, 0.1)' : 'white',
-                                                                        }}>
-                                                                        <div key={lesson._id}
-                                                                            className='lessonDiv'>
-                                                                            <div className='lessonTitleDiv'>
-                                                                                <Tooltip title="Drag lesson">
-                                                                                    <IconButton>
-                                                                                        <DragIndicatorIcon className='dragIcon' />
-                                                                                    </IconButton>
-                                                                                </Tooltip>
-                                                                                <Typography>{lesson.Title}</Typography>
-                                                                            </div>
-                                                                            <div className='lessonControlDiv'>
-                                                                                <div className='lessonType'>
-                                                                                    <Switch checked={lesson.isfree} size='small' onChange={() => handleLessonTypeChange(sectionindex, lessonindex)} sx={{
-                                                                                        '& .MuiSwitch-thumb': {
-                                                                                            marginTop: '-16px',
-                                                                                            color: 'rgb(77, 135, 51)',
-                                                                                        },
-                                                                                        '& .Mui-checked': {
-                                                                                            color: 'rgb(77, 135, 51)',
-                                                                                        },
-                                                                                        '& .Mui-checked + .MuiSwitch-track': {
-                                                                                            backgroundColor: 'rgb(77, 135, 51)',
-                                                                                            opacity: 0.5,
-                                                                                        },
-                                                                                    }} key={lesson._id} />
-                                                                                </div>
-                                                                                <Tooltip  >
-                                                                                    <IconButton onClick={(e) => { handleLessonMenuOpen(e, sectionindex, lessonindex, section._id, lesson._id) }}>
-                                                                                        <MoreVertIcon className='deleteIcon' fontSize='small' />
-                                                                                    </IconButton>
-                                                                                    <Menu
-                                                                                        anchorEl={lessonMenuAnchorEl}
-                                                                                        open={Boolean(lessonMenuAnchorEl)}
-                                                                                        onClose={handleLessonMenuClose}
-                                                                                        TransitionComponent={Fade} // You can use other transition components like Slide
-                                                                                        transitionDuration={200}
-                                                                                        PaperProps={{
-                                                                                            elevation: 4,
-                                                                                            style: {
-                                                                                                boxShadow: 'rgba(0, 0, 0, 0.04) 0px 3px 5px',
-                                                                                            },
-                                                                                        }}
-                                                                                    >
-                                                                                        {selectedSectionIndex !== null && selectedLessonIndex !== null && (
-                                                                                            [
-                                                                                                <MenuItem onClick={() => handleEditLesson(section._id)}>Edit</MenuItem>,
-                                                                                                <MenuItem onClick={() => handleDeleteLesson()} sx={{
-                                                                                                    color: 'red'
-                                                                                                }}>Delete</MenuItem>
-                                                                                            ]
-                                                                                        )}
-                                                                                    </Menu>
-                                                                                </Tooltip>
-                                                                            </div>
-
-
-                                                                        </div>
-                                                                        {provided.placeholder}
-                                                                    </div>)}
-                                                                </Draggable>
-                                                            })
-                                                        }
-                                                        <div className='newLessonDiv'>
-                                                            <Button startIcon={<AddCircleIcon />} size='small' sx={{
-                                                                color: 'rgb(77,135,51)'
-                                                            }}
-                                                                onClick={() => handleAddnewLesson(section._id, section)}
-                                                            >New Lesson</Button>
-                                                        </div>
-                                                        {provided.placeholder}
-                                                    </div>)}
-                                                </Draggable>
-                                                
-                                            </div>)
-                                    }
-                                </Droppable>
-                            })
-                        }
-                    </div>
                 </DragDropContext>
-                <div className='updateChangesdiv'>
-                    <Button variant='outlined' sx={{
-                        color: 'rgb(77,135,51)',
-                        border: '1px solid rgb(77,135,51)',
-                        '&:hover': { border: '1px solid rgb(77,135,51)' }
-                    }}
-                        disabled={!hasChanges} onClick={handleUpdateCourse}>Update Changes</Button>
-                </div>
+
+
                 {editLessonModal && <EditLessonModal handleCloseModel={handleCloseModel} courseId={id} Data={LessonData} sectionId={sectionId} fetchCourseData={fetchCourseData} setData={setLessonData} />}
             </div>
         </>
@@ -627,7 +542,7 @@ export default function CourseChapters() {
     }
 
     return (
-        <div  className='SectionsMainContainer'>
+        <div className='SectionsMainContainer'>
             <Tooltip title="Go back to courses page" arrow placement="right">
                 <Link to="/courses">
                     <IconButton>
@@ -717,4 +632,158 @@ export default function CourseChapters() {
 
         </div>
     );
+}
+
+
+
+function Sections({ section, handleSectionTitleChange, sectionindex, handleSectionTypeChange, handleMenuOpen, handleMenuClose, anchorEl, selectedSectionIndex, handleDeleteSection, handleLessonTypeChange, handleLessonMenuOpen, handleLessonMenuClose, lessonMenuAnchorEl, selectedLessonIndex, handleEditLesson, handleDeleteLesson, handleAddnewLesson }) {
+    return (<Draggable draggableId={section._id} index={sectionindex}>
+        {(provided, snapshot) => (<div className='droppableDiv' style={{ backgroundColor: snapshot.isDragging ? 'hsl(209.84,78.72%,46.08%, 0.15)' : 'white' }} {...provided.draggableProps} ref={provided.innerRef}>
+            <div >
+                <div className='sectionTitle'>
+                    <div className='sectionTitleField'>
+                        <Tooltip title='Drag section'>
+                            <IconButton {...provided.dragHandleProps}>
+                                <DragIndicatorIcon className='dragIcon' />
+                            </IconButton>
+                        </Tooltip>
+                        <TextField variant='standard' value={section.sectionTitle} onChange={(e) => handleSectionTitleChange(e, sectionindex)} />
+                    </div>
+                    <div className='sectionMoreoptionsDiv'>
+                        <div className='TitleSwitchDiv'>
+                            <Typography variant='h6'>Free</Typography>
+                            <Switch size='small' sx={{
+                                '& .MuiSwitch-thumb': {
+                                    marginTop: '-16px',
+                                    color: 'rgb(77, 135, 51)',
+                                },
+                                '& .Mui-checked': {
+                                    color: 'rgb(77, 135, 51)',
+                                },
+                                '& .Mui-checked + .MuiSwitch-track': {
+                                    backgroundColor: 'rgb(77, 135, 51)',
+                                    opacity: 0.5,
+                                },
+                            }} onChange={(e) => {
+                                handleSectionTypeChange(section._id, e.target.checked)
+                            }} key={section._id}></Switch>
+                        </div>
+                        <Tooltip  >
+                            <IconButton onClick={(e) => handleMenuOpen(e, sectionindex, section._id)}>
+                                <MoreVertIcon className='deleteIcon' fontSize='small' />
+                            </IconButton>
+                            <Menu
+                                key={section._id}
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={handleMenuClose}
+                                PaperProps={{
+                                    elevation: 4,
+                                    style: {
+                                        boxShadow: 'rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(17, 17, 26, 0.1) 0px 0px 8px',
+                                    },
+                                }}
+                            >
+                                {selectedSectionIndex !== null && (
+                                    [<MenuItem onClick={() => handleDeleteSection()} sx={{
+                                        color: 'red'
+                                    }}>Delete</MenuItem>]
+                                )}
+                            </Menu>
+                        </Tooltip>
+                    </div>
+                </div>
+                <Droppable droppableId={section._id} type='lesson'>
+                    {(provided) => (
+                        <div className='lessonMainContainer' ref={provided.innerRef} {...provided.droppableProps}>
+                            {
+                                section.subsections.length > 0 && section.subsections.map((lesson, lessonindex) => {
+                                    return <Lesson lesson={lesson} lessonindex={lessonindex} handleLessonTypeChange={handleLessonTypeChange} sectionindex={sectionindex} handleLessonMenuOpen={handleLessonMenuOpen} section={section} lessonMenuAnchorEl={lessonMenuAnchorEl} handleLessonMenuClose={handleLessonMenuClose} selectedSectionIndex={selectedSectionIndex} selectedLessonIndex={selectedLessonIndex} handleEditLesson={handleEditLesson} handleDeleteLesson={handleDeleteLesson} key={lesson._id} />
+                                })
+                            }
+                            {provided.placeholder}
+                        </div>
+                    )}
+
+                </Droppable>
+                <div className='newLessonDiv'>
+                    <Button startIcon={<AddCircleIcon />} size='small' sx={{
+                        color: 'rgb(77,135,51)'
+                    }}
+                        onClick={() => handleAddnewLesson(section._id, section)}
+                    >New Lesson</Button>
+                </div>
+            </div>
+        </div>)}
+    </ Draggable>
+    )
+}
+
+
+function Lesson({ lesson, lessonindex, handleLessonTypeChange, sectionindex, handleLessonMenuOpen, section, lessonMenuAnchorEl, handleLessonMenuClose, selectedSectionIndex, selectedLessonIndex, handleEditLesson, handleDeleteLesson }) {
+    return (<Draggable draggableId={lesson._id} index={lessonindex}>
+        {(provided) => (<div className='lessonDropDiv' style={{
+            backgroundColor: true ? 'hsl(209.84,78.72%,46.08%, 0.1)' : 'white',
+        }} ref={provided.innerRef} {...provided.draggableProps}>
+            <div key={lesson._id}
+                className='lessonDiv'>
+                <div className='lessonTitleDiv'>
+                    <Tooltip title="Drag lesson">
+                        <IconButton {...provided.dragHandleProps}>
+                            <DragIndicatorIcon className='dragIcon' />
+                        </IconButton>
+                    </Tooltip>
+                    <Typography>{lesson.Title}</Typography>
+                </div>
+                <div className='lessonControlDiv'>
+                    <div className='lessonType'>
+                        <Switch checked={lesson.isfree} size='small' onChange={() => handleLessonTypeChange(sectionindex, lessonindex)} sx={{
+                            '& .MuiSwitch-thumb': {
+                                marginTop: '-16px',
+                                color: 'rgb(77, 135, 51)',
+                            },
+                            '& .Mui-checked': {
+                                color: 'rgb(77, 135, 51)',
+                            },
+                            '& .Mui-checked + .MuiSwitch-track': {
+                                backgroundColor: 'rgb(77, 135, 51)',
+                                opacity: 0.5,
+                            },
+                        }} key={lesson._id} />
+                    </div>
+                    <Tooltip  >
+                        <IconButton onClick={(e) => { handleLessonMenuOpen(e, sectionindex, lessonindex, section._id, lesson._id) }}>
+                            <MoreVertIcon className='deleteIcon' fontSize='small' />
+                        </IconButton>
+                        <Menu
+                            anchorEl={lessonMenuAnchorEl}
+                            open={Boolean(lessonMenuAnchorEl)}
+                            onClose={handleLessonMenuClose}
+                            TransitionComponent={Fade} // You can use other transition components like Slide
+                            transitionDuration={200}
+                            PaperProps={{
+                                elevation: 4,
+                                style: {
+                                    boxShadow: 'rgba(0, 0, 0, 0.04) 0px 3px 5px',
+                                },
+                            }}
+                        >
+                            {selectedSectionIndex !== null && selectedLessonIndex !== null && (
+                                [
+                                    <MenuItem onClick={() => handleEditLesson(section._id)}>Edit</MenuItem>,
+                                    <MenuItem onClick={() => handleDeleteLesson()} sx={{
+                                        color: 'red'
+                                    }}>Delete</MenuItem>
+                                ]
+                            )}
+                        </Menu>
+                    </Tooltip>
+                </div>
+
+
+            </div>
+        </div>)}
+
+    </Draggable>
+    )
 }
