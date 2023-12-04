@@ -1,5 +1,5 @@
 
-import { Button, Container, Grid, Paper, TextField, Typography } from '@mui/material';
+import { Button, Container, Grid, Paper, TextField, Typography, Tooltip, IconButton } from '@mui/material';
 import React, { useState } from 'react'
 import styles from './AddCourses.module.css'
 import EditableTitle from '../EditableTitle/EditableTitle';
@@ -13,6 +13,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddContent from '../AddContent/AddContent';
 import { Switch } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
+
 const AddCourses = () => {
     const { userdata } = useAuth()
     const token = userdata.token;
@@ -36,39 +38,61 @@ const AddCourses = () => {
         toast.success("Section removed")
     };
 
+    const reorder = (list, startIndex, endIndex) => {
+        const result = list;
+        const [removed] = result.splice(startIndex, 1)
+        result.splice(endIndex, 0, removed)
+        return result
+    }
 
     const handleOnDragEnd = (results) => {
         const { destination, type, source } = results;
-        console.log(destination.droppableId, source.droppableId)
-        if (!results.destination) {
-            return; // Not a valid drop target
+        console.log(type)
+        if (!destination) {
+            return;
         }
         if (
             source.droppableId === destination.droppableId &&
             source.index === destination.index
         ) return;
-        if (type === 'group') {
-            const updatedSections = [...sections];
-            const [movedSection] = updatedSections.splice(results.source.index, 1);
-            updatedSections.splice(results.destination.index, 0, movedSection);
-            return setSections(updatedSections);
+        if (type === 'Sections') {
+            const SectionsData = [...sections];
+            const reorderdSections = reorder(SectionsData, source.index, destination.index)
+            setSections((prevSections) => [...reorderdSections]);
+            toast.success("Section reorderd")
         }
 
-        if (results.type === 'item') {
-            const sourceSectionIndex = sections.findIndex(section => section.sectionid === source.droppableId);
-            const destinationSectionIndex = sections.findIndex(section => section.sectionid === destination.droppableId);
+        if (type === 'lessons') {
+            const SectionsData = [...sections];
+            const sourceSection = SectionsData.find(section => section.sectionid === source.droppableId)
+            const destinationSection = SectionsData.find(section => section.sectionid === destination.droppableId)
+            if (!sourceSection || !destinationSection) return;
 
-            if (sourceSectionIndex !== -1 && destinationSectionIndex !== -1) {
-                const updatedSections = [...sections];
-                const [movedLesson] = updatedSections[sourceSectionIndex].subsections.splice(source.index, 1);
-                updatedSections[destinationSectionIndex].subsections.splice(destination.index, 0, movedLesson);
-                setSections(updatedSections);
+            if (!sourceSection.subsections) {
+                sourceSection.subsections = []
+            }
+
+            if (!destinationSection.subsections) {
+                destinationSection.subsections = []
+            }
+
+            if (source.droppableId === destination.droppableId) {
+                const reorderLessons = reorder(sourceSection.subsections, source.index, destination.index)
+                source.subsections = reorderLessons;
+                setSections(SectionsData)
+                toast.success("Lessons reordered")
+            } else {
+                const [movedLesson] = sourceSection.subsections.splice(source.index, 1);
+
+                destinationSection.subsections.splice(destination.index, 0, movedLesson)
+                setSections(SectionsData)
+                toast.success("Lessons reordered")
             }
         }
     }
 
     const generateSectionId = () => {
-        return `section-${Date.now()}`
+        return `${uuidv4()}`
     }
 
     const handleAddnewSection = () => {
@@ -226,117 +250,30 @@ const AddCourses = () => {
                                 setPrice={setPrice}
                                 price={price}
                             />
-                            <DragDropContext onDragEnd={handleOnDragEnd}>
-                                <div className={styles
-                                    .MainSectionContainer}>
-                                    {sections.length > 0 && <Typography variant="h4" sx={{
-                                        textAlign: 'center'
-                                    }}>Sections</Typography>}
-                                    <div className={styles.DroppableDiv}>
-                                        {
-                                            sections.length > 0 && sections.map((section, index) => {
-                                                return <div className={styles.SectionsDiv} >
 
-                                                    <div className={styles.DraggableSection} key={section.sectionid}>
-                                                        <div
-                                                            className={styles.DraggableDiv}>
-                                                            <div className={styles.TitleDiv}>
-                                                                <div className={styles.SectionTitle}>
-                                                                    <DragIndicatorIcon className={styles.DragIndicatorIcon} />
-                                                                    {section.editTitle ? (
-                                                                        <>
-                                                                            <TextField
-                                                                                id="standard-basic"
-                                                                                label="Title"
-                                                                                variant="standard"
-                                                                                value={section.sectionTitle}
-                                                                                onChange={(e) => handleSectionTitleChange(e, section.sectionid)}
-                                                                                sx={{
-                                                                                    marginLeft: '20px',
-                                                                                }}
-                                                                            />
-                                                                            <Button onClick={() => handleEditTitle(section.sectionid, false)} sx={{
-                                                                                color: 'rgb(77,135,51)',
-                                                                                border: '1px solid rgb(77,135,51)'
-                                                                            }}>Save</Button>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <Typography variant="h5" sx={{ marginLeft: '20px' }}>
-                                                                                {section.sectionTitle}
-                                                                            </Typography>
-                                                                            <EditIcon fontSize="small" onClick={() => handleEditTitle(section.sectionid, true)} sx={{ marginLeft: '10px' }} />
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                                <div>
-                                                                    <DeleteIcon className={styles.DeleteIcon} onClick={() => handleRemoveSection(section.sectionid)} />
-                                                                </div>
-                                                            </div>
-                                                            {section.subsections.length > 0 &&
-                                                                section.subsections.map((subsection, index) => {
-                                                                    return (
-                                                                        <Droppable key={subsection.LessonId} droppableId={subsection.LessonId} type='item'>
-                                                                            {
-                                                                                (provided) => (
-                                                                                    <div
+                            <div className={styles
+                                .MainSectionContainer}>
+                                {sections.length > 0 && <Typography variant="h4" sx={{
+                                    textAlign: 'center'
+                                }}>Sections</Typography>}
+                                <DragDropContext onDragEnd={handleOnDragEnd}>
+                                    <Droppable droppableId='Sections' type='Sections'>
+                                        {(provided) => (
+                                            <div className={styles.DroppableDiv} {...provided.droppableProps} ref={provided.innerRef}>
+                                                {
+                                                    sections.length > 0 && sections.map((section, index) => {
+                                                        return <Section
+                                                            index={index}
+                                                            section={section} handleSectionTitleChange={handleSectionTitleChange} handleEditTitle={handleEditTitle} handleRemoveSection={handleRemoveSection} handleLessonTypeChange={handleLessonTypeChange} handleEditLessonData={handleEditLessonData} handleDeleteLessson={handleDeleteLessson} handleNewLesson={handleNewLesson} key={section.sectionid} />
+                                                    })
+                                                }
+                                                {provided.placeholder}
+                                            </div>
+                                        )}
+                                    </Droppable>
+                                </DragDropContext>
+                            </div>
 
-                                                                                        {...provided.droppableProps} ref={provided.innerRef}>
-                                                                                        <Draggable key={subsection.LessonId} draggableId={subsection.LessonId} index={index}>
-                                                                                            {
-                                                                                                (provided) => (
-                                                                                                    <div ref={provided.innerRef}
-                                                                                                        {...provided.draggableProps}
-                                                                                                        {...provided.dragHandleProps} className={styles.subsections} style={{
-                                                                                                            borderBottom: '1px solid rgb(230,230,230)'
-                                                                                                        }}>
-
-                                                                                                        <div className={styles.subsectionInfo}>
-                                                                                                            <Typography variant="h6">{subsection.Title}</Typography>
-                                                                                                            <div className={styles.LessonSwitchDiv}>
-                                                                                                                <Typography>Free</Typography>
-                                                                                                                <Switch checked={subsection.isfree} onChange={() => handleLessonTypeChange(section.sectionid, index)} />
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div className={styles.EditLesson}>
-                                                                                                            <EditIcon onClick={() => handleEditLessonData(subsection)} />
-                                                                                                        </div>
-                                                                                                        <div className={styles.DeleteLessonDiv}>
-                                                                                                            <DeleteIcon onClick={() => handleDeleteLessson(section.sectionid, index)} />
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                )
-                                                                                            }
-
-                                                                                        </Draggable>
-                                                                                        {provided.placeholder}
-                                                                                    </div>
-                                                                                )
-                                                                            }
-
-                                                                        </Droppable>
-                                                                    )
-                                                                }
-                                                                )
-                                                            }
-                                                            <div className={styles.ButtonDiv}>
-                                                                <Button startIcon={<AddCircleOutlineIcon />} onClick={() => handleNewLesson(section.sectionid)} sx={{
-                                                                    color: 'rgb(77,135,51)'
-                                                                }}>
-                                                                    New lesson
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-
-                                            })
-                                        }
-
-                                    </div>
-                                </div>
-                            </DragDropContext>
                             <div className={styles.addnewSectionDiv}>
                                 <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddnewSection} sx={{
                                     border: '1px solid rgb(77,135,51)',
@@ -362,4 +299,108 @@ const AddCourses = () => {
     );
 }
 
-export default AddCourses
+export default AddCourses;
+
+
+
+
+function Section({ section, index, handleSectionTitleChange, handleEditTitle, handleRemoveSection, handleLessonTypeChange, handleEditLessonData, handleDeleteLessson, handleNewLesson }) {
+    return (
+        <Draggable draggableId={section.sectionid} index={index}>
+            {(provided) => (
+                <div className={styles.DraggableDiv} ref={provided.innerRef} {...provided.draggableProps} >
+                    <div className={styles.TitleDiv}>
+                        <div className={styles.SectionTitle}>
+                            <Tooltip title='Drag Section' >
+                                <IconButton {...provided.dragHandleProps}>
+                                    <DragIndicatorIcon className={styles.DragIndicatorIcon} />
+                                </IconButton>
+                            </Tooltip>
+                            {section.editTitle ? (
+                                <>
+                                    <TextField
+                                        id="standard-basic"
+                                        label="Title"
+                                        variant="standard"
+                                        value={section.sectionTitle}
+                                        onChange={(e) => handleSectionTitleChange(e, section.sectionid)}
+                                        sx={{
+                                            marginLeft: '20px',
+                                        }}
+                                    />
+                                    <Button onClick={() => handleEditTitle(section.sectionid, false)} sx={{
+                                        color: 'rgb(77,135,51)',
+                                        border: '1px solid rgb(77,135,51)'
+                                    }}>Save</Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Typography variant="h5" sx={{ marginLeft: '20px' }}>
+                                        {section.sectionTitle}
+                                    </Typography>
+                                    <EditIcon fontSize="small" onClick={() => handleEditTitle(section.sectionid, true)} sx={{ marginLeft: '10px' }} />
+                                </>
+                            )}
+                        </div>
+                        <div>
+                            <DeleteIcon className={styles.DeleteIcon} onClick={() => handleRemoveSection(section.sectionid)} />
+                        </div>
+                    </div>
+                    <Droppable droppableId={section.sectionid} type='lessons'>
+                        {(provided) => (
+                            <div className={styles.LessonDiv} ref={provided.innerRef} {...provided.droppableProps} >
+                                {section.subsections.length > 0 &&
+                                    section.subsections.map((subsection, index) => {
+                                        return <Lesson subsection={subsection} handleLessonTypeChange={handleLessonTypeChange} handleEditLessonData={handleEditLessonData} handleDeleteLessson={handleDeleteLessson} index={index} section={section} key={subsection.LessonId} />
+                                    })
+                                }
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+                    <div className={styles.ButtonDiv}>
+                        <Button startIcon={<AddCircleOutlineIcon />} onClick={() => handleNewLesson(section.sectionid)} sx={{
+                            color: 'rgb(77,135,51)'
+                        }}>
+                            New lesson
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </Draggable >
+    )
+}
+
+
+function Lesson({ subsection, handleLessonTypeChange, handleEditLessonData, handleDeleteLessson, index, section }) {
+    return (
+        <Draggable draggableId={subsection.LessonId} index={index}>
+            {(provided) => (
+                <div className={styles.subsections} style={{
+                    borderBottom: '1px solid rgb(230,230,230)'
+                }} ref={provided.innerRef} {...provided.draggableProps}>
+                    <Tooltip title='Drag Lesson'>
+                        <IconButton {...provided.dragHandleProps}>
+                            <DragIndicatorIcon className={styles.DragIndicatorIcon} />
+                        </IconButton>
+                    </Tooltip>
+                    <div className={styles.subsectionInfo}>
+                        <Typography variant="h6" sx={{
+                            fontSize: '1rem'
+                        }}>{subsection.Title}</Typography>
+                        <div className={styles.LessonSwitchDiv}>
+                            <Typography>Free</Typography>
+                            <Switch checked={subsection.isfree} onChange={() => handleLessonTypeChange(section.sectionid, index)} />
+                        </div>
+                    </div>
+                    <div className={styles.EditLesson}>
+                        <EditIcon onClick={() => handleEditLessonData(subsection)} />
+                    </div>
+                    <div className={styles.DeleteLessonDiv}>
+                        <DeleteIcon onClick={() => handleDeleteLessson(section.sectionid, index)} />
+                    </div>
+                </div>
+            )}
+        </Draggable>
+    )
+}

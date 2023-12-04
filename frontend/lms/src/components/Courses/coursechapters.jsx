@@ -232,7 +232,6 @@ export default function CourseChapters() {
             }
             return section
         })
-        console.log(updateSectionData)
         setCourseData({
             ...courseData, sections: updateSectionData
         })

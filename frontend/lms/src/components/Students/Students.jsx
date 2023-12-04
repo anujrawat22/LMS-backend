@@ -341,7 +341,7 @@ const Students = () => {
                             size="large" onClick={handleEmailDialogOpen}>Send Email</Button>
                         <Button
                             variant="contained"
-                            style={{ backgroundColor: 'Green', color: 'white',fontSize: '.9rem' }}
+                            style={{ backgroundColor: 'Green', color: 'white', fontSize: '.9rem' }}
                             size="large"
                             onClick={handleAddStudentDialogOpen}
                         >
@@ -464,6 +464,7 @@ const AddStudentDialog = ({ open, onClose, fetchData, courseData }) => {
     }
 
     const addStudentsManually = async () => {
+        const loader = toast.loading("Enrolling users")
         const students = fieldSets.map(fieldSet => {
             return {
                 name: fieldSet.name || '',
@@ -471,6 +472,12 @@ const AddStudentDialog = ({ open, onClose, fetchData, courseData }) => {
                 password: fieldSet.password,
             }
         });
+
+
+        if (selectedCoursesID.length === 0) {
+            toast.dismiss(loader)
+            return toast.error("Please select a course to proceed further")
+        }
         const request = {
             students,
             courses: selectedCoursesID
@@ -478,19 +485,16 @@ const AddStudentDialog = ({ open, onClose, fetchData, courseData }) => {
 
         try {
             const response = await AddStudentManually(request, token);
-            console.log(response)
-            if (response.data.errors.length > 0) {
-                response.data.errors.map((el) => {
-                    return toast.error(el.error)
-                })
-            }
             toast.success(response.data.msg);
-            onClose();
+            toast.dismiss(loader)
+
             fetchData();
         }
         catch (e) {
-            console.log(e)
-            toast.error("Error");
+            toast.dismiss(loader)
+            toast.error("Internal error");
+        } finally {
+            onClose();
         }
 
     }

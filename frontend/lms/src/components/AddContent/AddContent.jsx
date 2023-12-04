@@ -15,6 +15,7 @@ import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LessonPreview from '../LessonPreview/LessonPreview';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import { v4 as uuidv4 } from 'uuid';
 const label = { inputProps: { 'aria-label': 'Switch demo' } };
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -32,7 +33,7 @@ const VisuallyHiddenInput = styled('input')({
 
 const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
     const generateLessonId = () => {
-        return `Lesson-${Date.now()}`
+        return `${uuidv4()}`
     }
     const initialLessonState = Object.keys(LessonData).length > 0 ? LessonData : {
         Title: '',
@@ -381,8 +382,8 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                                             paddingRight: '20px'
                                         }} value={bannerimageUrl} onChange={(e) => setBannerImgUrl(e.target.value)}></TextField>
                                     <Button variant='outlined' onClick={handlebannerimgurl} sx={{
-                                        border : '1px solid rgb(77,135,51)',
-                                        color : 'rgb(77,135,51)'
+                                        border: '1px solid rgb(77,135,51)',
+                                        color: 'rgb(77,135,51)'
                                     }}>Add</Button>
                                 </div>
                             </div>
