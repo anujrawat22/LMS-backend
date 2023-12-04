@@ -22,7 +22,7 @@ const AllRoutes = () => {
                 <Route path='/forgot' element={<ForgetPassword />} />
 
                 <Route path='/courses' element={<Courses />} />
-                <Route path='/CourseDetails/:id' element={<CourseDetails />} />
+                <Route path='/CourseDetails/:id/section/:sectionId/lesson/:lessonId' element={<CourseDetails />} />
                 <Route path='/chapters/:id' element={<CourseChapters />} />
                 <Route element={<ProtectedRoute roles={['admin', 'superadmin']} />}>
                     <Route path='/admin/dashboard' element={<AdminDashboard />} />

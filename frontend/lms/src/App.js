@@ -53,12 +53,13 @@ function App() {
   return (
     <>
       <div style={{
-        height : '100dvh',
-        width : '100dvw',
-        overflow : 'scroll',
+        height: '100dvh',
+        width: '100dvw',
+        overflow: 'scroll',
+        overflowX: 'hidden'
       }}>
-       <AdminSideNavBar />
-       <AllRoutes/>
+        <AdminSideNavBar />
+        <AllRoutes />
       </div>
     </>
   );

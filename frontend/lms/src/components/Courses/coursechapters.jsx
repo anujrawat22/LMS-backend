@@ -99,8 +99,8 @@ export default function CourseChapters() {
         }
     }
 
-    const handleNavigateCourse = (lesson) => {
-        navigate(`/CourseDetails/${id}`, { state: { lessonData: lesson } })
+    const handleNavigateCourse = (sectionId ,lessonId) => {
+        navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`)
     }
 
     const checkforUserCourse = async () => {
@@ -438,7 +438,7 @@ export default function CourseChapters() {
                                 aria-controls="panel1a-content"
                                 sx={{ background: "#eee", minHeight: "30px", margin: "0px" }}
                             >
-                                <Typography sx={{}}><span style={{ fontWeight: "900" }}>{section.sectionTitle}</span></Typography>
+                                <Typography ><span style={{ fontWeight: "900" }}>{section.sectionTitle}</span></Typography>
                             </AccordionSummary>
                             {
                                 section.subsections.length > 0 && section.subsections.map((lesson) => {
@@ -478,7 +478,7 @@ export default function CourseChapters() {
                                                     textTransform: "uppercase",
                                                     minHeight: "2px !important",
                                                 }}
-                                                    onClick={() => handleNavigateCourse(lesson)}
+                                                    onClick={() => handleNavigateCourse(section._id, lesson._id)}
                                                 >
                                                     PREVIEW
                                                 </button>}
@@ -596,7 +596,7 @@ export default function CourseChapters() {
                                                     textTransform: "uppercase",
                                                     minHeight: "2px !important",
                                                 }}
-                                                    onClick={() => handleNavigateCourse(lesson)}
+                                                    onClick={() => handleNavigateCourse(section._id, lesson._id)}
                                                 >
                                                     PREVIEW
                                                 </button>
@@ -614,6 +614,7 @@ export default function CourseChapters() {
                                                     textTransform: "uppercase",
                                                     minHeight: "2px !important",
                                                 }}
+                                                    onClick={() => handleNavigateCourse(section._id, lesson._id)}
                                                 >
                                                     Start
                                                 </button>

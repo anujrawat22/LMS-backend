@@ -41,7 +41,7 @@ const Puller = styled(Box)(({ theme }) => ({
 
 
 export default function CourseDetails() {
-    const { id } = useParams()
+    const { id, lessonId, sectionId } = useParams()
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate()
     const [courseData, setCourseData] = useState({
@@ -66,15 +66,19 @@ export default function CourseDetails() {
         try {
             const response = await GetCourseDetails(id)
             setCourseData(response.data.data)
-            setLessonData(response.data.data.sections[0].subsections[0])
+            console.log(response.data.data)
+            const Sections = response.data.data.sections;
+            const LessonSection = Sections.find(section => section._id === sectionId)
+            const lessonData = LessonSection.subsections.find(lesson => lesson._id === lessonId)
+            setLessonData(lessonData)
         } catch (error) {
             console.log(error);
         }
     }
 
-    const handleLessonClick = (data) => {
-        setLessonData(data)
-
+    const handleLessonClick = (sectionId, lessonId , lesson) => {
+        navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`)
+        setLessonData(lesson)
     }
 
     const handleNavigateToCourseDetails = () => {
@@ -83,7 +87,6 @@ export default function CourseDetails() {
 
     useEffect(() => {
         fetchData()
-
     }, [])
 
 
@@ -116,8 +119,10 @@ export default function CourseDetails() {
                                     sections.subsections.length > 0 && sections.subsections.map((subsection, index) => {
                                         return <div className={styles.LessonAccordance}
                                             key={index}
-                                            onClick={() => handleLessonClick(subsection)}
-                                        >{subsection.Title}</div>
+                                            onClick={() => handleLessonClick(sections._id, subsection._id, subsection)}
+                                        ><NotesIcon fontSize='small' sx={{
+                                            marginRight: '10px'
+                                        }} />{subsection.Title}</div>
                                     })
                                 }
                             </AccordionDetails>

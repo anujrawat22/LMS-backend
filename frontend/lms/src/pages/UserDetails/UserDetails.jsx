@@ -53,6 +53,7 @@ const UserDetails = () => {
     }
 
     const handleAssignCourse = async () => {
+        const loader = toast.loading("Assigning Course")
         try {
             const res = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.assignCourse}/${id}/${assignCourseId._id}`, {
                 method: "POST",
@@ -62,26 +63,31 @@ const UserDetails = () => {
                 }
             })
             const response = await res.json()
+            toast.dismiss(loader)
             if (response.msg) {
                 setStudentData({ ...studentData, courses: [...studentData.courses, assignCourseId] })
+                
                 toast.success(response.msg)
             } else {
                 toast.error(response.error)
             }
         } catch (error) {
+            toast.dismiss(loader)
             console.log(error)
         }
     }
 
 
     const handleUnassignCourse = async (courseId) => {
+        const loader = toast.loading("Unassigning Course")
         try {
             const response = await UnassignCourse(id, courseId, token)
             setStudentData(
                 { ...studentData, courses: studentData.courses.filter(course => course._id !== courseId) });
             toast.success(response.data.msg)
+            toast.dismiss(loader)
         } catch (error) {
-            console.log(error)
+            toast.dismiss(loader)
             toast.error(error.data.error)
         }
     }

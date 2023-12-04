@@ -121,6 +121,8 @@
   height: auto;
   padding: 3px 5px;
   margin: 10px 0px;
+  display: flex;
+  align-items: center;
 }
 
 .LessonAccordance:hover {
