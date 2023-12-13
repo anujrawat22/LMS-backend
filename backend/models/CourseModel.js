@@ -6,7 +6,8 @@ const LessonSchema = new mongoose.Schema({
     images: [{ type: String }],
     videos: [{
         name: { type: String },
-        url: { type: String }
+        url: { type: String },
+        type: { type: String }
     }],
     embedMedia: { type: String },
     pptUrl: { type: String },

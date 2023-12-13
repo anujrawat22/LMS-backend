@@ -60,8 +60,10 @@ export default function CourseChapters() {
     const [selectedSectionID, setSelectedSectionID] = useState(null)
     const [selectedLessonID, setSelectedLessonID] = useState(null)
     const [selectedLessonIndex, setSelectedLessonIndex] = useState(null);
+    const [isnewSection, setIsNewSection] = useState(false)
     const [debouncedTitle, setDebouncedTitle] = useState('');
     const [isTitleChanged, setIsTitleChanged] = useState(false);
+    const [isLessonDeleted, setIsLessonDeleted] = useState(false)
     const handleMenuOpen = (event, sectionindex, sectionId) => {
         setAnchorEl(event.currentTarget);
         setSelectedSectionIndex(sectionindex);
@@ -99,7 +101,7 @@ export default function CourseChapters() {
         }
     }
 
-    const handleNavigateCourse = (sectionId ,lessonId) => {
+    const handleNavigateCourse = (sectionId, lessonId) => {
         navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`)
     }
 
@@ -153,6 +155,7 @@ export default function CourseChapters() {
     }
 
     const handleCourseDelete = () => {
+        setIsLessonDeleted(true)
         Swal.fire({
             title: "Delete Course?",
             text: "You won't be able to revert this!",
@@ -172,6 +175,8 @@ export default function CourseChapters() {
                 } catch (error) {
                     toast.dismiss(loader)
                     toast.error("Error in deleting the course")
+                } finally {
+                    setIsLessonDeleted(false)
                 }
             }
         });
@@ -245,6 +250,7 @@ export default function CourseChapters() {
     }
 
     const handleAddnewSection = async () => {
+        setIsNewSection(true)
         const url = config.recurring.domainUrl
         const endpoints = config.recurring.post.addSection
         const api = `${url}/${endpoints}`
@@ -265,6 +271,8 @@ export default function CourseChapters() {
             }
         } catch (error) {
             console.log(error)
+        } finally {
+            setIsNewSection(false)
         }
     }
 
@@ -513,9 +521,9 @@ export default function CourseChapters() {
                         </Tooltip>
                     </div>
                     <div className='EditDeleteBtns'>
-                        <Button startIcon={<AddIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }} className='Courseeditbtn' onClick={handleAddnewSection}>New Section</Button>
+                        <Button startIcon={<AddIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }} className='Courseeditbtn' onClick={handleAddnewSection} disabled={isnewSection}>New Section</Button>
                         <Button startIcon={<DeleteOutlineIcon />} sx={{ backgroundColor: 'rgb(77,135,51)', color: 'white', '&:hover': { backgroundColor: 'rgb(77,135,51)', transform: 'scale(1.02) ', transition: '300ms' }, padding: '0px 20px' }}
-                            onClick={handleCourseDelete}>Delete</Button>
+                            onClick={handleCourseDelete} disabled={isLessonDeleted}>Delete</Button>
                     </div>
                 </div>
                 <DragDropContext onDragEnd={handleOnDragEnd}>

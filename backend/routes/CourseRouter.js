@@ -27,4 +27,6 @@ CourseRouter.delete("/delete/lesson/:courseId/:sectionId/:lessonId", deleteLesso
 
 CourseRouter.patch("/update/:courseId/:sectionId", updateLesson)
 
+
+
 module.exports = { CourseRouter }

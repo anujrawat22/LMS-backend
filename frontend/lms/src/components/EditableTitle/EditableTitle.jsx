@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
 import styles from './EditableTitle.module.css'
-import { Box, Button, Container, Grid, Input, MenuItem, TextField, Typography , Tooltip  , IconButton } from '@mui/material';
+import { Box, Button, Container, Grid, Input, MenuItem, TextField, Typography, Tooltip, IconButton } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import toast, { Toaster } from 'react-hot-toast';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import config from '../../config.json';
+import { useAuth } from '../../Contexts/AuthContext';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -21,6 +23,8 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, setIsEditing, imageName, setImageName, Description, setDescription, setPrice, price }) => {
+    const { userdata } = useAuth()
+    const token = userdata.token
     const [thumbnailType, setthumbnailType] = useState(true)
     const [thumbnailUrl, setThumbnailUrl] = useState('')
     const currencies = [
@@ -62,16 +66,49 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
         setCourseTitle(e.target.value);
     };
 
-    const handleImageUpload = (event) => {
+    const handleImageUpload = async (event) => {
+        const loadingToast = toast.loading("Uploading Image")
         const file = event.target.files[0];
-        // Handle the selected image here
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setThumbnail(event.target.result);
-                setImageName(file.name)
-            };
-            reader.readAsDataURL(file);
+            const fileType = file.type.split("/")[1]
+            try {
+                const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "application/json",
+                        Authorization: `bearer ${token}`
+                    }
+                })
+                const responseBody = await response.json();
+                const { uploadURL, Key } = responseBody;
+
+                if (!uploadURL) {
+                    return toast.error("Error in uploading image")
+                }
+
+
+                const uploadResponse = await fetch(uploadURL, {
+                    method: "PUT",
+                    headers: {
+                        'Content-Type': `image/${fileType}`
+                    },
+                    body: file
+                })
+
+                if (!uploadResponse.ok) {
+                    return toast.error("Error in uploading image");
+
+                }
+
+                const fileLink = `${config.recurring.s3BucketUrl}/${Key}`;
+                setThumbnail(fileLink)
+                setImageName(event.target.files[0].name)
+                toast.dismiss(loadingToast)
+                toast.success("Image Uploaded");
+            } catch (error) {
+                toast.dismiss(loadingToast)
+                console.log(error)
+            }
         }
     };
 
@@ -167,7 +204,7 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
                         </Grid>
                         <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {imageName ? <div className={styles.imageDiv}>
-                                <h5 style={{ fontSize: '.8rem', width: '50%',height : '20px', overflow: 'hidden', textOverflow: 'ellipsis'}} >{
+                                <h5 style={{ fontSize: '.8rem', width: '50%', height: '20px', overflow: 'hidden', textOverflow: 'ellipsis' }} >{
                                     imageName}</h5>
                                 <Button startIcon={<CancelIcon />} onClick={() => {
                                     setImageName('')
@@ -180,19 +217,19 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
                                         sx={{
                                             fontSize: '.8rem',
                                             marginLeft: "10px",
-                                            backgroundColor : 'rgb(77,135,51)',
-                                            border : '1px solid rgb(77,135,51)'
+                                            backgroundColor: 'rgb(77,135,51)',
+                                            border: '1px solid rgb(77,135,51)'
                                         }}>
                                         Upload Thumbnail
                                         <VisuallyHiddenInput type="file" onChange={handleImageUpload}
                                             accept='image/*' />
                                     </Button> :
                                         <div className={styles.LogoUrlDiv}>
-                                            <TextField label='Logo Url' value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} />
+                                            <TextField label='Logo Url' value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} variant='standard' />
                                             <Button variant='outlined' sx={{
                                                 marginLeft: '20px',
-                                                color : 'rgb(77,135,51)',
-                                                border : '1px solid rgb(77,135,51)'
+                                                color: 'rgb(77,135,51)',
+                                                border: '1px solid rgb(77,135,51)'
                                             }} onClick={handleLogoUrl}>Add</Button>
                                         </div>
                                     }
@@ -213,8 +250,8 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
                             <textarea className={styles.descriptionTextarea} name="" id="" cols="30" rows="5" placeholder='Enter Short Description' value={Description} onChange={handleDescriptionChange}></textarea>
                             <Button variant='outlined' sx={{
                                 marginLeft: '20px',
-                                border : '1px solid rgb(77,135,51)',
-                                color : 'rgb(77,135,51)'
+                                border: '1px solid rgb(77,135,51)',
+                                color: 'rgb(77,135,51)'
                             }} onClick={handleSaveTitledes}>Save</Button>
                         </> : <>
                             <Typography variant='h6' className={styles.TextField}

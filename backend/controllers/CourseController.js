@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 exports.allCourses = async (req, res) => {
     let { page, limit } = req.query
     try {
-
         page = parseInt(page) || 1
         limit = parseInt(limit) || 10
 
@@ -47,7 +46,6 @@ exports.CoursebyId = async (req, res) => {
 exports.CreateCourse = async (req, res) => {
     const { title, thumbnail, sections, price, Description } = req.body;
     const userId = req.userId
-    console.log(req.body)
     try {
         const date = new Date()
         const monthNames = [
@@ -64,8 +62,6 @@ exports.CreateCourse = async (req, res) => {
 
         // Create the desired format
         const formattedDate = `${day} ${month} ${year}`;
-
-
         const courseData = new Course({ title, thumbnail, sections, createBy: userId, price, createdAt: formattedDate, Description })
         await courseData.save()
         res.status(201).send({ msg: "Course created", data: courseData })

@@ -82,7 +82,6 @@ exports.forgetPassword = async (req, res) => {
     const { email } = req.body;
     const otp = generateOTP()
     otps[email] = otp;
-
     const subject = 'Password Reset OTP';
     const text = `Your OTP for password reset is : ${otp}`
     try {
@@ -122,7 +121,6 @@ exports.verifyOTP = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
     const { email, newPassword } = req.body;
-    console.log(email, newPassword)
     try {
         const user = await User.findOne({ email })
         if (!user) {
@@ -148,7 +146,6 @@ exports.userDetails = async (req, res) => {
     let { page, limit, name, email } = req.query;
     page = page ? parseInt(page) : 1;
     limit = limit ? parseInt(limit) : 10;
-
     const filterOptions = {}
     if (name) {
         filterOptions.name = { $regex: name, $options: 'i' }; // Case-insensitive search for name
@@ -160,10 +157,8 @@ exports.userDetails = async (req, res) => {
     filterOptions.role = { $in: ['admin', 'user'] };
     try {
         const totalDocuments = await User.countDocuments(filterOptions);
-
         const query = User.find(filterOptions).select('name email lastLogin  joined role')
         query.skip((page - 1) * limit).limit(limit);
-
         const users = await query.exec()
         const today = new Date(); // Get the current date
         // Format the dates and calculate the time period for each user
@@ -577,7 +572,6 @@ exports.addStudent = async (req, res) => {
 exports.checkUserCourse = async (req, res) => {
     const userId = req.userId;
     const { courseId } = req.params;
-    console.log(courseId)
     try {
         const user = await User.findById(userId)
         // Validate if courseId is a valid ObjectId

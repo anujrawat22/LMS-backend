@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
+import config from '../../config.json';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
@@ -7,17 +8,40 @@ import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import { red } from '@mui/material/colors';
 import { Box, Container, Typography, } from '@mui/material';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { ThumbnailPresignedUrl } from '../../services/thumbnailPresignedUrl.service';
+const s3BucketUrl = config.recurring.s3BucketUrl;
 
 export default function CourseCard(data) {
+    const [modifyThumbnail, setModifyThumbnail] = useState('')
+
+    const handleModifyThumbnail = async () => {
+        if (isS3Image(data.data.thumbnail)) {
+            try {
+                const response = await ThumbnailPresignedUrl(data.data.thumbnail.replace(`${s3BucketUrl}/`, ''));
+                setModifyThumbnail(response.data.fileURL)
+            } catch (error) {
+
+            }
+        } else {
+            setModifyThumbnail(data.data.thumbnail)
+        }
+    }
+
+    useEffect(() => {
+        handleModifyThumbnail()
+    }, [])
+
     return (
         <>
             <Container sx={{ marginTop: "88px" }}>
-                <Card sx={{ height: "500px", padding: "10px" }} className='MainContainer'>
+                <Card sx={{ height: "500px" }} className='MainContainer'>
                     <CardMedia
-                        sx={{ objectFit: "contain" }}
+                        sx={{ objectFit: "cover", width: '100%' }}
                         component="img"
-                        height="280"
-                        image={data.data.thumbnail}
+                        height="300"
+                        image={modifyThumbnail}
                         alt="Paella dish"
                     />
                     <Typography>
@@ -77,4 +101,10 @@ export default function CourseCard(data) {
             </Container>
         </>
     );
-} 
+}
+
+
+function isS3Image(url) {
+    const s3Pattern = new RegExp(`^${s3BucketUrl}/.*`);
+    return s3Pattern.test(url);
+}

@@ -19,9 +19,9 @@ app.use("/api/users", UserRouter)
 
 app.use("/api/courses", CourseRouter)
 
-app.use("/api/media", MediaRouter)
+app.use("/api/media",  MediaRouter)
 
-app.use("/api/usercourses",Authenticate , Authorize(['admin','superadmin']), UserCourseRouter)
+app.use("/api/usercourses", Authenticate, Authorize(['admin', 'superadmin']), UserCourseRouter)
 
 app.listen(port, async () => {
     try {

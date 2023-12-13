@@ -21,14 +21,14 @@
 }
 
 .backButton {
-  border: 1px solid rgb(77,135,51);
+  border: 1px solid rgb(77, 135, 51);
   display: flex;
   align-items: center;
   justify-content: center;
   width: 50px;
   height: 30px;
   border-radius: 5px;
-  background-color: rgb(77,135,51);
+  background-color: rgb(77, 135, 51);
   color: white;
   cursor: pointer;
 }
@@ -51,7 +51,7 @@
   padding: 10px 20px;
   cursor: pointer;
   border-radius: 5px;
-  background-color: rgb(77,135,51);
+  background-color: rgb(77, 135, 51);
   color: white;
 }
 
@@ -121,7 +121,6 @@
 
 .videoDiv {
   width: 100%;
-
   height: auto;
   display: flex;
   align-items: center;
@@ -136,6 +135,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 10px;
+  flex-direction: column;
+  padding: 30px;
 }
 
 .videoUrlDiv {

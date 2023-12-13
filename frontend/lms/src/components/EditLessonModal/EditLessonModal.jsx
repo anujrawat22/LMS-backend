@@ -16,6 +16,11 @@ import PreviewEditLesson from '../PreviewEditLesson/PreviewEditLesson';
 import { UpdateLesson } from '../../services/updateLesson.service';
 import { useAuth } from '../../Contexts/AuthContext';
 import Swal from 'sweetalert2';
+import PropTypes from 'prop-types';
+import LinearProgress from '@mui/material/LinearProgress';
+import Box from '@mui/material/Box';
+import config from '../../config.json';
+import axios from 'axios'
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -28,6 +33,29 @@ const VisuallyHiddenInput = styled('input')({
     whiteSpace: 'nowrap',
     width: 1,
 });
+
+function LinearProgressWithLabel(props) {
+    return (
+        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            <Box sx={{ width: '100%', mr: 1 }}>
+                <LinearProgress variant="determinate" {...props} />
+            </Box>
+            <Box sx={{ minWidth: 35 }}>
+                <Typography variant="body2" color="text.secondary">{`${Math.round(
+                    props.value,
+                )}%`}</Typography>
+            </Box>
+        </Box>
+    );
+}
+
+LinearProgressWithLabel.propTypes = {
+    /**
+     * The value of the progress indicator for the determinate and buffer variants.
+     * Value between 0 and 100.
+     */
+    value: PropTypes.number.isRequired,
+};
 
 const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCourseData, setData }) => {
     const [contentType, setContentType] = useState('text')
@@ -56,6 +84,17 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
     const [PPTurl, setPPturl] = useState('')
     const [preview, setPreview] = useState(false)
     const [hasChanges, setHasChanges] = useState(false);
+    const [progress, setProgress] = React.useState(0);
+    const [isUploading, setIsuplaoding] = useState(false)
+    const [uploadController, setUploadController] = useState(null);
+
+    const handleCancelUpload = () => {
+        if (uploadController) {
+            uploadController.abort();
+            setIsuplaoding(false);
+            setProgress(0);
+        }
+    };
 
     const handleTextadd = () => {
         if (!text) {
@@ -78,25 +117,69 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
         setHasChanges(true)
     }
 
-    const handleAddVideo = (e) => {
+    const handleAddVideo = async (e) => {
         const toastpromise = toast.loading("Uploading Video")
         const file = e.target.files[0];
         const name = e.target.files[0].name
 
-        try {
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    setLessonData({ ...LessonData, videos: [...LessonData.videos, { name, url: event.target.result }] })
+        if (file) {
+            const fileType = file.type.split("/")[1];
+            const newUploadController = new AbortController();
+            setUploadController(newUploadController);
+            try {
+                const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.videoPresignredUrl}?fileType=${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "Application/json",
+                        Authorization: `bearer ${token}`
+                    }
+                })
+                const responseBody = await response.json();
+                const { uploadURL, Key } = responseBody;
+                if (!uploadURL) {
+                    return toast.error("Error in uploading video")
+                }
+                setIsuplaoding(true)
+
+
+                const axiosConfig = {
+                    onUploadProgress: (progressEvent) => {
+                        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                        setProgress(progress)
+                    },
+                    headers: {
+                        'Content-Type': `v/${fileType}`
+                    }
+                    ,
+                    signal: newUploadController.signal,
                 };
-                reader.readAsDataURL(file);
+
+                const uploadResponse = await axios.put(uploadURL, file, axiosConfig);
+
+                if (uploadResponse.status === 200) {
+                    const fileLink = `${config.recurring.s3BucketUrl}/${Key}`;
+                    setLessonData({ ...LessonData, videos: [...LessonData.videos, { url: fileLink, name }] })
+                    toast.dismiss(toastpromise)
+                    toast.success("Video Uploaded")
+                    setHasChanges(true)
+                }
+                else {
+                    toast.dismiss(toastpromise);
+                    toast.error('Error in uploading video');
+                }
+            } catch (error) {
+                if (error.name === 'CanceledError') {
+                    toast.dismiss(toastpromise);
+                    toast.error('Video upload canceled');
+                } else {
+                    toast.dismiss(toastpromise);
+                    toast.error('Video upload failed');
+                }
+            } finally {
+                setIsuplaoding(false);
+                setProgress(0);
+                setUploadController(null);
             }
-            toast.dismiss(toastpromise)
-            toast.success("Video Uploaded")
-            setHasChanges(true)
-        } catch (error) {
-            toast.dismiss(toastpromise)
-            console.log(error);
         }
     }
 
@@ -127,35 +210,96 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
         setHasChanges(true)
     }
 
-    const handleImage = (e) => {
-
+    const handleImage = async (e) => {
         const loadingToast = toast.loading("Uploading Image")
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setLessonData({ ...LessonData, images: [...LessonData.images, event.target.result] });
-            };
-            reader.readAsDataURL(file);
-            toast.dismiss(loadingToast)
-            toast.success("Image Uploaded")
-            setHasChanges(true)
+            const fileType = file.type.split("/")[1]
+            try {
+                const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "application/json",
+                        Authorization: `bearer ${token}`
+                    }
+                })
+                const responseBody = await response.json();
+                const { uploadURL, Key } = responseBody;
+
+                if (!uploadURL) {
+                    return toast.error("Error in uploading image")
+                }
+
+
+                const uploadResponse = await fetch(uploadURL, {
+                    method: "PUT",
+                    headers: {
+                        'Content-Type': `image/${fileType}`
+                    },
+                    body: file
+                })
+
+                if (!uploadResponse.ok) {
+                    return toast.error("Error in uploading image");
+
+                }
+
+                const fileLink = `${config.recurring.s3BucketUrl}/${Key}`;
+                setLessonData({ ...LessonData, images: [...LessonData.images, fileLink] });
+                toast.dismiss(loadingToast)
+                toast.success("Image Uploaded")
+                setHasChanges(true)
+            } catch (error) {
+                toast.dismiss(loadingToast)
+                toast.error("Error in uploading image")
+            }
         }
     }
 
 
-    const handlebannerImageUpload = (e) => {
+    const handlebannerImageUpload = async (e) => {
         const loadingToast = toast.loading("Uploading Image")
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setLessonData({ ...LessonData, bannerimage: event.target.result });
-            };
-            reader.readAsDataURL(file);
-            toast.dismiss(loadingToast)
-            toast.success("BannerImage Uploaded")
-            setHasChanges(true)
+            const fileType = file.type.split("/")[1]
+            try {
+                const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "application/json",
+                        Authorization: `bearer ${token}`
+                    }
+                })
+                const responseBody = await response.json();
+                const { uploadURL, Key } = responseBody;
+
+                if (!uploadURL) {
+                    return toast.error("Error in uploading image")
+                }
+
+
+                const uploadResponse = await fetch(uploadURL, {
+                    method: "PUT",
+                    headers: {
+                        'Content-Type': `image/${fileType}`
+                    },
+                    body: file
+                })
+
+                if (!uploadResponse.ok) {
+                    return toast.error("Error in uploading bannerimage");
+
+                }
+
+                const fileLink = `${config.recurring.s3BucketUrl}/${Key}`;
+                setLessonData({ ...LessonData, bannerimage: fileLink });
+                toast.dismiss(loadingToast)
+                toast.success("BannerImage Uploaded")
+                setHasChanges(true)
+            } catch (error) {
+                toast.dismiss(loadingToast)
+                toast.error("Error in uploading Banner Image")
+            }
         }
     }
 
@@ -182,20 +326,20 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
 
 
     const embedUrl = (url) => {
-        const parts = url.split('?'); 
+        const parts = url.split('?');
         if (parts.length === 2) {
             const baseUrl = parts[0];
             const query = parts[1];
 
-           
+
             const newBaseUrl = baseUrl.replace('/pub', '/embed');
             const newUrl = `${newBaseUrl}?${query}`;
             try {
                 new URL(newUrl);
-               
+
                 return newUrl
             } catch (error) {
-               
+
                 console.log(error)
                 toast.error('Invalid URL');
             }
@@ -303,12 +447,35 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
                                 contentType === 'video' &&
                                 <div className={styles.VideoDiv}>
                                     <div className={styles.videoBtn}>
-                                        <Button component="label" variant="contained" sx={{
-                                            backgroundColor: 'rgb(77,135,51)'
-                                        }} startIcon={<CloudUploadIcon />}>
-                                            Upload Video
-                                            <VisuallyHiddenInput type="file" accept='video/*' onChange={handleAddVideo} />
-                                        </Button>
+                                        {
+                                            isUploading ?
+                                                <div style={{
+                                                    width: '100%',
+                                                    display: 'flex',
+
+                                                    alignItems: 'center'
+
+                                                }}>
+                                                    <LinearProgressWithLabel value={progress} />
+                                                    <Button
+                                                        variant="outlined"
+                                                        size='small'
+                                                        onClick={handleCancelUpload}
+                                                        sx={{
+                                                            color: 'rgb(77,135,51)',
+                                                            border: '1px solid rgb(77,135,51)',
+                                                        }}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </div> :
+                                                <Button component="label" variant="contained" sx={{
+                                                    backgroundColor: 'rgb(77,135,51)'
+                                                }} startIcon={<CloudUploadIcon />}>
+                                                    Upload Video
+                                                    <VisuallyHiddenInput type="file" accept='video/*' onChange={handleAddVideo} />
+                                                </Button>
+                                        }
                                     </div>
                                     <Typography>OR</Typography>
                                     <div className={styles.videoUrlDiv}>

@@ -76,7 +76,7 @@ export default function CourseDetails() {
         }
     }
 
-    const handleLessonClick = (sectionId, lessonId , lesson) => {
+    const handleLessonClick = (sectionId, lessonId, lesson) => {
         navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`)
         setLessonData(lesson)
     }
@@ -134,7 +134,7 @@ export default function CourseDetails() {
             <Grid item xs={12} sm={12} md={9} className={styles.maincontent}>
                 {
                     Object.keys(Lessondata).length > 0 ?
-                        <CourseDetailMainContent data={Lessondata} />
+                        <CourseDetailMainContent data={Lessondata} courseId={id} sectionId={sectionId} />
                         :
                         null
                 }

@@ -27,11 +27,12 @@ class ImageVideoCarasouel extends React.Component {
         this.images = [];
 
         const allImages = props.allImages || [];
+        
         const videos = props.videos || [];
         if (allImages.length > 0) {
-
             for (let i = 0; i < allImages.length; i++) {
-                if (allImages[i].trim() === '') {
+                console.log(allImages[i])
+                if (allImages[i] !== undefined &&  allImages[i].trim() === '' ) {
                     continue;
                 }
                 this.images.push({

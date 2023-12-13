@@ -1,5 +1,5 @@
 .PreviewContainer {
-  border: 1px solid red;
+  /* border: 1px solid red; */
   height: 100dvh;
   width: 100dvw;
   background-color: rgba(236, 236, 236, 0.5);
@@ -89,6 +89,8 @@
   height: 500px;
   width: 100%;
 }
+
+
 
 
 text{

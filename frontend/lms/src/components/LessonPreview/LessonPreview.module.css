@@ -164,7 +164,6 @@
 }
 
 .VideoDiv {
-  /* border:  1px solid red; */
   height: auto;
   width: 100%;
   padding: 1% 5%;
@@ -181,9 +180,12 @@
 }
 
 .reactPlayer {
-  /* border: 1px solid blue; */
   margin-top: 30px;
   border-radius: 5px;
+}
+
+.react-player-controls .download-button {
+  display: none;
 }
 
 .gdriveDiv {

@@ -16,6 +16,12 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LessonPreview from '../LessonPreview/LessonPreview';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import { v4 as uuidv4 } from 'uuid';
+import config from '../../config.json';
+import { useAuth } from '../../Contexts/AuthContext';
+import PropTypes from 'prop-types';
+import LinearProgress from '@mui/material/LinearProgress';
+import Box from '@mui/material/Box';
+import axios from 'axios'
 const label = { inputProps: { 'aria-label': 'Switch demo' } };
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -30,11 +36,37 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 
+function LinearProgressWithLabel(props) {
+    return (
+        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            <Box sx={{ width: '100%', mr: 1 }}>
+                <LinearProgress variant="determinate" {...props} />
+            </Box>
+            <Box sx={{ minWidth: 35 }}>
+                <Typography variant="body2" color="text.secondary">{`${Math.round(
+                    props.value,
+                )}%`}</Typography>
+            </Box>
+        </Box>
+    );
+}
+
+LinearProgressWithLabel.propTypes = {
+    /**
+     * The value of the progress indicator for the determinate and buffer variants.
+     * Value between 0 and 100.
+     */
+    value: PropTypes.number.isRequired,
+};
+
+
 
 const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
     const generateLessonId = () => {
         return `${uuidv4()}`
     }
+    const { userdata } = useAuth()
+    const token = userdata.token;
     const initialLessonState = Object.keys(LessonData).length > 0 ? LessonData : {
         Title: '',
         text: [],
@@ -59,9 +91,17 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
     const [embedMediaUrl, setEmbedMediaUrl] = useState('')
     const [PPTurl, setPPturl] = useState('')
     const [ispreviewOpen, setPreviewOpen] = useState(false)
+    const [progress, setProgress] = React.useState(0);
+    const [isUploading, setIsuplaoding] = useState(false)
+    const [uploadController, setUploadController] = useState(null);
 
-
-
+    const handleCancelUpload = () => {
+        if (uploadController) {
+            uploadController.abort();
+            setIsuplaoding(false);
+            setProgress(0);
+        }
+    };
     const handletitleChange = (e) => {
         setLessonContent({ ...LessonContent, Title: e.target.value })
     }
@@ -112,32 +152,105 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
         const file = e.target.files[0];
         const name = e.target.files[0].name
 
-        try {
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    setLessonContent({ ...LessonContent, videos: [...LessonContent.videos, { name, url: event.target.result }] })
+
+        if (file) {
+            const fileType = file.type.split("/")[1];
+            const newUploadController = new AbortController();
+            setUploadController(newUploadController);
+            try {
+                const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.videoPresignredUrl}?fileType=${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "Application/json",
+                        Authorization: `bearer ${token}`
+                    }
+                })
+                const responseBody = await response.json();
+                const { uploadURL, Key } = responseBody;
+                if (!uploadURL) {
+                    return toast.error("Error in uploading video")
+                }
+                setIsuplaoding(true)
+                const axiosConfig = {
+                    onUploadProgress: (progressEvent) => {
+                        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                        setProgress(progress)
+                    },
+                    headers: {
+                        'Content-Type': `v/${fileType}`
+                    },
+                    signal: newUploadController.signal,
                 };
-                reader.readAsDataURL(file);
+
+                const uploadResponse = await axios.put(uploadURL, file, axiosConfig);
+
+                if (uploadResponse.status === 200) {
+                    const fileLink = `${config.recurring.s3BucketUrl}/${Key}`;
+                    setLessonContent({ ...LessonContent, videos: [...LessonContent.videos, { url: fileLink, name }] })
+                    toast.dismiss(toastpromise);
+                    toast.success("Video Uploaded");
+                } else {
+                    toast.dismiss(toastpromise);
+                    toast.error('Error in uploading video');
+                }
+            } catch (error) {
+                if (error.name === 'CanceledError') {
+                    toast.dismiss(toastpromise);
+                    toast.error('Video upload canceled');
+                } else {
+                    toast.dismiss(toastpromise);
+                    toast.error('Video upload failed');
+                }
+            } finally {
+                setIsuplaoding(false)
+                setProgress(0)
             }
-            toast.dismiss(toastpromise)
-            toast.success("Video Uploaded")
-        } catch (error) {
-            console.log(error);
         }
     }
 
-    const handleImage = (e) => {
+    const handleImage = async (e) => {
         const loadingToast = toast.loading("Uploading Image")
         const file = e.target.files[0];
+
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setLessonContent({ ...LessonContent, images: [...LessonContent.images, event.target.result] });
-            };
-            reader.readAsDataURL(file);
-            toast.dismiss(loadingToast)
-            toast.success("Image Uploaded")
+            const fileType = file.type.split("/")[1]
+            try {
+                const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "application/json",
+                        Authorization: `bearer ${token}`
+                    }
+                })
+                const responseBody = await response.json();
+                const { uploadURL, Key } = responseBody;
+
+                if (!uploadURL) {
+                    return toast.error("Error in uploading image")
+                }
+
+
+                const uploadResponse = await fetch(uploadURL, {
+                    method: "PUT",
+                    headers: {
+                        'Content-Type': `image/${fileType}`
+                    },
+                    body: file
+                })
+
+                if (!uploadResponse.ok) {
+                    return toast.error("Error in uploading image");
+
+                }
+
+                const fileLink = `${config.recurring.s3BucketUrl}/${Key}`;
+                setLessonContent({ ...LessonContent, images: [...LessonContent.images, fileLink] });
+                toast.dismiss(loadingToast)
+                toast.success("Image Uploaded");
+            } catch (error) {
+                toast.dismiss(loadingToast)
+                console.log(error)
+            }
         }
     }
 
@@ -150,17 +263,48 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
         toast.success("Image Uploaded")
     }
 
-    const handlebannerImageUpload = (e) => {
+    const handlebannerImageUpload = async (e) => {
         const loadingToast = toast.loading("Uploading Image")
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setLessonContent({ ...LessonContent, bannerimage: event.target.result });
-            };
-            reader.readAsDataURL(file);
-            toast.dismiss(loadingToast)
-            toast.success("BannerImage Uploaded")
+            const fileType = file.type.split("/")[1]
+            try {
+                const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "application/json",
+                        Authorization: `bearer ${token}`
+                    }
+                })
+                const responseBody = await response.json();
+                const { uploadURL, Key } = responseBody;
+
+                if (!uploadURL) {
+                    return toast.error("Error in uploading image")
+                }
+
+
+                const uploadResponse = await fetch(uploadURL, {
+                    method: "PUT",
+                    headers: {
+                        'Content-Type': `image/${fileType}`
+                    },
+                    body: file
+                })
+
+                if (!uploadResponse.ok) {
+                    return toast.error("Error in uploading bannerimage");
+
+                }
+
+                const fileLink = `${config.recurring.s3BucketUrl}/${Key}`;
+                setLessonContent({ ...LessonContent, bannerimage: fileLink });
+                toast.dismiss(loadingToast)
+                toast.success("Banner Image Uploaded");
+            } catch (error) {
+                toast.dismiss(loadingToast)
+                toast.error("Error in uploading Banner Image")
+            }
         }
     }
 
@@ -244,6 +388,35 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
         setLessonContent(initialLessonState)
         setOpen(false)
     }
+
+    const handleupdatelesson = () => {
+        if (LessonContent.Title === '') {
+            return toast.error("The lesson must contain a title")
+        }
+        setSections((prevSections) => {
+            return prevSections.map((section) => {
+                if (section.sectionid === sectionId) {
+                    const lessonIndex = section.subsections.findIndex(
+                        (lesson) => lesson.LessonId === LessonContent.LessonId
+                    )
+
+                    if (lessonIndex !== -1) {
+                        const updateSubsections = [...section.subsections];
+                        updateSubsections[lessonIndex] = LessonContent;
+                        return {
+                            ...section,
+                            subsections: updateSubsections
+                        }
+                    }
+
+                }
+                return section
+            })
+        })
+        toast.success('Lesson Updated')
+        setLessonContent(initialLessonState)
+        setOpen(false)
+    }
     return (
         <div className={styles.AddCourseModal}>
             <div className={styles.TitleDiv}>
@@ -295,12 +468,36 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                             <>
                                 <div className={styles.videoDiv}>
                                     <div className={styles.videoBtn}>
-                                        <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} sx={{
-                                            backgroundColor: 'rgb(77,135,51)',
-                                        }}>
-                                            Upload Video
-                                            <VisuallyHiddenInput type="file" accept='video/*' onChange={handleAddVideo} />
-                                        </Button>
+                                        {
+                                            isUploading ?
+                                                <div style={{
+                                                    width: '100%', display: 'flex',
+
+                                                    alignItems: 'center'
+
+                                                }}>
+                                                    <LinearProgressWithLabel value={progress} />
+                                                    <Button
+                                                        variant="outlined"
+                                                        size='small'
+                                                        onClick={handleCancelUpload}
+                                                        sx={{
+                                                            color: 'rgb(77,135,51)',
+                                                            border: '1px solid rgb(77,135,51)',
+                                                        }}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </div>
+                                                :
+                                                <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} sx={{
+                                                    backgroundColor: 'rgb(77,135,51)',
+                                                }}>
+                                                    Upload Video
+                                                    <VisuallyHiddenInput type="file" accept='video/*' onChange={handleAddVideo} />
+                                                </Button>
+                                        }
+
                                     </div>
                                     <Typography>OR</Typography>
                                     <div className={styles.videoUrlDiv}>
@@ -462,10 +659,16 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                 </div>
             </div>
             <div className={styles.AddLessonbtnDiv}>
-                <Button variant='outlined' onClick={handleAddlesson} sx={{
-                    border: '1px solid rgb(77,135,51)',
-                    color: 'rgb(77,135,51)'
-                }}>Add Lesson</Button>
+                {
+                    LessonData.LessonId ? <Button variant='outlined' onClick={handleupdatelesson} sx={{
+                        border: '1px solid rgb(77,135,51)',
+                        color: 'rgb(77,135,51)'
+                    }}>Update Lesson</Button> :
+                        <Button variant='outlined' onClick={handleAddlesson} sx={{
+                            border: '1px solid rgb(77,135,51)',
+                            color: 'rgb(77,135,51)'
+                        }}>Add Lesson</Button>
+                }
             </div>
             {
                 ispreviewOpen && <LessonPreview LessonContent={LessonContent} setLessonContent={setLessonContent} setPreviewOpen={setPreviewOpen} />
