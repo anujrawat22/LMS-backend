@@ -1,6 +1,6 @@
 {
   "recurring": {
-    "domainUrl": "http://localhost:8080/api",
+    "domainUrl": "https://busy-ruby-dibbler-vest.cyclic.app/api",
     "s3BucketUrl": "https://lmstestbucket22.s3.ap-south-1.amazonaws.com",
     "post": {
       "login": "users/login",
