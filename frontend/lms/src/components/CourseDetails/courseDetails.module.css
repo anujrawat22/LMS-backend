@@ -172,6 +172,8 @@
   border-bottom: 1px solid rgb(240, 240, 240);
 }
 
+
+
 @media screen and (max-width: 920px) {
   .coursesectionssidenavbar {
     display: none;
@@ -181,7 +183,6 @@
     display: block;
   }
 }
-
 
 @media screen and (max-width: 480) {
   .maincontent {

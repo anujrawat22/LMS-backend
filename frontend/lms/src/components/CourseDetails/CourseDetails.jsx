@@ -11,9 +11,6 @@ import { Global } from '@emotion/react';
 import { styled } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { grey } from '@mui/material/colors';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Skeleton from '@mui/material/Skeleton';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import NotesIcon from '@mui/icons-material/Notes';
 
@@ -25,19 +22,6 @@ const Root = styled('div')(({ theme }) => ({
         theme.palette.mode === 'light' ? grey[100] : theme.palette.background.default,
 }));
 
-const StyledBox = styled(Box)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === 'light' ? '#fff' : grey[800],
-}));
-
-const Puller = styled(Box)(({ theme }) => ({
-    width: 30,
-    height: 6,
-    backgroundColor: theme.palette.mode === 'light' ? grey[300] : grey[900],
-    borderRadius: 3,
-    position: 'absolute',
-    top: 8,
-    left: 'calc(50% - 15px)',
-}));
 
 
 export default function CourseDetails() {
@@ -55,18 +39,13 @@ export default function CourseDetails() {
     })
     const [toggleSwapbleDrawer, setToggleSwapbleDrawer] = useState(false)
     const [Lessondata, setLessonData] = useState({})
+    const [selectedLessonId, setSelectedLessonId] = useState(null);
 
-    const isMobileDevice = useMediaQuery('(max-width:900px)');
-
-    const handleToggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
 
     const fetchData = async () => {
         try {
             const response = await GetCourseDetails(id)
             setCourseData(response.data.data)
-            console.log(response.data.data)
             const Sections = response.data.data.sections;
             const LessonSection = Sections.find(section => section._id === sectionId)
             const lessonData = LessonSection.subsections.find(lesson => lesson._id === lessonId)
@@ -76,9 +55,18 @@ export default function CourseDetails() {
         }
     }
 
-    const handleLessonClick = (sectionId, lessonId, lesson) => {
-        navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`)
-        setLessonData(lesson)
+    const handleLessonClick = async (sectionId, lessonId) => {
+        try {
+
+            const response = await GetCourseDetails(id);
+            const Sections = response.data.data.sections;
+            const LessonSection = Sections.find(section => section._id === sectionId);
+            const newLessonData = LessonSection.subsections.find(subsection => subsection._id === lessonId);
+            setLessonData(newLessonData);
+            navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     const handleNavigateToCourseDetails = () => {
@@ -87,11 +75,12 @@ export default function CourseDetails() {
 
     useEffect(() => {
         fetchData()
-    }, [])
+        setSelectedLessonId(lessonId);
+    }, [lessonId, sectionId, id])
 
 
     return (
-        <Grid container className={styles.MainGridContainer}>
+        <Grid container className={styles.MainGridContainer} >
             <div className={styles.DrawerIcon}>
                 <Tooltip title='Lessons'>
                     <IconButton onClick={() => setToggleSwapbleDrawer(!toggleSwapbleDrawer)}>
@@ -106,23 +95,27 @@ export default function CourseDetails() {
                     </IconButton>
                 </Tooltip>
                 {
-                    courseData.sections.length > 0 && courseData.sections.map((sections) => {
-                        return <Accordion key={sections._id} expanded={true} sx={{ background: "transparent" }}>
+                    courseData.sections.length > 0 && courseData.sections.map((sections, index) => {
+                        return <Accordion key={index} expanded={true} sx={{ background: "transparent" }} >
                             <AccordionSummary
                                 aria-controls="panel1a-content"
                                 sx={{ background: "transparent" }}
                             >
                                 <Typography variant='h6' sx={{ background: "transparent" }} > {sections.sectionTitle}</Typography>
                             </AccordionSummary>
-                            <AccordionDetails sx={{ '&:hover': { backgroundColor: 'transparent' } }}>
+                            <AccordionDetails id={`section-${sections._id}`}>
                                 {
                                     sections.subsections.length > 0 && sections.subsections.map((subsection, index) => {
                                         return <div className={styles.LessonAccordance}
-                                            key={index}
+                                            key={subsection._id}
                                             onClick={() => handleLessonClick(sections._id, subsection._id, subsection)}
-                                        ><NotesIcon fontSize='small' sx={{
-                                            marginRight: '10px'
-                                        }} />{subsection.Title}</div>
+                                            id={`lesson-${subsection._id}`}
+                                            style={{
+                                                backgroundColor: subsection._id === selectedLessonId ? 'rgb(180, 211, 59)' : 'transparent',
+                                                color: subsection._id === selectedLessonId ? 'white' : 'black',
+                                            }}><NotesIcon fontSize='small' sx={{
+                                                marginRight: '10px'
+                                            }} />{subsection.Title}</div>
                                     })
                                 }
                             </AccordionDetails>
@@ -131,7 +124,7 @@ export default function CourseDetails() {
                 }
                 {/* </Paper> */}
             </Grid>
-            <Grid item xs={12} sm={12} md={9} className={styles.maincontent}>
+            <Grid item xs={12} sm={12} md={9} className={styles.maincontent} >
                 {
                     Object.keys(Lessondata).length > 0 ?
                         <CourseDetailMainContent data={Lessondata} courseId={id} sectionId={sectionId} />
@@ -139,22 +132,31 @@ export default function CourseDetails() {
                         null
                 }
             </Grid>
-            {toggleSwapbleDrawer ? <SwipeableEdgeDrawer open={toggleSwapbleDrawer} setOpen={setToggleSwapbleDrawer} courseData={courseData} setLessonData={setLessonData} /> : null}
+            {toggleSwapbleDrawer ? <SwipeableEdgeDrawer open={toggleSwapbleDrawer} setOpen={setToggleSwapbleDrawer} courseData={courseData} setLessonData={setLessonData} selectedLessonId={selectedLessonId} id={id} sectionId={sectionId} lessonId={lessonId} /> : null}
         </Grid>
     )
 }
 
 
-function SwipeableEdgeDrawer({ open, setOpen, courseData, setLessonData }) {
+function SwipeableEdgeDrawer({ open, setOpen, courseData, setLessonData, selectedLessonId, id }) {
 
-
+    const navigate = useNavigate()
     const toggleDrawer = (newOpen) => () => {
         setOpen(newOpen);
     };
 
 
-    const handleLessonClick = (data) => {
-        setLessonData(data)
+    const handleLessonClick = async (sectionId, lessonId) => {
+        try {
+            const response = await GetCourseDetails(id);
+            const Sections = response.data.data.sections;
+            const LessonSection = Sections.find(section => section._id === sectionId);
+            const newLessonData = LessonSection.subsections.find(subsection => subsection._id === lessonId);
+            setLessonData(newLessonData);
+            navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`);
+        } catch (error) {
+            console.log(error);
+        }
         setOpen(false)
     }
 
@@ -190,9 +192,16 @@ function SwipeableEdgeDrawer({ open, setOpen, courseData, setLessonData }) {
                                 <div className={styles.SectionContentDiv}>
                                     {
                                         sections.subsections.length > 0 && sections.subsections.map((subsection, index) => {
-                                            return <div className={styles.smallLessonAccordance}
+                                            return <div
+                                                id={`lesson-${subsection._id}`}
                                                 key={index}
-                                                onClick={() => handleLessonClick(subsection)}
+                                                onClick={() => handleLessonClick(sections._id, subsection._id)}
+                                                style={{
+                                                    backgroundColor: subsection._id === selectedLessonId ? 'rgb(180, 211, 59)' : 'transparent',
+                                                    color: subsection._id === selectedLessonId ? 'white' : 'black',
+                                                    display: 'flex',
+                                                    alignItems: 'center'
+                                                }}
                                             ><NotesIcon fontSize='small' sx={{
                                                 marginRight: '10px'
                                             }} />{subsection.Title}</div>

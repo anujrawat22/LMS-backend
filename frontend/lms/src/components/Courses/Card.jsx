@@ -88,7 +88,7 @@ export default function CourseCard(data) {
                                 <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
                                     <img style={{
                                         width: "42px", height: "42px", borderRadius: "100%"
-                                    }} src={data ? data.data.createBy.avatar : "https://cdn-icons-png.flaticon.com/512/2815/2815428.png"} />
+                                    }} src={data ? data.data.createBy.avatar : "https://cdn-icons-png.flaticon.com/512/2815/2815428.png"} alt='avatar' />
                                 </Avatar>
                             }
                             title={data.data.createBy.name}

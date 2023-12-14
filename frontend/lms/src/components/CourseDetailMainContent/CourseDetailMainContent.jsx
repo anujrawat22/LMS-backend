@@ -106,17 +106,18 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
         modifyVideos();
         modifyBannerImage();
     };
+
     useEffect(() => {
         checkforUserCourse()
         fetchAndUpdateURLs();
-    }, [])
+    }, [data])
 
     useInterval(fetchAndUpdateURLs, 5 * 60 * 1000);
     if (data.isfree || userHasCourse) {
         return (
             <>
                 {data.Title ? <div className={styles.TitleDiv} style={{
-                    backgroundImage: bannerImg ? `url(${data.bannerimage})` : 'none',
+                    backgroundImage: bannerImg ? `url(${bannerImg})` : 'none',
                     color: bannerImg ? 'white' : 'black'
                 }}>
                     <h1 className={styles.DataTitle}>{data.Title}</h1>
