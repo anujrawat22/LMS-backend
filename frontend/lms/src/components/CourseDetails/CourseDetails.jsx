@@ -79,6 +79,8 @@ export default function CourseDetails() {
     }, [lessonId, sectionId, id])
 
 
+
+
     return (
         <Grid container className={styles.MainGridContainer} >
             <div className={styles.DrawerIcon}>

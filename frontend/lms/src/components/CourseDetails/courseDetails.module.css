@@ -4,6 +4,7 @@
   display: flex;
 }
 
+
 .coursesectionssidenavbar {
   overflow: auto;
   overflow-x: hidden;
@@ -171,8 +172,6 @@
   margin: 5px 0px;
   border-bottom: 1px solid rgb(240, 240, 240);
 }
-
-
 
 @media screen and (max-width: 920px) {
   .coursesectionssidenavbar {

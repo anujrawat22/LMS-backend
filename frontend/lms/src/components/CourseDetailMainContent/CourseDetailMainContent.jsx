@@ -58,6 +58,12 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
         setModifiedImages(updatedImages.filter((image) => image !== null))
     }
 
+    const generateBlobUrl = async (videoUrl) => {
+        const response = await fetch(videoUrl);
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    };
+
     const modifyVideos = async () => {
         const UpdateVideos = await Promise.all(
             data.videos.map(async (video) => {
@@ -69,7 +75,7 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                         } else {
                             response = await AuthenticatePresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), token);
                         }
-                        return { url: response.data.fileURL, name: video.name };
+                        return { url: await generateBlobUrl(response.data.fileURL), name: video.name };
                     } catch (error) {
                         console.error('Error fetching presigned URL:', error);
                         return { url: null, name: null };
