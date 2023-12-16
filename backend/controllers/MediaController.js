@@ -77,6 +77,7 @@ exports.AuthenticatedPresignedUrl = async (req, res) => {
         const params = {
             Bucket: bucketName,
             Key: fileName,
+            ResponseContentDisposition: `inline; filename=${fileName}`,
             Expires: 60 * 5, // URL expires in 5 minutes
         };
 
