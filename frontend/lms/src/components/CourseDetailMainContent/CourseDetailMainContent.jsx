@@ -155,7 +155,7 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                             return <div className={styles.VideoDiv}>
                                 <ReactPlayer width={isMobile ? '100%' : '60%'}
                                     height={isMobile ? '230px' : '400px'} className={styles.ReactPlayer}
-                                    config={{ file: { attributes: { controlsList: 'nodownload' } } }}
+                                    config={{ file: { attributes: { controlsList: 'nodownload noembed' } } }}
 
                                     // Disable right click
                                     onContextMenu={e => e.preventDefault()} url={video.url} controls={true} />
