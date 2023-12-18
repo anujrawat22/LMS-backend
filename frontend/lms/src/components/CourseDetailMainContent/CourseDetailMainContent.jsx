@@ -13,6 +13,8 @@ import useInterval from '../UseInterval/useInterval';
 import config from '../../config.json';
 import { AuthenticatePresignedUrl } from '../../services/authenticatedPresignedUrl.service';
 import { PresignedUrl } from '../../services/generatePresignedUrl.service';
+import { Axios } from 'axios';
+import httpservice from '../../services/httpservice';
 const s3BucketUrl = config.recurring.s3BucketUrl;
 const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
     const { id } = useParams()
@@ -69,12 +71,8 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
             data.videos.map(async (video) => {
                 if (isS3Video(video.url)) {
                     try {
-                        let response;
-                        if (data.isfree) {
-                            response = await PresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
-                        } else {
-                            response = await AuthenticatePresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), token);
-                        }
+                        const response = await httpservice.get(video.url)
+                        console.log(response)
                         return { url: await generateBlobUrl(response.data.fileURL), name: video.name };
                     } catch (error) {
                         console.error('Error fetching presigned URL:', error);
@@ -154,6 +152,7 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                         modifiedVideos.map((video) => {
                             return <div className={styles.VideoDiv}>
                                 <ReactPlayer width={isMobile ? '100%' : '60%'}
+
                                     height={isMobile ? '230px' : '400px'} className={styles.ReactPlayer}
                                     config={{ file: { attributes: { controlsList: 'nodownload noembed' } } }}
 
