@@ -41,13 +41,13 @@ exports.PresignedUrl = async (req, res) => {
             return res.status(401).send({ error: "Course Not free" })
         }
 
-        // const fileURL = getSignedUrl({
-        //     url: "https://d33pa9gvfmn98s.cloudfront.net/" + newFileName,
-        //     dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
-        //     privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
-        //     keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
-        // })
-        const fileURL = "https://d1bhdk4epnq49c.cloudfront.net/" + fileName
+        const fileURL = getSignedUrl({
+            url: "https://d33pa9gvfmn98s.cloudfront.net/" + fileName,
+            dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
+            privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
+            keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
+        })
+        
         return res.status(200).send({ fileURL })
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
@@ -74,13 +74,12 @@ exports.ThumbnailUrl = async (req, res) => {
 exports.AuthenticatedPresignedUrl = async (req, res) => {
     const { fileName } = req.query;
     try {
-        // const fileURL = getSignedUrl({
-        //     url: "https://d33pa9gvfmn98s.cloudfront.net/" + newFileName,
-        //     dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
-        //     privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
-        //     keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
-        // })
-        const fileURL = "https://d1bhdk4epnq49c.cloudfront.net/" + fileName
+        const fileURL = getSignedUrl({
+            url: "https://d33pa9gvfmn98s.cloudfront.net/" + fileName,
+            dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
+            privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
+            keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
+        })
         return res.status(200).send({ fileURL })
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
