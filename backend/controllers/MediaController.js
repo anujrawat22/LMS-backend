@@ -94,8 +94,7 @@ exports.AuthenticatedPresignedUrl = async (req, res) => {
 
 exports.GetImageUploadURl = async (req, res) => {
     const ex = req.query.fileType
-
-    const Key = `images/${uuidv4()}.${ex}`
+    const Key = `${uuidv4()}.${ex}`
     try {
 
         const params = {
@@ -117,8 +116,7 @@ exports.GetImageUploadURl = async (req, res) => {
 exports.getVideoUploadUrl = async (req, res) => {
     const ex = req.query.fileType
 
-    const Key = `videos/${uuidv4()}.${ex}`
-    console.log(Key)
+    const Key = `${uuidv4()}.${ex}`
     try {
 
         const params = {
@@ -129,7 +127,6 @@ exports.getVideoUploadUrl = async (req, res) => {
         };
 
         const uploadURL = await s3.getSignedUrl('putObject', params);
-
         res.status(200).json({ uploadURL, Key });
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
