@@ -16,7 +16,7 @@ const bucketName = process.env.BUCKET_NAME
 
 exports.PresignedUrl = async (req, res) => {
     const { fileName } = req.query;
-    const newFileName = fileName.split("/")[1]
+   
     const { courseId, sectionId, lessonId } = req.params;
     try {
         const course = await Course.findById(courseId)
@@ -47,7 +47,7 @@ exports.PresignedUrl = async (req, res) => {
         //     privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
         //     keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
         // })
-        const fileURL = "https://d1bhdk4epnq49c.cloudfront.net/" + newFileName
+        const fileURL = "https://d1bhdk4epnq49c.cloudfront.net/" + fileName
         return res.status(200).send({ fileURL })
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
@@ -73,7 +73,6 @@ exports.ThumbnailUrl = async (req, res) => {
 
 exports.AuthenticatedPresignedUrl = async (req, res) => {
     const { fileName } = req.query;
-    const newFileName = fileName.split("/")[1]
     try {
         // const fileURL = getSignedUrl({
         //     url: "https://d33pa9gvfmn98s.cloudfront.net/" + newFileName,
@@ -81,7 +80,7 @@ exports.AuthenticatedPresignedUrl = async (req, res) => {
         //     privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
         //     keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
         // })
-        const fileURL = "https://d1bhdk4epnq49c.cloudfront.net/" + newFileName
+        const fileURL = "https://d1bhdk4epnq49c.cloudfront.net/" + fileName
         return res.status(200).send({ fileURL })
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
