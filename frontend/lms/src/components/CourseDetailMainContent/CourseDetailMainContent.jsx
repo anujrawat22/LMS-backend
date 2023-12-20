@@ -15,6 +15,7 @@ import { AuthenticatePresignedUrl } from '../../services/authenticatedPresignedU
 import { PresignedUrl } from '../../services/generatePresignedUrl.service';
 import { Axios } from 'axios';
 import httpservice from '../../services/httpservice';
+import { useRef } from 'react';
 const s3BucketUrl = config.recurring.s3BucketUrl;
 const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
     const { id } = useParams()
@@ -22,10 +23,8 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
     const role = userdata.role
     const { token } = userdata;
     const [userHasCourse, setUserHasCourse] = useState(false)
-    const [modifiedImages, setModifiedImages] = useState([])
-    const [modifiedVideos, setModifiedVideos] = useState([])
-    const [bannerImg, setBannerImg] = useState('')
     const isMobile = window.innerWidth <= 480;
+    
     const checkforUserCourse = async () => {
         try {
             const response = await CheckUserCourses(id, token)
@@ -35,94 +34,27 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
         }
     }
 
-    const modifyImages = async () => {
-        const updatedImages = await Promise.all(
-            data.images.map(async (image) => {
-                if (isS3Image(image)) {
-                    try {
-                        let response;
-                        if (data.isfree) {
-                            response = await PresignedUrl(image.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
-                        } else {
 
-                            response = await AuthenticatePresignedUrl(image.replace(`${s3BucketUrl}/`, ''), token);
-                        }
-                        return response.data.fileURL;
-                    } catch (error) {
-                        console.error('Error fetching presigned URL:', error);
-                        return fallbackImg;
-                    }
-                } else {
-                    return image;
-                }
-            })
-        );
-        setModifiedImages(updatedImages.filter((image) => image !== null))
-    }
 
-    const generateBlobUrl = async (videoUrl) => {
-        const response = await fetch(videoUrl);
-        const blob = await response.blob();
-        return URL.createObjectURL(blob);
-    };
 
-    const modifyVideos = async () => {
-        const UpdateVideos = await Promise.all(
-            data.videos.map(async (video) => {
-                if (isS3Video(video.url)) {
-                    try {
-                        const response = await httpservice.get(video.url)
-                        console.log(response)
-                        return { url: await generateBlobUrl(response.data.fileURL), name: video.name };
-                    } catch (error) {
-                        console.error('Error fetching presigned URL:', error);
-                        return { url: null, name: null };
-                    }
-                } else {
-                    return video;
-                }
-            })
-        );
-        const videos = UpdateVideos.filter(video => video.url !== null)
-        setModifiedVideos(videos)
-    }
 
-    const modifyBannerImage = async () => {
-        if (isS3Image(data.bannerimage)) {
-            try {
-                let response;
-                if (data.isfree) {
-                    response = await PresignedUrl(data.bannerimage.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
-                } else {
-                    response = await AuthenticatePresignedUrl(data.bannerimage.replace(`${s3BucketUrl}/`, ''), token);
-                }
-                setBannerImg(response.data.fileURL)
-            } catch (error) {
-                console.log(error)
-            }
-        } else {
-            setBannerImg(data.bannerimage)
-        }
-    }
 
-    const fetchAndUpdateURLs = async () => {
-        modifyImages();
-        modifyVideos();
-        modifyBannerImage();
-    };
+
 
     useEffect(() => {
         checkforUserCourse()
-        fetchAndUpdateURLs();
+        
     }, [data])
 
-    useInterval(fetchAndUpdateURLs, 5 * 60 * 1000);
+
+
+
     if (data.isfree || userHasCourse) {
         return (
             <>
                 {data.Title ? <div className={styles.TitleDiv} style={{
-                    backgroundImage: bannerImg ? `url(${bannerImg})` : 'none',
-                    color: bannerImg ? 'white' : 'black'
+                    backgroundImage: data.bannerimage ? `url(${data.bannerimage})` : 'none',
+                    color: data.bannerimage ? 'white' : 'black'
                 }}>
                     <h1 className={styles.DataTitle}>{data.Title}</h1>
 
@@ -144,15 +76,21 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                         : null
                 }
                 {
-                    modifiedImages.length > 0 ?
-                        <ImageVideoCarasouel allImages={modifiedImages} free={data.isfree} data={data} sectionId={sectionId} lessonId={data._id} courseId={courseId} /> : null
+                    data.images.length > 0 ?
+                        <ImageVideoCarasouel allImages={data.images} free={data.isfree} data={data} sectionId={sectionId} lessonId={data._id} courseId={courseId} /> : null
                 }
                 {
-                    modifiedVideos.length > 0 ?
-                        modifiedVideos.map((video) => {
+                    data.videos.length > 0 ?
+                    data.videos.map((video, index) => {
                             return <div className={styles.VideoDiv}>
+                                <canvas
+                                    
+                                    width={isMobile ? '100%' : '60%'}
+                                    height={isMobile ? '230px' : '400px'}
+                                    className={styles.Canvas}
+                                ></canvas>
                                 <ReactPlayer width={isMobile ? '100%' : '60%'}
-
+                                    id={`video_${index}`}
                                     height={isMobile ? '230px' : '400px'} className={styles.ReactPlayer}
                                     config={{ file: { attributes: { controlsList: 'nodownload noembed' } } }}
 
@@ -186,12 +124,3 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
 
 export default CourseDetailMainContent
 
-function isS3Image(url) {
-    const s3Pattern = new RegExp(`^${s3BucketUrl}/.*`);
-    return s3Pattern.test(url);
-}
-
-function isS3Video(url) {
-    const s3Pattern = new RegExp(`^${s3BucketUrl}/.*`);
-    return s3Pattern.test(url);
-}
