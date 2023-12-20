@@ -81,7 +81,7 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
                 })
                 const responseBody = await response.json();
                 const { uploadURL, Key } = responseBody;
-
+                console.log(uploadURL)
                 if (!uploadURL) {
                     return toast.error("Error in uploading image")
                 }

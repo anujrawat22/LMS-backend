@@ -1,4 +1,4 @@
-
+const { getSignedUrl } = require("@aws-sdk/cloudfront-signer")
 const { v4: uuidv4 } = require('uuid')
 require('dotenv').config()
 const AWS = require('aws-sdk');
@@ -16,6 +16,7 @@ const bucketName = process.env.BUCKET_NAME
 
 exports.PresignedUrl = async (req, res) => {
     const { fileName } = req.query;
+    const newFileName = fileName.split("/")[1]
     const { courseId, sectionId, lessonId } = req.params;
     try {
         const course = await Course.findById(courseId)
@@ -40,15 +41,14 @@ exports.PresignedUrl = async (req, res) => {
             return res.status(401).send({ error: "Course Not free" })
         }
 
-        const params = {
-            Bucket: bucketName,
-            Key: fileName,
-            Expires: 60 * 5, // URL expires in 5 minutes
-        };
-
-        const fileURL = await s3.getSignedUrl('getObject', params);
-        const expirationTime = Math.floor(Date.now() / 1000) + (60 * 5);
-        res.status(200).json({ fileURL, Key: fileName, expiresAt: expirationTime });
+        // const fileURL = getSignedUrl({
+        //     url: "https://d33pa9gvfmn98s.cloudfront.net/" + newFileName,
+        //     dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
+        //     privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
+        //     keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
+        // })
+        const fileURL = "https://d1bhdk4epnq49c.cloudfront.net/" + newFileName
+        return res.status(200).send({ fileURL })
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -73,17 +73,16 @@ exports.ThumbnailUrl = async (req, res) => {
 
 exports.AuthenticatedPresignedUrl = async (req, res) => {
     const { fileName } = req.query;
+    const newFileName = fileName.split("/")[1]
     try {
-        const params = {
-            Bucket: bucketName,
-            Key: fileName,
-            ResponseContentDisposition: `inline; filename=${fileName}`,
-            Expires: 60 * 5, // URL expires in 5 minutes
-        };
-
-        const fileURL = await s3.getSignedUrl('getObject', params);
-        const expirationTime = Math.floor(Date.now() / 1000) + (60 * 5);
-        res.status(200).json({ fileURL, Key: fileName, expiresAt: expirationTime });
+        // const fileURL = getSignedUrl({
+        //     url: "https://d33pa9gvfmn98s.cloudfront.net/" + newFileName,
+        //     dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
+        //     privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
+        //     keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
+        // })
+        const fileURL = "https://d1bhdk4epnq49c.cloudfront.net/" + newFileName
+        return res.status(200).send({ fileURL })
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -94,7 +93,9 @@ exports.AuthenticatedPresignedUrl = async (req, res) => {
 
 exports.GetImageUploadURl = async (req, res) => {
     const ex = req.query.fileType
+
     const Key = `${uuidv4()}.${ex}`
+    console.log(Key)
     try {
 
         const params = {
@@ -105,7 +106,6 @@ exports.GetImageUploadURl = async (req, res) => {
         };
 
         const uploadURL = await s3.getSignedUrl('putObject', params);
-
         res.status(200).json({ uploadURL, Key });
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
@@ -117,6 +117,7 @@ exports.getVideoUploadUrl = async (req, res) => {
     const ex = req.query.fileType
 
     const Key = `${uuidv4()}.${ex}`
+    console.log(Key)
     try {
 
         const params = {
@@ -127,6 +128,7 @@ exports.getVideoUploadUrl = async (req, res) => {
         };
 
         const uploadURL = await s3.getSignedUrl('putObject', params);
+
         res.status(200).json({ uploadURL, Key });
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);

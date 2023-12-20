@@ -3,6 +3,7 @@ const { connection } = require('./config/db')
 const { UserRouter } = require('./routes/UserRouter')
 const { Authenticate } = require('./middlewares/Authenticate.middleware')
 const { CourseRouter } = require('./routes/CourseRouter')
+const fs = require('fs');
 require('dotenv').config()
 const port = +process.env.PORT || 8080
 const app = express()
@@ -19,7 +20,7 @@ app.use("/api/users", UserRouter)
 
 app.use("/api/courses", CourseRouter)
 
-app.use("/api/media",  MediaRouter)
+app.use("/api/media", MediaRouter)
 
 app.use("/api/usercourses", Authenticate, Authorize(['admin', 'superadmin']), UserCourseRouter)
 
