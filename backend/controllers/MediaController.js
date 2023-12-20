@@ -42,12 +42,11 @@ exports.PresignedUrl = async (req, res) => {
         }
 
         const fileURL = getSignedUrl({
-            url: "https://d33pa9gvfmn98s.cloudfront.net/" + fileName,
+            url: process.env.CLOUDFRONT_URL + fileName,
             dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
             privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
             keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
         })
-        
         return res.status(200).send({ fileURL })
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
@@ -75,7 +74,7 @@ exports.AuthenticatedPresignedUrl = async (req, res) => {
     const { fileName } = req.query;
     try {
         const fileURL = getSignedUrl({
-            url: "https://d33pa9gvfmn98s.cloudfront.net/" + fileName,
+            url: process.env.CLOUDFRONT_URL + fileName,
             dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
             privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
             keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
