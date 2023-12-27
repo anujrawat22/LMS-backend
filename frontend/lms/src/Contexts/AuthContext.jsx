@@ -12,7 +12,6 @@ const initialData = {
 }
 
 
-
 export const AuthProvider = ({ children }) => {
     const [userdata, setUserData] = useState(initialData)
     const login = (token, username, role, avatar) => {

@@ -35,7 +35,7 @@ export default function CourseCard(data) {
 
     return (
         <>
-            <Container sx={{ marginTop: "88px" }}>
+            <Container >
                 <Card sx={{ height: "500px" }} className='MainContainer'>
                     <CardMedia
                         sx={{ objectFit: "cover", width: '100%' }}

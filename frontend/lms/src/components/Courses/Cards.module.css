@@ -1,18 +1,15 @@
-.cardmainDiv {
-  width: 100%;
-  height: auto;
+
+
+
+.pagination{
+  /* border: 1px solid red; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.cardcontainer {
-  /* border: 10px solid red; */
-  padding: 8% 2%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto;
-  row-gap: 70px;
-}
-.Card:hover {
-  cursor: pointer;
-  transform: scale(1.01);
-  box-shadow: rgb(180,211,59) 0px 2px 8px 0px;
+.filters{
+  margin-top: 80px;
+  margin-bottom: 0px;
+  padding: 0px 5%;
 }

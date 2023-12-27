@@ -47,7 +47,7 @@ function App() {
       autoLogin(JSON.parse(token))
     } else {
       logout()
-      navigate("/courses")
+        navigate("/courses")
     }
   }, [])
 

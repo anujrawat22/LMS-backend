@@ -22,6 +22,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Link as RouterLink } from 'react-router-dom';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import styles from './sidenavbar.module.css';
+import { useNavigate } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
 const drawerWidth = 240;
 
@@ -50,6 +51,7 @@ const settings = ['Profile', 'Logout'];
 
 export default function AdminSideNavBar() {
     const { userdata, logout } = useAuth()
+    const navigate = useNavigate()
     const name = userdata.username
     const [open, setOpen] = React.useState(false);
     const [guestDrawer, setguestDrawer] = React.useState(false)
@@ -129,6 +131,7 @@ export default function AdminSideNavBar() {
                                                 <MenuItem key={setting} onClick={() => {
                                                     handleCloseUserMenu()
                                                     logout()
+                                                    navigate('/login')
                                                 }}>
                                                     <Typography textAlign="center">{setting}</Typography>
                                                 </MenuItem> : <MenuItem key={setting} onClick={handleCloseUserMenu}>
@@ -150,7 +153,7 @@ export default function AdminSideNavBar() {
                                             color: 'white'
                                         }}
                                             onClick={() => setguestDrawer(!guestDrawer)}>
-                                            <MenuIcon fontSize='small'/>
+                                            <MenuIcon fontSize='small' />
                                         </IconButton>
                                     </Box>
                                     {

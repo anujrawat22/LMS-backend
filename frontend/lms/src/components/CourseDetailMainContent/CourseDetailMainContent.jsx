@@ -13,16 +13,15 @@ import config from '../../config.json';
 import { AuthenticatePresignedUrl } from '../../services/authenticatedPresignedUrl.service';
 import { PresignedUrl } from '../../services/generatePresignedUrl.service';
 import { Skeleton } from '@mui/material';
-import ReactPlayer from 'react-player'
+
+import VideoComponent from '../VideoComponent/VideoComponent';
 const s3BucketUrl = config.recurring.s3BucketUrl;
 const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
     const { id } = useParams()
     const { userdata } = useAuth()
-    const role = userdata.role
     const { token } = userdata;
     const [userHasCourse, setUserHasCourse] = useState(false)
     const [modifiedImages, setModifiedImages] = useState([])
-    const [modifiedVideos, setModifiedVideos] = useState([])
     const [bannerImg, setBannerImg] = useState('')
     const isMobile = window.innerWidth <= 480;
     const checkforUserCourse = async () => {
@@ -60,44 +59,34 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
     }
 
 
-    const modifyVideos = async () => {
-        const UpdateVideos = await Promise.all(
-            data.videos.map(async (video) => {
-                if (isS3Video(video.url)) {
-                    try {
-                        let response;
-                        if (data.isfree) {
-                            response = await PresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
-                        } else {
-                            response = await AuthenticatePresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), token);
-                        }
-                        return { url: response.data.fileURL, name: video.name };
-                    } catch (error) {
-                        console.error('Error fetching presigned URL:', error);
-                        return { url: null, name: null };
-                    }
-                } else {
-                    return video;
-                }
-            })
-        );
-        const videos = UpdateVideos.filter(video => video.url !== null)
-        setModifiedVideos(videos)
-    }
+    // const modifyVideos = async () => {
+    //     const UpdateVideos = await Promise.all(
+    //         data.videos.map(async (video) => {
+    //             if (isS3Video(video.url)) {
+    //                 try {
+    //                     let response;
+    //                     if (data.isfree) {
+    //                         response = await PresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
+    //                     } else {
+    //                         response = await AuthenticatePresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), token);
 
-    const VideoComponent = ({ url }) => (
-        <Suspense fallback={<Skeletons width={isMobile ? '100%' : '60%'} height={isMobile ? '230px' : '400px'} />}>
-            <ReactPlayer
-                width={isMobile ? '100%' : '60%'}
-                height={isMobile ? '230px' : '400px'}
-                className={styles.ReactPlayer}
-                config={{ file: { attributes: { controlsList: 'nodownload noembed' } } }}
-                onContextMenu={(e) => e.preventDefault()}
-                url={url}
-                controls={true}
-            />
-        </Suspense>
-    );
+    //                     }
+
+    //                     return { url: response.data.fileURL, name: video.name };
+    //                 } catch (error) {
+    //                     console.error('Error fetching presigned URL:', error);
+    //                     return { url: null, name: null };
+    //                 }
+    //             } else {
+    //                 return video;
+    //             }
+    //         })
+    //     );
+    //     const videos = UpdateVideos.filter(video => video.url !== null)
+    //     setModifiedVideos(videos)
+    // }
+
+
 
 
     const modifyBannerImage = async () => {
@@ -120,12 +109,14 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
 
     const fetchAndUpdateURLs = async () => {
         modifyImages();
-        modifyVideos();
         modifyBannerImage();
     };
 
     useEffect(() => {
         checkforUserCourse()
+    })
+
+    useEffect(() => {
         fetchAndUpdateURLs();
     }, [data])
 
@@ -161,10 +152,10 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                         <ImageVideoCarasouel allImages={modifiedImages} free={data.isfree} data={data} sectionId={sectionId} lessonId={data._id} courseId={courseId} /> : null
                 }
                 {
-                    modifiedVideos.length > 0 ?
-                        modifiedVideos.map((video) => {
-                            return <div className={styles.VideoDiv}>
-                                <VideoComponent url={video.url} />
+                    data.videos.length > 0 ?
+                        data.videos.map((video) => {
+                            return <div className={styles.VideoDiv} key={video._id}>
+                                <VideoComponent url={video.url} data={data}/>
                                 <Typography variant='h6'>
                                     {video.name}
                                 </Typography>
