@@ -58,7 +58,7 @@ const VideoComponent = ({ url, data, sectionId, courseId }) => {
     };
     return (
         <>
-            <ReactPlayer url={videoUrl} controls={true} config={playerConfig}></ReactPlayer>
+            <ReactPlayer url={videoUrl} controls={true} config={playerConfig}  width={'100%'} height={'80dvh'}></ReactPlayer>
         </>
     )
 }
