@@ -20,12 +20,12 @@
 
 @media screen and (max-width: 720px) {
   .filters{
-    padding: 0px 10%;
+    padding: 0px 8%;
   }
 }
 
 @media screen and (max-width: 480px) {
   .filters{
-    padding: 0px 15%;
+    padding: 0px 8%;
   }
 }

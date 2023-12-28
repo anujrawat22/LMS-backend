@@ -57,7 +57,7 @@ export default function Courses() {
 
             </Box>
             {
-                <Grid container sx={{ padding: '40px' }} spacing={2}>
+                <Grid container sx={{ padding: '2%' }} spacing={2}>
                     {
                         courseData.length > 0 ? courseData.map((data) => {
                             return <Grid item md={4} sm={12} xs={12} lg={4} key={data._id} onClick={() => handlecardClick(data._id)} >
