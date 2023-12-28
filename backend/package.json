@@ -14,6 +14,7 @@
     "@aws-sdk/cloudfront-signer": "^3.468.0",
     "aws-sdk": "^2.1511.0",
     "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "csv-parser": "^3.0.0",
     "csv-writer": "^1.6.0",

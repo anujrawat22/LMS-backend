@@ -2,19 +2,26 @@ const { Course } = require("../models/CourseModel")
 const mongoose = require('mongoose');
 
 exports.allCourses = async (req, res) => {
-    let { page, limit } = req.query
+    let { page, limit, title } = req.query
     try {
         page = parseInt(page) || 1
         limit = parseInt(limit) || 10
 
         const skip = (page - 1) * limit;
-
-        const courseData = await Course.find().skip(skip).limit(limit).populate({
+        const filter = {};
+        if (title) {
+            console.log('hello')
+            filter.title = { $regex: new RegExp(title, 'i') }; // Case-insensitive search
+        }
+        
+        const courseData = await Course.find(filter).skip(skip).limit(limit).populate({
             path: 'createBy',
             select: 'name email avatar'
         })
 
         const totalCount = await Course.countDocuments();
+
+
 
         res.status(200).send({
             msg: "Course Data", data: {
@@ -23,7 +30,6 @@ exports.allCourses = async (req, res) => {
                 totalPages: Math.ceil(totalCount / limit)
             }
         })
-
     } catch (error) {
         console.log("Error fetching course data :", error)
         res.status(500).send({ error: "Server error" })

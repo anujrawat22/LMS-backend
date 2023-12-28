@@ -11,13 +11,14 @@ const cors = require('cors')
 const { MediaRouter } = require('./routes/mediaRouter')
 const { UserCourseRouter } = require('./routes/UserCourseRouter')
 const { Authorize } = require('./middlewares/Authorization.middleware')
+const cookieParser = require('cookie-parser')
 // const NodeRSA = require('node-rsa');
 // const key = new NodeRSA({b: 2048});
 app.use(express.json())
 app.use(cors({
     origin: "*"
 }))
-
+app.use(cookieParser())
 // const public_key = key.exportKey('public')
 // const private_key = key.exportKey('private')
 // fs.writeFileSync('./Keys/public_key.pem',public_key)

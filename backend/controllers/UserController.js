@@ -110,7 +110,6 @@ exports.verifyOTP = async (req, res) => {
         if (otps[email] !== enteredOTP) {
             return res.status(400).send({ error: "Invalid OTP" })
         }
-        delete otps[email]
         res.status(200).send({ msg: "OTP Validation successful" })
     } catch (error) {
         console.log("Error in OTP validation :", error)
@@ -120,12 +119,16 @@ exports.verifyOTP = async (req, res) => {
 
 
 exports.resetPassword = async (req, res) => {
-    const { email, newPassword } = req.body;
+    const { email, newPassword, enteredOTP } = req.body;
     try {
         const user = await User.findOne({ email })
         if (!user) {
             return res.status(404).send({ error: "User doesn't exists " })
         }
+        if (otps[email] !== enteredOTP) {
+            return res.status(400).send({ error: "Invalid OTP" })
+        }
+        delete otps[email]
         bcrypt.hash(newPassword, 5, async (err, hash) => {
             if (err) {
                 return res.status(400).send({ error: "Something went wrong" })

@@ -16,7 +16,7 @@ const bucketName = process.env.BUCKET_NAME
 
 exports.PresignedUrl = async (req, res) => {
     const { fileName } = req.query;
-   
+
     const { courseId, sectionId, lessonId } = req.params;
     try {
         const course = await Course.findById(courseId)
@@ -41,13 +41,15 @@ exports.PresignedUrl = async (req, res) => {
             return res.status(401).send({ error: "Course Not free" })
         }
 
-        const fileURL = getSignedUrl({
-            url: process.env.CLOUDFRONT_URL + fileName,
-            dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
-            privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
-            keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
-        })
-        return res.status(200).send({ fileURL })
+
+
+        // const params = {
+        //     Bucket: bucketName,
+        //     Key: fileName,
+        //     Expires: 60 * 60 * 3
+        // };
+        // const fileURL = await s3.getSignedUrl('getObject', params);
+        return res.status(200).send({ fileURL: process.env.CLOUDFRONT_URL + fileName });
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -73,13 +75,14 @@ exports.ThumbnailUrl = async (req, res) => {
 exports.AuthenticatedPresignedUrl = async (req, res) => {
     const { fileName } = req.query;
     try {
-        const fileURL = getSignedUrl({
-            url: process.env.CLOUDFRONT_URL + fileName,
-            dateLessThan: new Date(Date.now()) + 1000 * 60 * 5,
-            privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
-            keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID
-        })
-        return res.status(200).send({ fileURL })
+        const params = {
+            Bucket: bucketName,
+            Key: fileName,
+            Expires: 60 * 60 * 3
+        };
+        const fileURL = await s3.getSignedUrl('getObject', params);
+        return res.status(200).send({ fileURL });
+
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
         res.status(500).json({ error: 'Internal Server Error' });
