@@ -1,15 +1,31 @@
-
-
-
-.pagination{
+.pagination {
   /* border: 1px solid red; */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.filters{
+.filters {
   margin-top: 80px;
   margin-bottom: 0px;
   padding: 0px 5%;
+}
+
+@media screen and (max-width: 1020px) {
+  .filters{
+    padding: 0px 8%;
+  }
+}
+
+
+@media screen and (max-width: 720px) {
+  .filters{
+    padding: 0px 10%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .filters{
+    padding: 0px 15%;
+  }
 }

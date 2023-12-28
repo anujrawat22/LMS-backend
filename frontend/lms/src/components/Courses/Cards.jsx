@@ -42,6 +42,7 @@ export default function Courses() {
     };
 
     const handleSearchcourse = () => {
+        if(title === '') return;
         fetchData(1, title);
     }
 

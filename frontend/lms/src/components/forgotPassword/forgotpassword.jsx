@@ -62,6 +62,7 @@ export default function ForgetPassword() {
     const [open, setOpen] = useState(false);
     const [userEmail, setUserEmail] = useState('')
     const navigate = useNavigate();
+    const [otp, setOtp] = useState('')
     const [isOtpSend, setIssendOtp] = useState(false)
     const [isotpverified, setIsotpverified] = useState(false)
     const [Password, setpassword] = useState({
@@ -98,7 +99,7 @@ export default function ForgetPassword() {
     };
 
     const Otpverification = async (otp) => {
-        console.log(otp)
+        setOtp(otp)
         const loader = toast.loading("Verifying OTP")
         try {
             const payload = { enteredOTP: otp, email: userEmail }
@@ -140,7 +141,7 @@ export default function ForgetPassword() {
         }
 
         try {
-            const payload = { email: userEmail, newPassword: Password.newPassword }
+            const payload = { email: userEmail, newPassword: Password.newPassword, enteredOTP: otp }
             const response = await ResetPassword(payload)
             toast.success(response.data.msg)
             setTimeout(() => {
@@ -149,6 +150,8 @@ export default function ForgetPassword() {
         } catch (error) {
             setpasswordBtn(false)
             toast.error(error.response.data.error)
+        } finally {
+            setOtp('')
         }
     }
 

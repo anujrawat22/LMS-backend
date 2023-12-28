@@ -155,7 +155,7 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                     data.videos.length > 0 ?
                         data.videos.map((video) => {
                             return <div className={styles.VideoDiv} key={video._id}>
-                                <VideoComponent url={video.url} data={data}/>
+                                <VideoComponent url={video.url} data={data} sectionId={sectionId} courseId={courseId} />
                                 <Typography variant='h6'>
                                     {video.name}
                                 </Typography>

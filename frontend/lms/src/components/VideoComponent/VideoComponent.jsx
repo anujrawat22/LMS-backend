@@ -12,7 +12,6 @@ const VideoComponent = ({ url, data, sectionId, courseId }) => {
     const { userdata } = useAuth()
     const { token } = userdata
     const modifyVideos = async (url) => {
-
         if (isS3Video(url)) {
             try {
                 let response;
@@ -21,8 +20,8 @@ const VideoComponent = ({ url, data, sectionId, courseId }) => {
                 } else {
                     response = await AuthenticatePresignedUrl(url.replace(`${s3BucketUrl}/`, ''), token);
                 }
-                const videoBlob = await fetchAndRevokeBlob(response.data.fileURL);
-                setVideoUrl(videoBlob);
+                
+                setVideoUrl(response.data.fileURL);
             } catch (error) {
                 console.error('Error fetching presigned URL:', error);
                 setVideoUrl(null)
@@ -32,22 +31,16 @@ const VideoComponent = ({ url, data, sectionId, courseId }) => {
         }
     }
 
-    const fetchAndRevokeBlob = async (videoUrl) => {
-        return new Promise((resolve) => {
-            fetch(videoUrl)
-                .then((response) => response.blob())
-                .then((blob) => {
-                    const blobUrl = URL.createObjectURL(blob);
-                    resolve(blobUrl);
-                    // You may want to delay revoking the blob URL until after the video has loaded
-                    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000); // Delayed revocation after 5 seconds
-                })
-                .catch((error) => {
-                    console.error('Error fetching blob:', error);
-                    resolve(null);
-                });
-        });
-    };
+    // const fetchAndRevokeBlob = async (videoUrl) => {
+    //     return new Promise((resolve) => {
+    //         fetch(videoUrl)
+    //             .then((response) => console.log(response))
+    //             .catch((error) => {
+    //                 console.error('Error fetching blob:', error);
+    //                 resolve(null);
+    //             });
+    //     });
+    // };
 
 
 
@@ -65,7 +58,7 @@ const VideoComponent = ({ url, data, sectionId, courseId }) => {
     };
     return (
         <>
-            {videoUrl ? <ReactPlayer url={videoUrl} controls={true} config={playerConfig}></ReactPlayer> : null}
+            <ReactPlayer url={videoUrl} controls={true} config={playerConfig}></ReactPlayer>
         </>
     )
 }
