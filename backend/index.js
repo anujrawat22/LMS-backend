@@ -14,7 +14,7 @@ const { Authorize } = require('./middlewares/Authorization.middleware')
 const cookieParser = require('cookie-parser')
 
 app.use(express.json())
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: 'https://lms-backend-two.vercel.app/', credentials: true }));
 app.use(cookieParser())
 
 app.use("/api/users", UserRouter)
