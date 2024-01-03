@@ -1,8 +1,8 @@
 {
   "recurring": {
-    "domainUrl": "https://busy-ruby-dibbler-vest.cyclic.app/api",
+    "domainUrl": "http://localhost:8080/api",
     "s3BucketUrl": "https://lmstestbucket22.s3.ap-south-1.amazonaws.com",
-    "yourCloudFrontUrl" : "https://d1bhdk4epnq49c.cloudfront.net",
+    "yourCloudFrontUrl": "https://d1bhdk4epnq49c.cloudfront.net",
     "post": {
       "login": "users/login",
       "verifyOtp": "users/verify-otp",
@@ -12,13 +12,15 @@
       "sendEmail": "users/sendEmail",
       "approvalRequest": "users",
       "addCourse": "courses/create",
-      "autoLogin": "users/autoLogin",
+      "checkUserAuth": "users/checkAuth",
       "assignCourse": "usercourses/assign",
       "addstudentsCSV": "users/addstudents/importCsv",
       "addstudentManually": "users/addstudent",
       "addSection": "courses/addSection",
       "ImagePresignedUrl": "media/get-image-upload-url",
-      "videoPresignredUrl": "media/get-video-upload-url"
+      "videoPresignredUrl": "media/get-video-upload-url",
+      "logout": "users/logout",
+      "refreshAccessToken": "users/refresh/accessToken"
     },
     "get": {
       "allstudents": "users/all",
@@ -30,7 +32,8 @@
       "checkUserCourses": "users/check/UserCourse",
       "presignedUrl": "media/generate-preSigned-url",
       "presignedUrlAuthenticated": "media/generate-presigned-url-auth",
-      "thumbnail": "media/thumbnail"
+      "thumbnail": "media/thumbnail",
+      "allcoursesInfo": "courses/allcoursesInfo"
     },
     "delete": {
       "unassignCourse": "usercourses/unassign",

@@ -6,6 +6,6 @@ const URL = config.recurring.domainUrl;
 const endPoints = config.recurring.get.studentdetail;
 const api = `${URL}/${endPoints}`;
 
-export const studentDetailsbyId = (id, token) => {
-    return httpservice.get(`${api}/${id}`, { headers: { Authorization: `bearer ${token}` } })
+export const studentDetailsbyId = (id) => {
+    return httpservice.get(`${api}/${id}`, {  withCredentials : true  })
 }

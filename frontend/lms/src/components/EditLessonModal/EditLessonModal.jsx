@@ -129,9 +129,9 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
             try {
                 const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.videoPresignredUrl}?fileType=${fileType}`, {
                     method: "POST",
+                    credentials: 'include',
                     headers: {
-                        "Content-type": "Application/json",
-                        Authorization: `bearer ${token}`
+                        "Content-type": "Application/json"
                     }
                 })
                 const responseBody = await response.json();
@@ -218,9 +218,9 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
             try {
                 const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
                     method: "POST",
+                    credentials: 'include',
                     headers: {
-                        "Content-type": "application/json",
-                        Authorization: `bearer ${token}`
+                        "Content-type": "application/json"
                     }
                 })
                 const responseBody = await response.json();
@@ -265,9 +265,9 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
             try {
                 const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
                     method: "POST",
+                    credentials: 'include',
                     headers: {
-                        "Content-type": "application/json",
-                        Authorization: `bearer ${token}`
+                        "Content-type": "application/json"
                     }
                 })
                 const responseBody = await response.json();
@@ -364,7 +364,7 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
         const loader = toast.loading("Updating course")
         setHasChanges(false)
         try {
-            const response = await UpdateLesson(courseId, sectionId, { lesson: LessonData }, token)
+            const response = await UpdateLesson(courseId, sectionId, { lesson: LessonData })
             toast.dismiss(loader)
             toast.success(response.data.msg)
             fetchCourseData()

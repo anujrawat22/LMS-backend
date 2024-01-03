@@ -5,8 +5,8 @@ const URL = config.recurring.domainUrl;
 const endpoint = config.recurring.update.user_role_update
 const api = `${URL}/${endpoint}`
 
-export const UpdateUserRoleService = (role, userId, token) => {
+export const UpdateUserRoleService = (role, userId) => {
     return httpservice.patch(`${api}/${userId}`, {
         role
-    }, { headers: { Authorization: `bearer ${token}` } });
+    }, {  withCredentials : true });
 }

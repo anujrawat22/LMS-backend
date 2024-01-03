@@ -5,34 +5,37 @@ exports.allCourses = async (req, res) => {
     let { page, limit, title } = req.query
     try {
         page = parseInt(page) || 1
-        limit = parseInt(limit) || 10
+        limit = parseInt(limit) || 9
 
         const skip = (page - 1) * limit;
         const filter = {};
         if (title) {
-            console.log('hello')
-            filter.title = { $regex: new RegExp(title, 'i') }; // Case-insensitive search
+            filter.title = { $regex: new RegExp(title, 'i') }; 
         }
-        
+
         const courseData = await Course.find(filter).skip(skip).limit(limit).populate({
             path: 'createBy',
             select: 'name email avatar'
         })
 
-        const totalCount = await Course.countDocuments();
-
-
-
         res.status(200).send({
             msg: "Course Data", data: {
                 courses: courseData,
-                currentPage: page,
-                totalPages: Math.ceil(totalCount / limit)
             }
         })
     } catch (error) {
         console.log("Error fetching course data :", error)
         res.status(500).send({ error: "Server error" })
+    }
+}
+
+
+exports.allCoursesInfo = async (req, res) => {
+    try {
+        const courseData = await Course.find()
+        console.log(courseData)
+    } catch (error) {
+
     }
 }
 

@@ -2,7 +2,6 @@ import React from 'react'
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import bg from "../../assets/signin.svg";
-import bgimg from "../../assets/bgimg.jpg";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -50,8 +49,9 @@ const Login = () => {
         const loader = toast.loading("Signing In")
         try {
             const response = await UserLogin(formData)
-            const { username, role, token, avatar } = response.data;
-            login(token, username, role, avatar)
+            console.log(response )
+            const { name, role, avatar } = response.data.loggedInUser;
+            login( name, role, avatar)
             toast.dismiss(loader)
             toast.success("SignIn Successfull")
             if (role === 'superadmin' || role === 'admin') {
@@ -61,7 +61,7 @@ const Login = () => {
             }
         } catch (error) {
             toast.dismiss(loader)
-            toast.error(error.response.data.error)
+            toast.error(error)
         }
     }
 
@@ -173,7 +173,7 @@ const Login = () => {
                                                             minWidth: "170px",
                                                             backgroundColor: "#FF9A01",
                                                         }}
-                                                        onClick={handleSignin}
+
                                                     >
                                                         Sign in
                                                     </Button>

@@ -6,6 +6,6 @@ const endpoint = config.recurring.put.updateCourse;
 const api = `${URL}/${endpoint}`
 
 
-export const UpdateCourse = (courseId, payload, token) => {
-    return httpservice.put(`${api}/${courseId}`, payload, { headers: { Authorization: `bearer ${token}` } })
+export const UpdateCourse = (courseId, payload) => {
+    return httpservice.put(`${api}/${courseId}`, payload, {  withCredentials : true  })
 }

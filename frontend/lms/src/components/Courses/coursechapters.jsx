@@ -107,7 +107,7 @@ export default function CourseChapters() {
 
     const checkforUserCourse = async () => {
         try {
-            const response = await CheckUserCourses(id, token)
+            const response = await CheckUserCourses(id)
             setUserHasCourse(response.data.hasCourse)
         } catch (error) {
             console.log(error)
@@ -182,9 +182,9 @@ export default function CourseChapters() {
         });
     }
 
-    const handleUpdateCourse = async (id, data, token) => {
+    const handleUpdateCourse = async (id, data) => {
         try {
-            const response = await UpdateCourse(id, data, token)
+            const response = await UpdateCourse(id, data)
             toast.success(response.data.msg)
         } catch (error) {
             toast.error("Error updating course")
@@ -193,7 +193,7 @@ export default function CourseChapters() {
     }
 
     const UpdateCourseData = () => {
-        handleUpdateCourse(id, courseData, token)
+        handleUpdateCourse(id, courseData)
     }
 
     const debouncedNetworkRequest = useCallback(
@@ -257,9 +257,9 @@ export default function CourseChapters() {
         try {
             const res = await fetch(`${api}/${id}`, {
                 method: "PUT",
+                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
-                    'Authorization': `bearer ${token}`
                 }
             })
             const response = await res.json()
@@ -289,7 +289,7 @@ export default function CourseChapters() {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        const response = await DeleteSection(id, selectedSectionID, token)
+                        const response = await DeleteSection(id, selectedSectionID)
                         setCourseData(response.data.data)
                         toast.success(response.data.msg)
                     } catch (error) {
@@ -387,7 +387,7 @@ export default function CourseChapters() {
 
                 destinationSection.subsections.splice(destination.index, 0, movedLesson)
                 setCourseData({ ...courseData, sections: updatedSections })
-                handleUpdateCourse(id, courseData, token)
+                handleUpdateCourse(id, courseData)
             }
 
         }

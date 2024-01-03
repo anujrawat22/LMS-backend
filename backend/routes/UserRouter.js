@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const { login, signup, forgetPassword, resetPassword, verifyOTP, userDetails, userdetailsbyId, downloadCSV, sendEmail, updaterole, autoLogin, ImportCSV, addStudent,  checkUserCourse, deleteUser } = require('../controllers/UserController')
+const { login, signup, forgetPassword, resetPassword, verifyOTP, userDetails, userdetailsbyId, downloadCSV, sendEmail, updaterole, ImportCSV, addStudent, checkUserCourse, deleteUser, logout, checkAuth, refreshAccessToken } = require('../controllers/UserController')
 const { Authorize } = require('../middlewares/Authorization.middleware')
 const { Authenticate } = require('../middlewares/Authenticate.middleware')
 const multer = require('multer')
@@ -18,12 +18,15 @@ UserRouter.post("/verify-otp", verifyOTP)
 
 UserRouter.post("/reset-password", resetPassword)
 
+UserRouter.post("/refresh/accessToken", refreshAccessToken)
 
 UserRouter.use(Authenticate)
 
+UserRouter.post("/logout", logout)
+
 UserRouter.get("/check/UserCourse/:courseId", checkUserCourse)
 
-UserRouter.post("/autoLogin", autoLogin)
+UserRouter.post("/checkAuth", checkAuth)
 
 UserRouter.delete("/delete/:Id", Authorize(['admin', 'superadmin']), deleteUser)
 

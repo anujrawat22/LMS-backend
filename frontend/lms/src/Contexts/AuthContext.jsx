@@ -6,7 +6,6 @@ const AuthContext = createContext()
 const initialData = {
     username: localStorage.getItem('user') || "",
     role: localStorage.getItem('role') || "",
-    token: localStorage.getItem('token') || "",
     isAuthenticated: false,
     avatar: null
 }
@@ -14,12 +13,11 @@ const initialData = {
 
 export const AuthProvider = ({ children }) => {
     const [userdata, setUserData] = useState(initialData)
-    const login = (token, username, role, avatar) => {
-        localStorage.setItem('token', JSON.stringify(token))
+    const login = ( username, role, avatar) => {
         localStorage.setItem('user', JSON.stringify(username))
         localStorage.setItem('role', JSON.stringify(role))
         setUserData({
-            ...userdata, token: token, isAuthenticated: true, username: username, role: role, avatar: avatar
+            ...userdata,  isAuthenticated: true, username: username, role: role, avatar: avatar
         })
 
     }

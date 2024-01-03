@@ -1,67 +1,80 @@
 
-import { Grid } from '@mui/material';
 import './App.css';
 import AllRoutes from './components/AllRoutes';
 import AdminSideNavBar from './components/SideNavBar/sidenavbar';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './Contexts/AuthContext';
 import config from './config.json';
-
-
-
-
+import { checkUserAuth } from './services/checkUserAuth.service';
+import { useAuth } from './Contexts/AuthContext';
+import { handleUserLogout } from './services/logout';
 
 
 function App() {
   const navigate = useNavigate()
-  const { login, logout } = useAuth()
-  const { userdata } = useAuth()
-  const autoLogin = async (usertoken) => {
+  const { login } = useAuth()
+  const checkUserAuthentication = async () => {
     try {
-      const res = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.autoLogin}`, {
-        method: "Post",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${usertoken}`
+      const response = await checkUserAuth()
+      let res = await response.json()
+      if (response.status === 200) {
+        const { name, role, avatar } = res.loggedInUser;
+        login(name, role, avatar)
+        if (role === 'admin' || role === 'superadmin') {
+          navigate('/admin/dashboard')
+        } else {
+          navigate('/courses')
         }
-      }
-      )
-      const response = await res.json();
-      const { token, username, role, avatar } = response;
-      login(token, username, role, avatar)
-      if (role === 'admin' || role === 'superadmin') {
-        navigate("/admin/dashboard")
-      } else if (role === 'user') {
-        navigate("/courses")
+      } else if (response.status === 401) {
+        refreshToken()
+      } else {
+        await handleUserLogout()
       }
     } catch (error) {
-      console.log(error)
-      logout()
+      await handleUserLogout()
+    }
+  }
+
+  const refreshToken = async () => {
+    const api = `${config.recurring.domainUrl}/${config.recurring.post.refreshAccessToken}`
+    try {
+      const res = await fetch(api, {
+        method: "POST",
+        credentials: 'include',
+        headers: {
+          'Content-type': "Application/json"
+        }
+      })
+      const response = await res.json()
+      console.log(response)
+      if (res.status === 200) {
+        const { name, role, avatar } = response.loggedInUser;
+        login(name, role, avatar)
+        if (role === 'admin' || role === 'superadmin') {
+          navigate('/admin/dashboard')
+        } else {
+          navigate('/courses')
+        }
+      }
+    } catch (error) {
     }
   }
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token && token !== 'undefined') {
-      autoLogin(JSON.parse(token))
-    } else {
-      logout()
-        navigate("/courses")
-    }
+    checkUserAuthentication()
   }, [])
 
   useEffect(() => {
     const handleContextMenu = (e) => {
       e.preventDefault();
     };
-
     document.addEventListener('contextmenu', handleContextMenu);
 
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu);
     };
   }, []);
+  
   return (
     <>
       <div style={{

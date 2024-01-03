@@ -43,13 +43,13 @@ exports.PresignedUrl = async (req, res) => {
 
 
 
-        // const params = {
-        //     Bucket: bucketName,
-        //     Key: fileName,
-        //     Expires: 60 * 60 * 3
-        // };
-        // const fileURL = await s3.getSignedUrl('getObject', params);
-        return res.status(200).send({ fileURL: process.env.CLOUDFRONT_URL + fileName });
+        const params = {
+            Bucket: bucketName,
+            Key: fileName,
+            Expires: 60 * 60 * 3
+        };
+        const fileURL = await s3.getSignedUrl('getObject', params);
+        return res.status(200).send({ fileURL });
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -82,7 +82,6 @@ exports.AuthenticatedPresignedUrl = async (req, res) => {
         };
         const fileURL = await s3.getSignedUrl('getObject', params);
         return res.status(200).send({ fileURL });
-
     } catch (error) {
         console.error('Error generating pre-signed URL:', error);
         res.status(500).json({ error: 'Internal Server Error' });

@@ -23,7 +23,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import styles from './sidenavbar.module.css';
 import { useNavigate } from 'react-router-dom';
-import LoginIcon from '@mui/icons-material/Login';
+import { handleUserLogout } from '../../services/logout';
 const drawerWidth = 240;
 
 
@@ -60,11 +60,20 @@ export default function AdminSideNavBar() {
         setAnchorElUser(event.currentTarget);
     };
 
-
+    const handleNavigatetoHome = () => {
+        navigate('/courses')
+    }
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
+
+    const handleLogout = () => {
+        handleCloseUserMenu()
+        handleUserLogout()
+        logout()
+        navigate('/login')
+    }
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -85,6 +94,10 @@ export default function AdminSideNavBar() {
                                 className={styles.Logo}
                                 src='https://drive.google.com/uc?export=view&id=1WEptUger6Bqs1OHLN9znAqtF06x9OJRk'
                                 alt="CEOITBOX"
+                                onClick={handleNavigatetoHome}
+                                style={{
+                                    cursor: 'pointer'
+                                }}
                             />
                         </Typography>
                         <Typography
@@ -95,7 +108,6 @@ export default function AdminSideNavBar() {
                             sx={{ flexGrow: 1, textAlign: "center" }}
                             className={styles.WebsiteTitle}
                         >
-                            LMS
                         </Typography>
                         {
                             userdata.isAuthenticated ?
@@ -128,11 +140,7 @@ export default function AdminSideNavBar() {
                                         </MenuItem>
                                         {settings.map((setting) => (
                                             setting === 'Logout' ?
-                                                <MenuItem key={setting} onClick={() => {
-                                                    handleCloseUserMenu()
-                                                    logout()
-                                                    navigate('/login')
-                                                }}>
+                                                <MenuItem key={setting} onClick={handleLogout}>
                                                     <Typography textAlign="center">{setting}</Typography>
                                                 </MenuItem> : <MenuItem key={setting} onClick={handleCloseUserMenu}>
                                                     <Typography textAlign="center">{setting}</Typography>
@@ -237,8 +245,6 @@ function TemporaryDrawer({ open, setOpen }) {
 }
 
 function GuestDrawer({ open, setOpen }) {
-    const { userdata } = useAuth()
-    const { role, isAuthenticated } = userdata;
     const list = () => (
         <Box sx={{
             padding: '60px 0px',

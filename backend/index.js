@@ -14,9 +14,7 @@ const { Authorize } = require('./middlewares/Authorization.middleware')
 const cookieParser = require('cookie-parser')
 
 app.use(express.json())
-app.use(cors({
-    origin: "*"
-}))
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(cookieParser())
 
 app.use("/api/users", UserRouter)
@@ -26,6 +24,8 @@ app.use("/api/courses", CourseRouter)
 app.use("/api/media", MediaRouter)
 
 app.use("/api/usercourses", Authenticate, Authorize(['admin', 'superadmin']), UserCourseRouter)
+
+
 
 app.listen(port, async () => {
     try {

@@ -23,17 +23,37 @@ exports.signup = async (req, res) => {
         if (findexistingUser) {
             return res.status(401).send({ error: "User with this email Id already exists" })
         }
-        bcrypt.hash(password, saltRounds, async (err, hash) => {
-            if (err) {
-                return res.status(500).send({ error: "Something went wrong" })
-            }
-            const user = new User({ name, email, password: hash, role, joined: new Date })
-            await user.save()
-            res.status(201).send({ msg: "Signup Successful" })
+
+        const user = await User.create({
+            name,
+            email,
+            password
+        })
+
+        const createdUser = await User.findById(user._id).select("-password -refresToken")
+        if (!createdUser) {
+            return res.status(500).send({ error: "Something went wrong while registering the user" })
+        }
+        res.status(201).json({
+            msg: "User registered Successfully"
         })
     } catch (error) {
         console.log("Error signing up :", error);
         res.status(500).send({ error: "Server error " })
+    }
+}
+
+const generateAccessAndRefereshTokens = async (userId) => {
+    try {
+        const user = await User.findById(userId)
+
+        const accessToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
+        user.refreshToken = refreshToken
+        await user.save({ validateBeforeSave: false })
+        return { accessToken, refreshToken }
+    } catch (error) {
+        throw new Error(500, "Something went wrong while generating referesh and access token:", error)
     }
 }
 
@@ -50,26 +70,31 @@ exports.login = async (req, res) => {
         if (!user) {
             return res.status(404).send({ error: "User doesn't exist , Please signup" })
         }
-        const hashedPassword = user.password
-        bcrypt.compare(password, hashedPassword, async (err, result) => {
-            if (err) {
-                return res.status(500).send({ error: "Something went wrong" })
-            }
-            if (result) {
-                const options = {
-                    expiresIn: 1000 * 60 * 15
-                }
-                const token = jwt.sign({ id: user._id, role: user.role }, secretKey, { expiresIn: "7d" })
-                res.cookie('token', token, options)
-                user.lastLogin = new Date;
-                await user.save();
-                return res.status(200).send({ msg: "Login successful", username: user.name, token, role: user.role, avatar: user.avatar })
-            } else {
-                return res.status(400).send({
-                    error: "Invalid credentials"
-                })
-            }
-        })
+        const isPasswordValid = await user.isPasswordCorrect(password)
+
+        if (!isPasswordValid) {
+            return res.status(401).send({ error: "Invalid Credentials" })
+        }
+
+        const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id)
+
+        const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+
+       
+        const options = {
+            httponly: true,
+            secure: true
+        }
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json({
+                msg: "Login Successfull",
+                loggedInUser
+            })
     } catch (error) {
         console.log("Error in logging In :", error)
         res.status(500).send({ error: "Server error" })
@@ -77,6 +102,73 @@ exports.login = async (req, res) => {
     }
 }
 
+
+exports.logout = async (req, res) => {
+    const id = req.userId;
+    try {
+        await User.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    refreshToken: undefined
+                }
+            },
+            {
+                new: true
+            }
+        )
+        return res
+            .status(200)
+            .clearCookie('accessToken')
+            .clearCookie('refreshToken')
+            .send({ msg: "User logged Out" })
+    } catch (error) {
+        console.log("Error logging out user:", error)
+        res.status(500).send({ error: 'Server error' })
+    }
+}
+
+exports.refreshAccessToken = async (req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken;
+    if (!incomingRefreshToken) {
+        return res.status(401).send({ error: "Unauthorized request" })
+    }
+
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+
+
+        const user = await User.findById(decodedToken?._id)
+
+
+        if (!user) {
+            return res.status(401).send({ error: "Invalid refresh token" })
+        }
+
+        if (incomingRefreshToken !== user?.refreshToken) {
+            return res.status(401).send({ error: "Refresh token is expired or used" })
+        }
+
+        const options = {
+            httponly: true,
+            secure: true
+        }
+
+        const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id)
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .send({
+                msg: "Access token refreshed",
+                loggedInUser: user
+            })
+    } catch (error) {
+        console.log("Refresh Token error :", error)
+        res.status(401).send({ error: error?.message || "Invalid refresh token" })
+    }
+}
 
 exports.forgetPassword = async (req, res) => {
     const { email } = req.body;
@@ -94,7 +186,7 @@ exports.forgetPassword = async (req, res) => {
         setTimeout(() => {
             delete otps[email];
             console.log(`Deleted OTP for email: ${email}`);
-        }, 600000);
+        }, 1000000);
 
         res.status(200).send({ msg: `Otp sent to ${email}` })
     } catch (error) {
@@ -129,16 +221,9 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).send({ error: "Invalid OTP" })
         }
         delete otps[email]
-        bcrypt.hash(newPassword, 5, async (err, hash) => {
-            if (err) {
-                return res.status(400).send({ error: "Something went wrong" })
-            }
-            if (hash) {
-                user.password = hash;
-                await user.save();
-                res.status(200).send({ msg: "Password Changed" })
-            }
-        })
+        user.password = newPassword;
+        await user.save()
+        res.status(200).send({ msg: "Password changed successfully" })
     } catch (error) {
         console.log("Error changing password :", error)
         res.status(500).send({ error: "Server error" })
@@ -475,19 +560,14 @@ exports.updaterole = async (req, res) => {
     }
 }
 
-exports.autoLogin = async (req, res) => {
+exports.checkAuth = async (req, res) => {
     const userId = req.userId;
     try {
-        const user = await User.findById(userId)
+        const user = await User.findById(userId).select("-password -refreshToken")
         if (!user) {
-            return res.status(404).send({ error: "User doesn't exist" })
+            return res.status(404).send({ error: "User not found" })
         }
-        const options = {
-            expiresIn: 1000 * 60 * 15
-        }
-        const token = jwt.sign({ id: user._id, role: user.role }, secretKey, { expiresIn: "7d" })
-        res.cookie('token', token, options)
-        return res.status(200).send({ msg: "Login successful", username: user.name, token, role: user.role, avatar: user.avatar })
+        return res.status(200).send({ msg: "User is authenticated", loggedInUser: user })
     }
     catch (error) {
         console.log("Error in auto login :", error)

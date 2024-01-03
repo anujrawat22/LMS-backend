@@ -5,7 +5,7 @@ const URL = config.recurring.domainUrl;
 const endpoint = config.recurring.delete.deleteMedia;
 const api = `${URL}/${endpoint}`;
 
-export const DeleteMedia = (Key, type, token) => {
+export const DeleteMedia = (Key, type) => {
     console.log(Key)
-    return httpservice.delete(`${api}?Key=${Key}&folder=${type}`, { headers: { Authorization: `bearer ${token}` } })
+    return httpservice.delete(`${api}?Key=${Key}&folder=${type}`, {  withCredentials : true  })
 }

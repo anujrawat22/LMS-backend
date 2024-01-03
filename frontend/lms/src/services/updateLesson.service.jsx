@@ -5,6 +5,6 @@ const Url = config.recurring.domainUrl;
 const endpoint = config.recurring.update.updateLesson;
 const api = `${Url}/${endpoint}`
 
-export const UpdateLesson = (courseId, sectionId, lesson, token) => {
-    return httpservice.patch(`${api}/${courseId}/${sectionId}`, lesson, { headers: { Authorization: `bearer ${token}` } })
+export const UpdateLesson = (courseId, sectionId, lesson) => {
+    return httpservice.patch(`${api}/${courseId}/${sectionId}`, lesson, {  withCredentials : true  })
 }

@@ -1,11 +1,13 @@
 const { Router } = require("express")
-const { allCourses, updateCourse, deleteCourse, CoursebyId, CreateCourse, updateLesson, addNewSection, deleteLesson, deleteSection } = require("../controllers/CourseController")
+const { allCourses, updateCourse, deleteCourse, CoursebyId, CreateCourse, updateLesson, addNewSection, deleteLesson, deleteSection, allCoursesInfo } = require("../controllers/CourseController")
 const { Authorize } = require("../middlewares/Authorization.middleware")
 const { Authenticate } = require("../middlewares/Authenticate.middleware")
 
 CourseRouter = Router()
 
 CourseRouter.get("/all", allCourses)
+
+CourseRouter.get("/allcoursesInfo", allCoursesInfo)
 
 CourseRouter.get("/:id", CoursebyId)
 

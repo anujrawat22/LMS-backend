@@ -7,8 +7,6 @@ const api = `${URL}/${endpoints}`;
 
 export const ApprovalRequest = ({ value, id, token }) => {
     const newapi = `${api}/${value}/${id}`
-    const config = {
-        headers: { Authorization: `Bearer ${token}` }
-    };
-    return httpservice.post(newapi, config)
+
+    return httpservice.post(newapi, { withCredentials: true })
 }

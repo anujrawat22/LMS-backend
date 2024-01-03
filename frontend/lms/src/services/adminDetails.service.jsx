@@ -6,6 +6,6 @@ const endpoints = config.recurring.get.adminDetails;
 const api = `${URL}/${endpoints}`;
 
 
-export const AdminDetails = (token) => {
-    return httpservice.get(api, { headers: { Authorization: `bearer ${token}` } })
+export const AdminDetails = () => {
+    return httpservice.get(api, {  withCredentials : true   })
 }

@@ -17,11 +17,10 @@ const AllRoutes = () => {
     return (
         <>
             <Routes>
+                <Route path='/courses' element={<Courses />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/signup' element={<Signup />} />
                 <Route path='/forgot' element={<ForgetPassword />} />
-
-                <Route path='/courses' element={<Courses />} />
                 <Route path='/CourseDetails/:id/section/:sectionId/lesson/:lessonId' element={<CourseDetails />} />
                 <Route path='/chapters/:id' element={<CourseChapters />} />
                 <Route element={<ProtectedRoute roles={['admin', 'superadmin']} />}>

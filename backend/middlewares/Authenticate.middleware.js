@@ -1,20 +1,22 @@
 const jwt = require('jsonwebtoken')
-const secretKey = process.env.SECRET_KEY
 
 
 const Authenticate = (req, res, next) => {
-
-    const token = req.headers?.authorization?.split(" ")[1]
+    const token = req.cookies.accessToken || req.headers?.authorization?.split(" ")[1]
     try {
         if (!token) {
             return res.status(401).send({ error: "Unauthorized" })
         }
-        jwt.verify(token, secretKey, (err, decoded) => {
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
             if (err) {
+                if (err.message === 'jwt expired') {
+                    return res.status(401).send({ error: "Token expired" })
+                }
                 return res.status(400).send({ error: "Something went wrong" })
             }
             if (decoded) {
-                req.userId = decoded.id;
+                req.userId = decoded._id;
                 req.role = decoded.role;
                 next()
             } else {
