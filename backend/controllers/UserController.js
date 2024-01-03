@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt')
 const saltRounds = 5
 const jwt = require('jsonwebtoken');
 const { sendEmail } = require("../services/nodemailer");
-const secretKey = process.env.SECRET_KEY;
 const otps = {};
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
