@@ -15,11 +15,9 @@ const cookieParser = require('cookie-parser')
 
 app.use(express.json())
 app.use(cors({ origin: 'https://lms-backend-two.vercel.app', credentials: true }));
+
 app.use(cookieParser())
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "https://lms-backend-two.vercel.app")
-  }) 
 
 app.use("/api/users", UserRouter)
 
