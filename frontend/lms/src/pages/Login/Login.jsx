@@ -49,19 +49,20 @@ const Login = () => {
         const loader = toast.loading("Signing In")
         try {
             const response = await UserLogin(formData)
-            console.log(response )
-            const { name, role, avatar } = response.data.loggedInUser;
-            login( name, role, avatar)
-            toast.dismiss(loader)
-            toast.success("SignIn Successfull")
-            if (role === 'superadmin' || role === 'admin') {
-                navigate('/admin/dashboard')
-            } else if (role === 'user') {
-                navigate('/courses')
-            }
+            if (response.status === 200) {
+                const { name, role, avatar } = response.data.loggedInUser;
+                login(name, role, avatar)
+                toast.dismiss(loader)
+                toast.success("SignIn Successfull")
+                if (role === 'superadmin' || role === 'admin') {
+                    navigate('/admin/dashboard')
+                } else if (role === 'user') {
+                    navigate('/courses')
+                }
+            } 
         } catch (error) {
             toast.dismiss(loader)
-            toast.error(error)
+            toast.error(error.response.data.error)
         }
     }
 

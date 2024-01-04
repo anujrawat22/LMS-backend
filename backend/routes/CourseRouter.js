@@ -15,7 +15,10 @@ CourseRouter.use(Authenticate)
 
 CourseRouter.post("/create", CreateCourse)
 
+
+
 CourseRouter.use(Authorize(['admin', 'superadmin']))
+
 
 CourseRouter.put("/update/:id", updateCourse)
 

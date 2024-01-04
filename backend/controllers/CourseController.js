@@ -10,7 +10,7 @@ exports.allCourses = async (req, res) => {
         const skip = (page - 1) * limit;
         const filter = {};
         if (title) {
-            filter.title = { $regex: new RegExp(title, 'i') }; 
+            filter.title = { $regex: new RegExp(title, 'i') };
         }
 
         const courseData = await Course.find(filter).skip(skip).limit(limit).populate({
@@ -32,10 +32,10 @@ exports.allCourses = async (req, res) => {
 
 exports.allCoursesInfo = async (req, res) => {
     try {
-        const courseData = await Course.find()
-        console.log(courseData)
+        const courseData = await Course.find().select("_id title")
+        res.status(200).send({ data: courseData })
     } catch (error) {
-
+        res.status(500).send({ error: "Server error" })
     }
 }
 

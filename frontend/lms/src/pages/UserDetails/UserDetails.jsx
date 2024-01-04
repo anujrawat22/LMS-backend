@@ -10,6 +10,7 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { UnassignCourse } from '../../services/unAssignCourse.service';
 import Avatar from '@mui/material/Avatar';
+import { allcoursesInfo } from '../../services/allcourseInfo.service';
 
 
 
@@ -34,8 +35,8 @@ const UserDetails = () => {
 
     const fetchCourseData = async () => {
         try {
-            const response = await getCourseData()
-            const data = response.data.data.courses
+            const response = await allcoursesInfo()
+            const data = response.data.data
             setCourseData(data)
         } catch (error) {
             console.log(error);
@@ -57,9 +58,9 @@ const UserDetails = () => {
         try {
             const res = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.assignCourse}/${id}/${assignCourseId._id}`, {
                 method: "POST",
+                credentials : 'include',
                 headers: {
-                    "content-type": 'applications/json',
-                    Authorization: `bearer ${token}`
+                    "content-type": 'applications/json'
                 }
             })
             const response = await res.json()
@@ -78,7 +79,7 @@ const UserDetails = () => {
     }
 
 
-    const handleUnassignCourse = async (courseId) => {
+  const handleUnassignCourse = async (courseId) => {
         const loader = toast.loading("Unassigning Course")
         try {
             const response = await UnassignCourse(id, courseId, token)

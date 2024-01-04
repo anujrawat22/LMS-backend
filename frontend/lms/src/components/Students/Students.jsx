@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './Students.module.css';
 import { studentsData } from '../../services/studentdata.service';
 import { Autocomplete, Box, Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, Grid, IconButton, MenuItem, Paper, Select, TextField, Typography, DialogContentText, Tooltip } from '@mui/material';
-import { Link, useNavigate ,redirect } from 'react-router-dom';
+import { Link, useNavigate, redirect } from 'react-router-dom';
 import { CSVDownload } from '../../services/csvDownload.service';
 import { sendEmail } from '../../services/sendEmail.service';
 import toast, { Toaster } from 'react-hot-toast';
@@ -26,6 +26,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import Swal from 'sweetalert2';
 import Slide from '@mui/material/Slide';
 import Backdrop from '@mui/material/Backdrop';
+import { allcoursesInfo } from '../../services/allcourseInfo.service';
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -139,8 +140,8 @@ const Students = () => {
 
     const fetchCourseData = async () => {
         try {
-            const response = await getCourseData()
-            setCoursedata(response.data.data)
+            const response = await allcoursesInfo()
+            setCoursedata({ courses: response.data.data })
         } catch (error) {
         }
     }
@@ -705,9 +706,6 @@ const SendMailDialogSlide = ({ open, setOpen, handlesendEmail }) => {
                 keepMounted
                 onClose={handleClose}
                 aria-describedby="alert-dialog-slide-description"
-                sx={{
-                    border: '1px solid red'
-                }}
             >
                 <DialogTitle>{"Send Email to selected students"}</DialogTitle>
                 <DialogContent className={styles.EmailDialogContent}>

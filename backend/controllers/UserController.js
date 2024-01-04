@@ -82,7 +82,7 @@ exports.login = async (req, res) => {
 
        
         const options = {
-            httponly: true,
+            httpOnly : true,
             secure: true
         }
 
@@ -149,11 +149,12 @@ exports.refreshAccessToken = async (req, res) => {
         }
 
         const options = {
-            httponly: true,
+            httpOnly : true,
             secure: true
         }
 
         const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id)
+
 
         return res
             .status(200)
