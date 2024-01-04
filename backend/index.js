@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path');
 const { connection } = require('./config/db')
 const { UserRouter } = require('./routes/UserRouter')
 const { Authenticate } = require('./middlewares/Authenticate.middleware')
@@ -14,10 +15,8 @@ const { Authorize } = require('./middlewares/Authorization.middleware')
 const cookieParser = require('cookie-parser')
 
 app.use(express.json())
-app.use(cors({ origin: 'https://lms-backend-two.vercel.app', credentials: true }));
-
+app.use(cors());
 app.use(cookieParser())
-
 
 app.use("/api/users", UserRouter)
 
@@ -27,6 +26,11 @@ app.use("/api/media", MediaRouter)
 
 app.use("/api/usercourses", Authenticate, Authorize(['admin', 'superadmin']), UserCourseRouter)
 
+app.use(express.static(path.join(__dirname, '../frontend/lms/build')));
+
+app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../frontend/lms/build/index.html'));
+});
 
 
 app.listen(port, async () => {
