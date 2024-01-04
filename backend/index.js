@@ -17,6 +17,11 @@ app.use(express.json())
 app.use(cors({ origin: 'https://lms-backend-two.vercel.app', credentials: true }));
 app.use(cookieParser())
 
+app.use(async (req, res) => {
+    res.header('Access-Control-Allow-Origin', 'https://lms-backend-two.vercel.app');
+    res.header('Access-Control-Allow-Credentials', true);
+})
+
 app.use("/api/users", UserRouter)
 
 app.use("/api/courses", CourseRouter)
