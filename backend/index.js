@@ -16,8 +16,7 @@ const cookieParser = require('cookie-parser')
 app.use(express.json())
 
 const corsOptions = {
-    origin: process.env.DOMAIN,
-    credentials: true,
+    credentials: true
 };
 app.use(cors(corsOptions));
 
