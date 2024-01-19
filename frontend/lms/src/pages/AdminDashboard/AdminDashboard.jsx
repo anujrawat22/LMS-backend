@@ -1,15 +1,10 @@
 
 import * as React from 'react';
-import { styled} from '@mui/material/styles';
-import MuiDrawer from '@mui/material/Drawer';
-import MuiAppBar from '@mui/material/AppBar';
 
 import Students from '../../components/Students/Students';
 
 import { Grid } from '@mui/material';
 
-
-const drawerWidth = 240;
 
 
 export default function AdminDashboard() {

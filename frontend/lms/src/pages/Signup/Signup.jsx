@@ -3,7 +3,6 @@ import React from 'react'
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import bg from "../../assets/signin.svg";
-import bgimg from "../../assets/bgimg.jpg";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -16,6 +15,7 @@ import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { UserSignup } from "../../services/signup.service";
 import styles from './Signup.module.css'
+import EmailModal from '../../components/EmailModal/EmailModal';
 
 const darkTheme = createTheme({
     palette: {
@@ -23,16 +23,6 @@ const darkTheme = createTheme({
     },
 });
 
-const boxstyle = {
-    position: "absolute",
-    top: "50%",
-    left: "52.5%",
-    transform: "translate(-50%, -50%)",
-    width: "75%",
-    height: "70%",
-    bgcolor: "background.paper",
-    boxShadow: 24,
-};
 
 const center = {
     position: "relative",
@@ -45,13 +35,11 @@ const center = {
 };
 const Signup = () => {
     const navigate = useNavigate();
-    const [confirmPassword, setConfirmPassword] = useState('')
     const [formData, setFromData] = useState({
         name: '',
         email: '',
-        password: ''
     })
-
+    const [open, setOpen] = useState(false);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFromData({ ...formData, [name]: value })
@@ -59,20 +47,12 @@ const Signup = () => {
     const handleSubmit = async (event) => {
 
         event.preventDefault();
-        if (formData.password.length < 8) {
-            return toast.error("Password should contain at least 8 Characters")
-        }
-
-        if (confirmPassword !== formData.password) {
-            return toast.error("Password does not match")
-        }
 
         const loader = toast.loading("Registering user")
         try {
             const response = await UserSignup({ ...formData, role: 'user' })
             toast.dismiss(loader)
             toast.success(response.data.msg)
-            navigate("/login")
         } catch (error) {
             toast.dismiss(loader)
             return toast.error(error.response.data.error)
@@ -154,32 +134,7 @@ const Signup = () => {
                                                             onChange={handleChange}
                                                         />
                                                     </Grid>
-                                                    <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }}>
-                                                        <TextField
-                                                            required
-                                                            fullWidth
-                                                            name="password"
-                                                            label="Password"
-                                                            type="password"
-                                                            id="password"
-                                                            autoComplete="new-password"
-                                                            value={formData.password}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }}>
-                                                        <TextField
-                                                            required
-                                                            fullWidth
-                                                            name="confirmpassword"
-                                                            label="Confirm Password"
-                                                            type="password"
-                                                            id="confirmpassword"
-                                                            autoComplete="new-password"
-                                                            value={confirmPassword}
-                                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                                        />
-                                                    </Grid>
+
                                                     <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }}>
                                                         <Button
                                                             type="submit"
@@ -198,13 +153,25 @@ const Signup = () => {
                                                             Register
                                                         </Button>
                                                     </Grid>
+
                                                     <Grid item xs={12}>
                                                         <Grid container justifyContent="flex-end">
-                                                            <Grid item xs={12} sm={12} md={12} lg={12} sx={{ display: "flex", ml: "2em", mr: "2em", mt: "1em"}} >
-                                                            Already have an account?
+                                                            <Grid item xs={12} sm={12} md={12} lg={12} sx={{ display: "flex", ml: "2em", mr: "2em", mt: "1em" }} >
+                                                                Already have an account?
                                                                 <Link href="#" variant="body3" to="/login" style={{ color: "white" }}>
-                                                                     Sign in
+                                                                    Sign in
                                                                 </Link>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <Grid container justifyContent="flex-end">
+                                                            <Grid item xs={12} sm={12} md={12} lg={12} sx={{ display: "flex", ml: "2em", mr: "2em", mt: "1em" }} >
+
+                                                                <Button sx={{
+                                                                    color: 'white'
+                                                                }}
+                                                                    onClick={() => setOpen(true)}>Verify Email</Button>
                                                             </Grid>
                                                         </Grid>
                                                     </Grid>
@@ -218,6 +185,9 @@ const Signup = () => {
                     </Grid>
                 </Box>
             </div>
+            {
+                open ? <EmailModal open={open} setOpen={setOpen} /> : null
+            }
         </>
     )
 }

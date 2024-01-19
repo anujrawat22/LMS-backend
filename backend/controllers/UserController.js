@@ -7,17 +7,27 @@ const { sendEmail } = require("../services/nodemailer");
 const otps = {};
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
-const fs = require('fs');
 const { createObjectCsvWriter } = require('csv-writer');
 const { Course } = require("../models/CourseModel");
+const { generateVerificationToken } = require("../services/verificationToken");
+const fs = require('fs');
+const path = require('path');
+const emailTemplatePath = path.join(__dirname, '..', 'email-templates', 'verificationEmailTemplate.html');
+const LoginOTPTemplatePath = path.join(__dirname, '..', 'email-templates', 'LoginOTPTemplate.html')
+const otpGenerator = require('otp-generator')
+
 
 exports.signup = async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email } = req.body;
     try {
-        if (!name || !email || !password) {
+        if (!name || !email) {
             return res.status(400).send({ error: "Please provide all user details" })
         }
         const findexistingUser = await User.findOne({ email })
+
+        if (findexistingUser && findexistingUser.isVerified === false) {
+            return res.status(401).send({ error: "Already registered , Please verify email to proceed" })
+        }
 
         if (findexistingUser) {
             return res.status(401).send({ error: "User with this email Id already exists" })
@@ -26,19 +36,89 @@ exports.signup = async (req, res) => {
         const user = await User.create({
             name,
             email,
-            password
+            role: 'user',
+            isVerified: false
         })
 
-        const createdUser = await User.findById(user._id).select("-password -refresToken")
+        const verificationToken = generateVerificationToken(user._id)
+
+        user.verificationToken = verificationToken
+        await user.save()
+
+        const verificationLink = `${process.env.DOMAIN_URL}/api/users/verify/${verificationToken}`;
+
+        const emailTemplate = fs.readFileSync(emailTemplatePath, 'utf-8');
+
+        const emailBody = emailTemplate
+            .replace('{userName}', user.name)
+            .replace('{verificationLink}', verificationLink);
+
+        await sendEmail(email, 'Email Verification', emailBody)
+
+        const createdUser = await User.findById(user._id).select("-refreshToken")
         if (!createdUser) {
             return res.status(500).send({ error: "Something went wrong while registering the user" })
         }
         res.status(201).json({
-            msg: "User registered Successfully"
+            msg: `Verification email send to ${user.email} , Please verify to continue`
         })
     } catch (error) {
         console.log("Error signing up :", error);
         res.status(500).send({ error: "Server error " })
+    }
+}
+
+exports.verifyUser = async (req, res) => {
+    const { token } = req.params;
+    try {
+        jwt.verify(token, process.env.VERIFICATION_TOKEN_KEY, async (err, decoded) => {
+            if (err) {
+                res.status(500).send({ error: 'Something went wrong' })
+            }
+
+            if (decoded) {
+                const userId = decoded.userId
+                const user = await User.findById(userId)
+                user.isVerified = true;
+                await user.save()
+                const loginPageURL = `${process.env.DOMAIN_URL}/login`
+                res.redirect(loginPageURL);
+            } else {
+                res.status(500).send({ error: "Something went wrong" })
+            }
+        })
+    } catch (error) {
+        console.log("Error is verifying user :", error)
+        res.status(500).send({ error: "Internal server error" })
+    }
+}
+
+exports.SendVerificationEmail = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email })
+
+        if (!user) {
+            return res.status(404).send({ error: 'User does not exist, Please Signup' })
+        }
+
+        const verificationToken = generateVerificationToken(user._id)
+        user.verificationToken = verificationToken;
+        await user.save()
+
+        const verificationLink = `${process.env.DOMAIN_URL}/api/users/verify/${verificationToken}`;
+
+        const emailTemplate = fs.readFileSync(emailTemplatePath, 'utf-8');
+
+        const emailBody = emailTemplate
+            .replace('{userName}', user.name)
+            .replace('{verificationLink}', verificationLink);
+        await sendEmail(email, 'Email Verification', emailBody)
+
+        res.status(200).send({ msg: 'Verification email sent to user email Id' })
+    } catch (error) {
+        console.log("Error sending user verification email:", error)
+        res.status(500).send({ error: 'Internal Server error' })
     }
 }
 
@@ -58,10 +138,10 @@ const generateAccessAndRefereshTokens = async (userId) => {
 
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, otp } = req.body;
     try {
-        if (!email || !password) {
-            return res.status(401).send({ error: "Please provide the required fields" })
+        if (!email || !otp) {
+            return res.status(401).send({ error: "Please fill required fields" })
         }
 
         const user = await User.findOne({ email })
@@ -69,20 +149,24 @@ exports.login = async (req, res) => {
         if (!user) {
             return res.status(404).send({ error: "User doesn't exist , Please signup" })
         }
-        const isPasswordValid = await user.isPasswordCorrect(password)
 
-        if (!isPasswordValid) {
-            return res.status(401).send({ error: "Invalid Credentials" })
+        if (user.otp.code !== otp) {
+            return res.status(401).send({ error: "Invalid OTP" });
         }
 
+        if (user.otp.expiry < new Date()) {
+            return res.status(401).send({ error: "OTP Expired" })
+        }
+
+        user.otp = {};
+        await user.save();
         const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id)
 
-        const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+        const loggedInUser = await User.findById(user._id).select("-refreshToken")
 
 
-       
         const options = {
-            httpOnly : true,
+            httpOnly: true,
             secure: true
         }
 
@@ -97,7 +181,39 @@ exports.login = async (req, res) => {
     } catch (error) {
         console.log("Error in logging In :", error)
         res.status(500).send({ error: "Server error" })
+    }
+}
 
+exports.GenerateLoginOTP = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const otpCode = generateOTP()
+
+        user.otp = {
+            code: otpCode,
+            expiry: new Date(Date.now() + 5 * 60 * 1000), // OTP is valid for 5 minutes
+        };
+
+        await user.save();
+
+        const emailTemplate = fs.readFileSync(LoginOTPTemplatePath, 'utf-8')
+
+        const emailBody = emailTemplate
+            .replace('{userName}', user.name)
+            .replace('{otpCode}', otpCode);
+
+        await sendEmail(email, 'Login OTP', emailBody)
+
+        res.status(200).send({ msg: `OTP send to ${email}` })
+    } catch (error) {
+        console.log("Error in sending otp :", error)
+        res.status(500).send({ error: 'Internal Server Error' })
     }
 }
 
@@ -149,7 +265,7 @@ exports.refreshAccessToken = async (req, res) => {
         }
 
         const options = {
-            httpOnly : true,
+            httpOnly: true,
             secure: true
         }
 
@@ -170,146 +286,50 @@ exports.refreshAccessToken = async (req, res) => {
     }
 }
 
-exports.forgetPassword = async (req, res) => {
-    const { email } = req.body;
-    const otp = generateOTP()
-    otps[email] = otp;
-    const subject = 'Password Reset OTP';
-    const text = `Your OTP for password reset is : ${otp}`
-    try {
-        const user = await User.findOne({ email })
-        if (!user) {
-            return res.status(404).send({ error: "User dosen't exist" })
-        }
-        await sendEmail(email, subject, text)
 
-        setTimeout(() => {
-            delete otps[email];
-            console.log(`Deleted OTP for email: ${email}`);
-        }, 1000000);
+const calculateDateDifference = (startDate, endDate) => {
+    const dateDiff = endDate - startDate;
+    const daysDiff = Math.floor(dateDiff / (24 * 60 * 60 * 1000));
+    const monthsDiff = Math.floor(daysDiff / 30);
+    const yearsDiff = Math.floor(monthsDiff / 12);
 
-        res.status(200).send({ msg: `Otp sent to ${email}` })
-    } catch (error) {
-        console.log("Error sending OTP to email:", error)
-        res.status(500).send({ error: "Server error" })
+    if (yearsDiff > 0) {
+        return `${yearsDiff} ${yearsDiff === 1 ? 'year' : 'years'}`;
+    } else if (monthsDiff > 0) {
+        return `${monthsDiff} ${monthsDiff === 1 ? 'month' : 'months'}`;
+    } else {
+        return `${daysDiff} ${daysDiff === 1 ? 'day' : 'days'}`;
     }
-}
-
-
-exports.verifyOTP = async (req, res) => {
-    const { enteredOTP, email } = req.body;
-    try {
-        if (otps[email] !== enteredOTP) {
-            return res.status(400).send({ error: "Invalid OTP" })
-        }
-        res.status(200).send({ msg: "OTP Validation successful" })
-    } catch (error) {
-        console.log("Error in OTP validation :", error)
-        res.status(500).send({ error: "Server error" })
-    }
-}
-
-
-exports.resetPassword = async (req, res) => {
-    const { email, newPassword, enteredOTP } = req.body;
-    try {
-        const user = await User.findOne({ email })
-        if (!user) {
-            return res.status(404).send({ error: "User doesn't exists " })
-        }
-        if (otps[email] !== enteredOTP) {
-            return res.status(400).send({ error: "Invalid OTP" })
-        }
-        delete otps[email]
-        user.password = newPassword;
-        await user.save()
-        res.status(200).send({ msg: "Password changed successfully" })
-    } catch (error) {
-        console.log("Error changing password :", error)
-        res.status(500).send({ error: "Server error" })
-    }
-}
+};
 
 exports.userDetails = async (req, res) => {
     let { page, limit, name, email } = req.query;
-    page = page ? parseInt(page) : 1;
-    limit = limit ? parseInt(limit) : 10;
-    const filterOptions = {}
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const filterOptions = {};
+
     if (name) {
-        filterOptions.name = { $regex: name, $options: 'i' }; // Case-insensitive search for name
+        filterOptions.name = { $regex: name, $options: 'i' };
     }
     if (email) {
-        filterOptions.email = { $regex: email, $options: 'i' }; // Case-insensitive search for email
+        filterOptions.email = { $regex: email, $options: 'i' };
     }
 
     filterOptions.role = { $in: ['admin', 'user'] };
+
     try {
         const totalDocuments = await User.countDocuments(filterOptions);
-        const query = User.find(filterOptions).select('name email lastLogin  joined role')
-        query.skip((page - 1) * limit).limit(limit);
-        const users = await query.exec()
-        const today = new Date(); // Get the current date
-        // Format the dates and calculate the time period for each user
-        const formattedUsers = users.map((user) => {
-            const lastLoginDate = user.lastLogin ? new Date(user.lastLogin) : null;
-            const joinedDate = new Date(user.joined);
+        const users = await User.find(filterOptions)
+            .select('name email lastLogin joined role')
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .exec();
 
-            let lastLoginPeriod = null;
-            let joinedPeriod = null;
+        const today = new Date();
 
-            if (lastLoginDate) {
-                // Calculate the difference between lastLoginDate and today
-                let yearsDiff = today.getUTCFullYear() - lastLoginDate.getUTCFullYear();
-                let monthsDiff = today.getUTCMonth() - lastLoginDate.getUTCMonth();
-                let daysDiff = today.getUTCDate() - lastLoginDate.getUTCDate();
-
-                if (daysDiff < 0) {
-                    monthsDiff--; // Decrement months if the days are negative
-                    daysDiff += new Date(today.getUTCFullYear(), today.getUTCMonth(), 0).getUTCDate(); // Add days to make it positive
-                }
-                if (monthsDiff < 0) {
-                    yearsDiff--; // Decrement years if the months are negative
-                    monthsDiff += 12; // Add 12 months to make it positive 
-                }
-
-                if (yearsDiff === 0 && monthsDiff === 0) {
-                    if (daysDiff <= 1) {
-                        lastLoginPeriod = `${daysDiff} day ago`;
-                    } else {
-
-                        lastLoginPeriod = `${daysDiff} days ago`;
-                    }
-                } else {
-                    lastLoginPeriod = `${yearsDiff} years, ${monthsDiff} months, and ${daysDiff} days ago`;
-                }
-            }
-
-            if (joinedDate) {
-                // Calculate the difference between joinedDate and today
-                let yearsDiff = today.getUTCFullYear() - joinedDate.getUTCFullYear();
-                let monthsDiff = today.getUTCMonth() - joinedDate.getUTCMonth();
-                let daysDiff = today.getUTCDate() - joinedDate.getUTCDate();
-
-                if (daysDiff < 0) {
-                    monthsDiff--; // Decrement months if the days are negative
-                    daysDiff += new Date(today.getUTCFullYear(), today.getUTCMonth(), 0).getUTCDate(); // Add days to make it positive
-                }
-                if (monthsDiff < 0) {
-                    yearsDiff--; // Decrement years if the months are negative
-                    monthsDiff += 12; // Add 12 months to make it positive
-                }
-
-                if (yearsDiff === 0 && monthsDiff === 0) {
-                    if (daysDiff <= 1) {
-                        joinedPeriod = `${daysDiff} day ago`;
-                    } else {
-
-                        joinedPeriod = `${daysDiff} days ago`;
-                    }
-                } else {
-                    joinedPeriod = `${yearsDiff} years, ${monthsDiff} months, and ${daysDiff} days ago`;
-                }
-            }
+        const formattedUsers = users.map(user => {
+            const lastLoginPeriod = user.lastLogin ? calculateDateDifference(new Date(user.lastLogin), today) : null;
+            const joinedPeriod = calculateDateDifference(new Date(user.joined), today);
 
             return {
                 ...user.toObject(),
@@ -317,12 +337,20 @@ exports.userDetails = async (req, res) => {
                 joined: joinedPeriod,
             };
         });
-        res.status(200).send({ msg: "User data", data: formattedUsers, currentPage: page, totalPage: Math.ceil(totalDocuments / limit), totalDocuments: totalDocuments })
+
+        res.status(200).send({
+            msg: 'User data',
+            data: formattedUsers,
+            currentPage: page,
+            totalPage: Math.ceil(totalDocuments / limit),
+            totalDocuments: totalDocuments,
+        });
     } catch (error) {
-        console.log("Error getting users data :", error)
-        res.status(500).send({ error: "Server error" })
+        console.log('Error getting users data:', error);
+        res.status(500).send({ error: 'Server error' });
     }
-}
+};
+
 
 exports.downloadCSV = async (req, res) => {
     let { page, limit, name, email } = req.query;
@@ -529,7 +557,6 @@ exports.sendEmail = async (req, res) => {
 
         const emails = await User.find({ _id: { $in: selectedUserIds } },
             'email')
-        console.log(emails)
 
         for (const user of emails) {
             await sendEmail(user.email, subject, body)
@@ -670,6 +697,25 @@ exports.checkUserCourse = async (req, res) => {
         res.status(200).send({ hasCourse });
     } catch (error) {
         console.log("Error checking user courses :", error)
+        res.status(500).send({ error: "Server error" })
+    }
+}
+
+exports.UserCourses = async (req, res) => {
+    const userId = req.userId;
+    try {
+        const user = await User.findById(userId).populate('courses')
+
+        if (!user) {
+            return res.status(404).send({ error: "User not found" })
+        }
+
+        const courses = await Course.populate(user.courses, { path: 'createBy' });
+
+        return res.status(200).json({ courses })
+
+    } catch (error) {
+        console.log("Error in fetching user courses :", error)
         res.status(500).send({ error: "Server error" })
     }
 }

@@ -11,12 +11,12 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-function sendEmail(toEmail, subject, text) {
+function sendEmail(toEmail, subject, html) {
     const mailOptions = {
         from: 'your_email@gmail.com',
         to: toEmail,
         subject: subject,
-        text: text,
+        html: html,
     };
 
     return new Promise((resolve, reject) => {

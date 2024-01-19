@@ -119,8 +119,6 @@ const Students = () => {
         window.location.href = `mailto:${email}`;
     }
 
-
-
     const handlesendEmail = async (mailData) => {
         try {
             if ((mailData.subject === '' || null) || (mailData.body === '' || null)) {

@@ -12,8 +12,9 @@ import config from '../../config.json';
 import { AuthenticatePresignedUrl } from '../../services/authenticatedPresignedUrl.service';
 import { useAuth } from '../../Contexts/AuthContext';
 import fallbackImg from '../../assets/backimg.jpg'
+import VideoComponent from '../VideoComponent/VideoComponent';
 const s3BucketUrl = config.recurring.s3BucketUrl;
-const PreviewEditLesson = ({ LessonData, onClose, setLessonData }) => {
+const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, courseId }) => {
     const { userdata } = useAuth()
     const token = userdata.token;
     const [isEditing, setIsEditing] = useState(false)
@@ -86,7 +87,6 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData }) => {
             })
         );
         const videos = UpdateVideos.filter(video => video.url !== null)
-        console.log(videos)
         setModifiedVideos(videos)
     }
 
@@ -185,9 +185,8 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData }) => {
                             {
                                 modifiedVideos.map((video) => {
                                     return <div className={styles.PlayerDiv}>
-                                        <ReactPlayer config={{ file: { attributes: { controlsList: 'nodownload' } } }}
-                                            onContextMenu={e => e.preventDefault()} className={styles.reactPlayer} url={video.url} controls={true}></ReactPlayer>
-                                        <Typography>{video.name}</Typography>
+                                        <VideoComponent url={video.url} name={video.name} sectionId={sectionId} courseId={courseId} data={LessonData} />
+
                                         {isEditing &&
                                             <Tooltip title='Delete video'>
                                                 <IconButton onClick={() => handleDeleteVideo(video.url)}>

@@ -13,6 +13,9 @@ exports.allCourses = async (req, res) => {
             filter.title = { $regex: new RegExp(title, 'i') };
         }
 
+        const totalCourses = await Course.countDocuments(filter);
+        const totalPages = Math.ceil(totalCourses / limit);
+
         const courseData = await Course.find(filter).skip(skip).limit(limit).populate({
             path: 'createBy',
             select: 'name email avatar'
@@ -21,6 +24,8 @@ exports.allCourses = async (req, res) => {
         res.status(200).send({
             msg: "Course Data", data: {
                 courses: courseData,
+                total_pages: totalPages,
+                current_page: page
             }
         })
     } catch (error) {
@@ -38,6 +43,8 @@ exports.allCoursesInfo = async (req, res) => {
         res.status(500).send({ error: "Server error" })
     }
 }
+
+
 
 
 exports.CoursebyId = async (req, res) => {

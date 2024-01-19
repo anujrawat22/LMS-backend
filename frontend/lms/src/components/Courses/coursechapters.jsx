@@ -542,7 +542,7 @@ export default function CourseChapters() {
                 </DragDropContext>
 
 
-                {editLessonModal && <EditLessonModal handleCloseModel={handleCloseModel} courseId={id} Data={LessonData} sectionId={sectionId} fetchCourseData={fetchCourseData} setData={setLessonData} />}
+                {editLessonModal && <EditLessonModal handleCloseModel={handleCloseModel} courseId={id} Data={LessonData} sectionId={sectionId} fetchCourseData={fetchCourseData} setData={setLessonData}  lessonId={selectedLessonID} />}
             </div>
         </>
         );

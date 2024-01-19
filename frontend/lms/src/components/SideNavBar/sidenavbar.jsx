@@ -24,6 +24,9 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import styles from './sidenavbar.module.css';
 import { useNavigate } from 'react-router-dom';
 import { handleUserLogout } from '../../services/logout';
+import { useMediaQuery } from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+
 const drawerWidth = 240;
 
 
@@ -60,6 +63,8 @@ export default function AdminSideNavBar() {
         setAnchorElUser(event.currentTarget);
     };
 
+    const isSmallScreen = useMediaQuery((theme) => defaultTheme.breakpoints.down('sm'));
+
     const handleNavigatetoHome = () => {
         navigate('/courses')
     }
@@ -89,10 +94,19 @@ export default function AdminSideNavBar() {
                         >
                             <MenuIcon onClick={() => setOpen(!open)} />
                         </IconButton> : null}
+                        {userdata.role === 'user' && isSmallScreen ?
+                            <IconButton
+                                edge="start"
+                                color="inherit"
+                                aria-label="open drawer"
+                            >
+                                <MenuIcon onClick={() => setOpen(!open)} />
+                            </IconButton> : null
+                        }
                         <Typography>
                             <img
                                 className={styles.Logo}
-                                src='https://drive.google.com/uc?export=view&id=1WEptUger6Bqs1OHLN9znAqtF06x9OJRk'
+                                src='https://ceoitbox.com/wp-content/uploads/2022/04/logo.png.webp'
                                 alt="CEOITBOX"
                                 onClick={handleNavigatetoHome}
                                 style={{
@@ -112,9 +126,17 @@ export default function AdminSideNavBar() {
                         {
                             userdata.isAuthenticated ?
                                 <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-                                    {userdata.role === 'user' && <Box marginRight={'15px'}>
-                                        <Link to={'/courses'} style={{ color: 'white', textDecoration: 'none' }}>My Courses</Link>
-                                    </Box>}
+                                    {userdata.role === 'user' && !isSmallScreen ?
+                                        <>
+                                            <Box marginRight={'15px'}>
+                                                <Link to={'/courses'} style={{ color: 'white', textDecoration: 'none' }}>All Courses</Link>
+                                            </Box>
+                                            <Box marginRight={'15px'}>
+                                                <Link to={'/myCourses'} style={{ color: 'white', textDecoration: 'none' }}>My Courses</Link>
+                                            </Box>
+                                        </>
+                                        : null
+                                    }
                                     <Tooltip title="Open settings">
                                         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                                             <Avatar alt="Remy Sharp" src={userdata.avatar} />
@@ -149,7 +171,6 @@ export default function AdminSideNavBar() {
                                     </Menu>
                                 </Box> :
                                 <>
-
                                     <Box
                                         className={styles.Usernavigations}>
                                         <Link to={'/courses'} style={{ color: 'white', textDecoration: 'none' }}>All Courses</Link>
@@ -195,11 +216,22 @@ function TemporaryDrawer({ open, setOpen }) {
                 >
                     <ListItemButton onClick={handleCloseDrawer}>
                         <ListItemIcon>
-                            <LibraryBooksIcon />
+                            <SchoolIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Courses" sx={{ color: "#444" }} />
+                        <ListItemText primary="All Courses" sx={{ color: "#444" }} />
                     </ListItemButton>
                 </ListItem>
+                {role === 'user' ? <ListItem
+                    component={RouterLink} to={'/myCourses'}
+                    disablePadding sx={{ display: 'block' }}
+                >
+                    <ListItemButton onClick={handleCloseDrawer}>
+                        <ListItemIcon>
+                            <LibraryBooksIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="My Courses" sx={{ color: "#444" }} />
+                    </ListItemButton>
+                </ListItem> : null}
                 {(role === 'superadmin' || role === 'admin') &&
                     <>
                         <ListItem

@@ -54,3 +54,48 @@ exports.unassignCourse = async (req, res) => {
         res.status(500).send({ error: "Server error" })
     }
 }
+
+
+exports.authAllCourse = async (req, res) => {
+    const userId = req.userId;
+    const { page, title } = req.query;
+
+    try {
+        const user = await User.findById(userId).populate('courses');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const pageInt = parseInt(page) || 1;
+        const limitInt =  9;
+        const skip = (pageInt - 1) * limitInt;
+
+        const filter = {};
+        if (title) {
+            filter.title = { $regex: new RegExp(title, 'i') };
+        }
+
+        const totalCourses = await Course.countDocuments(filter);
+        const totalPages = Math.ceil(totalCourses / limitInt);
+
+        const allCourses = await Course.find(filter)
+            .skip(skip)
+            .limit(limitInt);
+
+        const updatedCourses = allCourses.map(course => {
+            const isPurchased = user.courses.some(userCourse => userCourse._id.toString() === course._id.toString());
+            return { ...course.toObject(), isPurchased };
+        });
+
+        return res.status(200).send({
+            courses: updatedCourses,
+            total_pages: totalPages,
+            current_page: pageInt
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+

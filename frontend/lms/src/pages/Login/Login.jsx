@@ -1,4 +1,5 @@
 import React from 'react'
+import { Input } from '@mui/material'
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import bg from "../../assets/signin.svg";
@@ -16,6 +17,8 @@ import { UserLogin } from "../../services/login.service";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "../../Contexts/AuthContext";
 import styles from './Login.module.css';
+import { generateLoginOTP } from '../../services/generateLoginOTP.service';
+import ResponsiveMuiOtpInput from '../../components/ResponsiveMuiOtpInput/ResponsiveMuiOtpInput';
 
 const darkTheme = createTheme({
     palette: {
@@ -39,16 +42,18 @@ const Login = () => {
     const { login } = auth;
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        email: '',
-        password: ''
+        email: ''
     })
-
+    const [isDisabled, setIsDisabled] = useState(false)
+    const [isVerifyButtonDisabled, setVerifyButtonDisabled] = useState(true)
+    const [isOTPSent, setIsOtpSent] = useState(false)
+    const [otp, setOtp] = useState('')
 
     const handleSignin = async (e) => {
         e.preventDefault()
         const loader = toast.loading("Signing In")
         try {
-            const response = await UserLogin(formData)
+            const response = await UserLogin({ ...formData, otp })
             if (response.status === 200) {
                 const { name, role, avatar } = response.data.loggedInUser;
                 login(name, role, avatar)
@@ -59,17 +64,53 @@ const Login = () => {
                 } else if (role === 'user') {
                     navigate('/courses')
                 }
-            } 
+            }
         } catch (error) {
             toast.dismiss(loader)
             toast.error(error.response.data.error)
+        } finally {
+            setIsOtpSent(false)
+            setVerifyButtonDisabled(true)
+            setFormData({
+                email: ''
+            })
+            setOtp('')
         }
+    }
+
+    const handleGenerateLoginOTP = async (e) => {
+        e.preventDefault()
+        setIsDisabled(true)
+        const toastPromise = toast.loading("Sending Login OTP")
+        try {
+            const response = await generateLoginOTP(formData)
+            toast.dismiss(toastPromise)
+            toast.success(response.data.msg)
+            setIsOtpSent(true)
+        } catch (error) {
+            toast.dismiss(toastPromise)
+            toast.error(error.response.data.error)
+        } finally {
+            setIsDisabled(false)
+        }
+    }
+
+    const handleOTPChange = (newValue) => {
+        if (otp.length !== 6) {
+            setVerifyButtonDisabled(true)
+        }
+        setOtp(newValue)
+    }
+
+    const handleComplete = () => {
+        setVerifyButtonDisabled(false)
     }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value })
     }
+
     return (
         <div
             className={styles.Container}
@@ -104,7 +145,41 @@ const Login = () => {
                             }}
                         >
                             <ThemeProvider theme={darkTheme}>
-                                <Container>
+                                {isOTPSent ? <Container>
+                                    <Box height={35} />
+                                    <Box sx={center}>
+                                        <LockOutlinedIcon />
+                                        <Typography component="h1" variant="h4">
+                                            Verify OTP
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ mt: 2 }}>
+                                        <form onSubmit={handleSignin}>
+                                            <Grid container spacing={1} justifyContent={'center'}>
+                                                <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }} lg={8}>
+                                                    <ResponsiveMuiOtpInput value={otp} onChange={handleOTPChange} length={6} autoFocus onComplete={handleComplete} />
+                                                </Grid>
+                                                <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }} lg={8}>
+                                                    <Button
+                                                        type="submit"
+                                                        variant="contained"
+                                                        fullWidth
+                                                        size="large"
+                                                        sx={{
+                                                            mt: "10px",
+                                                            borderRadius: 28,
+                                                            color: "#ffffff",
+                                                            backgroundColor: "#FF9A01",
+                                                        }}
+                                                        disabled={isVerifyButtonDisabled}
+                                                    >
+                                                        Verify
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </form>
+                                    </Box>
+                                </Container> : <Container>
                                     <Box height={35} />
                                     <Box sx={center}>
                                         <Avatar
@@ -119,7 +194,7 @@ const Login = () => {
                                     <Box
                                         sx={{ mt: 2 }}
                                     >
-                                        <form onSubmit={handleSignin}>
+                                        <form onSubmit={handleGenerateLoginOTP}>
                                             <Grid container spacing={1}>
                                                 <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }}>
                                                     <TextField
@@ -132,33 +207,6 @@ const Login = () => {
                                                         value={formData.email}
                                                         onChange={handleChange}
                                                     />
-                                                </Grid>
-                                                <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }}>
-                                                    <TextField
-                                                        required
-                                                        fullWidth
-                                                        name="password"
-                                                        label="Password"
-                                                        type="password"
-                                                        id="password"
-                                                        autoComplete="new-password"
-                                                        value={formData.password}
-                                                        onChange={handleChange}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }}>
-                                                    <Stack direction="row" spacing={2}>
-                                                        <Typography
-                                                            variant="body1"
-                                                            component="span"
-                                                            onClick={() => {
-                                                                navigate("/forgot");
-                                                            }}
-                                                            style={{ marginTop: "10px", cursor: "pointer" }}
-                                                        >
-                                                            Forgot password?
-                                                        </Typography>
-                                                    </Stack>
                                                 </Grid>
                                                 <Grid item xs={12} sm={12} md={12} lg={12} sx={{ ml: "2em", mr: "2em" }}>
                                                     <Button
@@ -174,7 +222,7 @@ const Login = () => {
                                                             minWidth: "170px",
                                                             backgroundColor: "#FF9A01",
                                                         }}
-
+                                                        disabled={isDisabled}
                                                     >
                                                         Sign in
                                                     </Button>
@@ -192,7 +240,7 @@ const Login = () => {
                                             </Grid>
                                         </form>
                                     </Box>
-                                </Container>
+                                </Container>}
                             </ThemeProvider>
                         </Box>
                     </Grid>

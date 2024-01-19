@@ -1,46 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
-import config from '../../config.json';
-import { useAuth } from '../../Contexts/AuthContext';
-import { PresignedUrl } from '../../services/generatePresignedUrl.service';
-import { AuthenticatePresignedUrl } from '../../services/authenticatedPresignedUrl.service';
-const s3BucketUrl = config.recurring.s3BucketUrl;
+import { getVideoUrl } from '../../services/generateVideoUrl.service';
+import { generateAuthVideoUrl } from '../../services/generateAuthvideoUrl.service';
 
-const VideoComponent = ({ url, data, sectionId, courseId }) => {
-
+const VideoComponent = ({ url, name, data, courseId, sectionId }) => {
+    console.log(url, name, sectionId, courseId)
     const [videoUrl, setVideoUrl] = useState('')
-    const { userdata } = useAuth()
-    const { token } = userdata
+    const [isVideoCipherVideo, setIsVideoCipherVideo] = useState(false);
+
+
     const modifyVideos = async (url) => {
-        if (isS3Video(url)) {
-            try {
-                let response;
-                if (data.isfree) {
-                    response = await PresignedUrl(url.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
-                } else {
-                    response = await AuthenticatePresignedUrl(url.replace(`${s3BucketUrl}/`, ''), token);
-                }
-                
-                setVideoUrl(response.data.fileURL);
-            } catch (error) {
-                console.error('Error fetching presigned URL:', error);
-                setVideoUrl(null)
+        if (isVideoCipherVideoId(name)) {
+            let response;
+            if (data.isfree) {
+                response = await getVideoUrl(`${courseId}/${sectionId}/${data._id}`, { videoId: url })
+            } else {
+                response = await generateAuthVideoUrl({ videoId: url })
             }
-        } else {
-            setVideoUrl(url)
+            setIsVideoCipherVideo(true)
+            setVideoUrl(response.data.url)
         }
     }
 
-    // const fetchAndRevokeBlob = async (videoUrl) => {
-    //     return new Promise((resolve) => {
-    //         fetch(videoUrl)
-    //             .then((response) => console.log(response))
-    //             .catch((error) => {
-    //                 console.error('Error fetching blob:', error);
-    //                 resolve(null);
-    //             });
-    //     });
-    // };
 
 
 
@@ -58,14 +39,23 @@ const VideoComponent = ({ url, data, sectionId, courseId }) => {
     };
     return (
         <>
-            <ReactPlayer url={videoUrl} controls={true} config={playerConfig}  width={'100%'} height={'80dvh'}></ReactPlayer>
+            {isVideoCipherVideo ? <iframe
+                src={videoUrl}
+                style={{
+                    width: '100%', height: '75dvh',borderRadius : '15px'
+                }}
+                allow="encrypted-media"
+                allowfullscreen
+                title='VideoCipher'
+            ></iframe>
+                :
+                <ReactPlayer url={videoUrl} controls={true} config={playerConfig} width={'100%'} height={'80dvh'}></ReactPlayer>}
         </>
     )
 }
 
 export default VideoComponent;
 
-function isS3Video(url) {
-    const s3Pattern = new RegExp(`^${s3BucketUrl}/.*`);
-    return s3Pattern.test(url);
+function isVideoCipherVideoId(name) {
+    return name === "videoCipherVideoId"
 }

@@ -11,6 +11,7 @@ import { useAuth } from '../../Contexts/AuthContext';
 import fallbackImg from '../../assets/backimg.jpg'
 import { DeleteMedia } from '../../services/deleteMedia.service';
 import useInterval from '../UseInterval/useInterval';
+import VideoComponent from '../VideoComponent/VideoComponent';
 const s3BucketUrl = config.recurring.s3BucketUrl;
 const LessonPreview = ({ LessonContent, setLessonContent, setPreviewOpen }) => {
     const { userdata } = useAuth()
@@ -214,11 +215,7 @@ const LessonPreview = ({ LessonContent, setLessonContent, setPreviewOpen }) => {
                             {
                                 modifiedVideos.map((video) => {
                                     return <div className={styles.reactplayerDiv}>
-                                        <ReactPlayer config={{ file: { attributes: { controlsList: 'nodownload' } } }}
-
-                                            // Disable right click
-                                            onContextMenu={e => e.preventDefault()} className={styles.reactPlayer} url={video.url} controls={true}
-                                        ></ReactPlayer>
+                                        <VideoComponent url={video.url} name={video.name} />
                                         <Typography variant='h6'>{video.name}</Typography>
                                         {isEditing ?
                                             <span className={styles.deleteIcon}

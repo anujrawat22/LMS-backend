@@ -21,7 +21,9 @@ import { useAuth } from '../../Contexts/AuthContext';
 import PropTypes from 'prop-types';
 import LinearProgress from '@mui/material/LinearProgress';
 import Box from '@mui/material/Box';
-import axios from 'axios'
+import axios from 'axios';
+
+
 const label = { inputProps: { 'aria-label': 'Switch demo' } };
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -150,49 +152,31 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
     const handleAddVideo = async (e) => {
         const toastpromise = toast.loading("Uploading Video")
         const file = e.target.files[0];
-        const name = e.target.files[0].name
-
-
         if (file) {
-            const fileType = file.type.split("/")[1];
-            const newUploadController = new AbortController();
-            setUploadController(newUploadController);
             try {
-                const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.videoPresignredUrl}?fileType=${fileType}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-type": "Application/json",
-                        Authorization: `bearer ${token}`
-                    }
-                })
-                const responseBody = await response.json();
-                const { uploadURL, Key } = responseBody;
-                if (!uploadURL) {
-                    return toast.error("Error in uploading video")
-                }
+                const url = `${config.recurring.domainUrl}/${config.recurring.post.uploadVideo}`;
+                const formData = new FormData()
+                formData.append("file", file)
+
+                const newUploadController = new AbortController();
+                setUploadController(newUploadController);
+
+
                 setIsuplaoding(true)
                 const axiosConfig = {
                     onUploadProgress: (progressEvent) => {
                         const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
                         setProgress(progress)
                     },
-                    headers: {
-                        'Content-Type': `v/${fileType}`
-                    },
                     signal: newUploadController.signal,
+                    withCredentials: true
                 };
 
-                const uploadResponse = await axios.put(uploadURL, file, axiosConfig);
-
-                if (uploadResponse.status === 200) {
-                    const fileLink = `${config.recurring.s3BucketUrl}/${Key}`;
-                    setLessonContent({ ...LessonContent, videos: [...LessonContent.videos, { url: fileLink, name }] })
-                    toast.dismiss(toastpromise);
-                    toast.success("Video Uploaded");
-                } else {
-                    toast.dismiss(toastpromise);
-                    toast.error('Error in uploading video');
-                }
+                const response = await axios.post(url, formData, axiosConfig)
+                console.log(response.data.url)
+                setLessonContent({ ...LessonContent, videos: [...LessonContent.videos, { url: response.data.url, name: 'videoCipherVideoId', status: 'processing' }] })
+                toast.dismiss(toastpromise)
+                toast.success("Video Uploaded")
             } catch (error) {
                 if (error.name === 'CanceledError') {
                     toast.dismiss(toastpromise);
@@ -202,8 +186,9 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                     toast.error('Video upload failed');
                 }
             } finally {
-                setIsuplaoding(false)
                 setProgress(0)
+                setIsuplaoding(false)
+                setUploadController(null)
             }
         }
     }

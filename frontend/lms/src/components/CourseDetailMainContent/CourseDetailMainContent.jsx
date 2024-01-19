@@ -1,7 +1,7 @@
-import React, { Suspense, useEffect } from 'react';
+import React, {  useEffect } from 'react';
 import styles from './CourseDetailMainContent.module.css';
-import { Button, Typography } from '@mui/material';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
+import {  Typography } from '@mui/material';
+
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../Contexts/AuthContext';
 import { useState } from 'react';
@@ -12,7 +12,6 @@ import useInterval from '../UseInterval/useInterval';
 import config from '../../config.json';
 import { AuthenticatePresignedUrl } from '../../services/authenticatedPresignedUrl.service';
 import { PresignedUrl } from '../../services/generatePresignedUrl.service';
-import { Skeleton } from '@mui/material';
 
 import VideoComponent from '../VideoComponent/VideoComponent';
 const s3BucketUrl = config.recurring.s3BucketUrl;
@@ -58,33 +57,6 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
         setModifiedImages(updatedImages.filter((image) => image !== null))
     }
 
-
-    // const modifyVideos = async () => {
-    //     const UpdateVideos = await Promise.all(
-    //         data.videos.map(async (video) => {
-    //             if (isS3Video(video.url)) {
-    //                 try {
-    //                     let response;
-    //                     if (data.isfree) {
-    //                         response = await PresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
-    //                     } else {
-    //                         response = await AuthenticatePresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), token);
-
-    //                     }
-
-    //                     return { url: response.data.fileURL, name: video.name };
-    //                 } catch (error) {
-    //                     console.error('Error fetching presigned URL:', error);
-    //                     return { url: null, name: null };
-    //                 }
-    //             } else {
-    //                 return video;
-    //             }
-    //         })
-    //     );
-    //     const videos = UpdateVideos.filter(video => video.url !== null)
-    //     setModifiedVideos(videos)
-    // }
 
 
 
@@ -155,8 +127,7 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                     data.videos.length > 0 ?
                         data.videos.map((video) => {
                             return <div className={styles.VideoDiv} key={video._id}>
-                                <VideoComponent url={video.url} data={data} sectionId={sectionId} courseId={courseId} />
-                                
+                                <VideoComponent url={video.url} name={video.name} data={data} sectionId={sectionId} courseId={courseId} />
                             </div>
                         }) : null
                 }
@@ -187,16 +158,3 @@ function isS3Image(url) {
     return s3Pattern.test(url);
 }
 
-function isS3Video(url) {
-    const s3Pattern = new RegExp(`^${s3BucketUrl}/.*`);
-    return s3Pattern.test(url);
-}
-
-function Skeletons({ width, height }) {
-    return (
-        <div className={styles.VideoDiv}>
-            <Skeleton variant="rect" width={width} height={height} />
-            <Skeleton variant="text" width="60%" />
-        </div>
-    );
-}

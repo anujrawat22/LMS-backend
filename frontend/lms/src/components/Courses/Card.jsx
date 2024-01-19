@@ -11,21 +11,22 @@ import { Box, Container, Typography, } from '@mui/material';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { ThumbnailPresignedUrl } from '../../services/thumbnailPresignedUrl.service';
+import './Card.css'
 const s3BucketUrl = config.recurring.s3BucketUrl;
 
-export default function CourseCard(data) {
+export default function CourseCard({ data }) {
     const [modifyThumbnail, setModifyThumbnail] = useState('')
 
     const handleModifyThumbnail = async () => {
-        if (isS3Image(data.data.thumbnail)) {
+        if (isS3Image(data.thumbnail)) {
             try {
-                const response = await ThumbnailPresignedUrl(data.data.thumbnail.replace(`${s3BucketUrl}/`, ''));
+                const response = await ThumbnailPresignedUrl(data.thumbnail.replace(`${s3BucketUrl}/`, ''));
                 setModifyThumbnail(response.data.fileURL)
             } catch (error) {
 
             }
         } else {
-            setModifyThumbnail(data.data.thumbnail)
+            setModifyThumbnail(data.thumbnail)
         }
     }
 
@@ -36,65 +37,61 @@ export default function CourseCard(data) {
     return (
         <>
             <Container >
-                <Card sx={{ height: "500px" }} className='MainContainer'>
+                <Card sx={{
+                    height: "400px",
+                    transition: 'border-color 0.3s ease-in-out, color 0.3s ease-in-out',
+                    ':hover': {
+                        borderColor: 'rgb(180, 211, 59)',
+                        color: 'rgb(180, 211, 59)',
+                        boxShadow: 'rgba(180, 211, 59, 0.6) 0px 2px 8px 0px',
+                        cursor: 'pointer'
+                    },
+                }} className='MainContainer'>
                     <CardMedia
                         sx={{ objectFit: "cover", width: '100%' }}
                         component="img"
-                        height="300"
+                        height="220"
                         image={modifyThumbnail}
                         alt="Paella dish"
                     />
                     <Typography>
                         <div class='cardData' style={{
-                            color: "#2b3636",
-                            lineHeight: "25px",
-                            padding: "16px 16px 4px",
-                            fontWeight: "700",
-                            fontSize: "20px",
-                            maxHeight: "65px",
-                            overflow: "hidden",
-                            display: "-webkit-box",
-                            wordWrap: "break-word",
-                            webkitBoxOrient: "vertical",
-                            webkitLineClamp: "2"
+                            padding: '10px'
                         }}>
-                            {data.data.title}
+                            <p style={{
+                                margin: 0,
+                                fontSize: '20px',
+                                fontWeight: 'bold'
+                            }}>
+                                {data.title}
+                            </p>
                         </div>
-                        <div class='cardData' style={{
-                            color: "#586f6f",
-                            padding: "5px 16px",
-                            fontWeight: "200",
-                            fontSize: "16px",
-                            overflow: "hidden",
-                            display: "-webkit-box",
-                            maxHeight: "60px",
-                            wordWrap: "break-word",
-                            webkitBoxOrient: "vertical",
-                            webkitLineClamp: "2"
+                        <div style={{
+                            padding: '0px 10px',
+                            fontSize: '14px',
+                            height: '50px',
+                            display: 'flex',
+                            alignItems: 'start',
+                            color: 'rgb(140,140,140)',
+                            textOverflow: 'ellipsis'
                         }}
                         >
-                            {data.data.Description}
+                            {data.Description}
                         </div>
                     </Typography>
                     <Box sx={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        paddingRight: '10px'
+                        padding: '20px'
                     }}>
-
-                        <CardHeader
-                            avatar={
-                                <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                                    <img style={{
-                                        width: "42px", height: "42px", borderRadius: "100%"
-                                    }} src={data ? data.data.createBy.avatar : "https://cdn-icons-png.flaticon.com/512/2815/2815428.png"} alt='avatar' />
-                                </Avatar>
-                            }
-                            title={data.data.createBy.name}
-                            subheader={data.data.createdAt}
-                        />
-                        <Typography>{`${data.data.price.symbol}${data.data.price.amount}`}</Typography>
+                        <Typography sx={{
+                            color: 'rgb(180,211,59)',
+                            fontWeight: 700
+                        }} >{`${data.price.symbol}${data.price.amount}`}</Typography>
+                        {data.isPurchased ? <button className='button'>
+                            View Content
+                        </button> : <button className='button'>View Details</button>}
                     </Box>
                 </Card>
 
