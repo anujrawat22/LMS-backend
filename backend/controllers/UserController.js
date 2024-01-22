@@ -166,13 +166,15 @@ exports.login = async (req, res) => {
 
 
         const options = {
-            expires: new Date(
+            expiresIn: new Date(
                 Date.now() + 1000 * 60 * 60 * 24 * process.env.JWT_COOKIE_EXPIRE
             ),
             httpOnly: true,
             sameSite: "none",
             secure: true
         };
+
+        console.log(options)
 
         res.cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options)
 
