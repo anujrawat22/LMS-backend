@@ -19,6 +19,7 @@ import { useAuth } from "../../Contexts/AuthContext";
 import styles from './Login.module.css';
 import { generateLoginOTP } from '../../services/generateLoginOTP.service';
 import ResponsiveMuiOtpInput from '../../components/ResponsiveMuiOtpInput/ResponsiveMuiOtpInput';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const darkTheme = createTheme({
     palette: {
@@ -54,6 +55,7 @@ const Login = () => {
         const loader = toast.loading("Signing In")
         try {
             const response = await UserLogin({ ...formData, otp })
+            console.log(response)
             if (response.status === 200) {
                 const { name, role, avatar } = response.data.loggedInUser;
                 login(name, role, avatar)
@@ -147,6 +149,9 @@ const Login = () => {
                             <ThemeProvider theme={darkTheme}>
                                 {isOTPSent ? <Container>
                                     <Box height={35} />
+                                    <Box sx={{ mt: 2 }}>
+                                        <ArrowBackIcon onClick={()=>setIsOtpSent(false)}/>
+                                    </Box>
                                     <Box sx={center}>
                                         <LockOutlinedIcon />
                                         <Typography component="h1" variant="h4">

@@ -7,7 +7,7 @@ const accessKeyId = process.env.ACCESS_KEY_ID;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 const region = process.env.REGION;
 const axios = require('axios');
-const FormData = require('form-data');
+
 
 
 

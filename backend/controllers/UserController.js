@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const emailTemplatePath = path.join(__dirname, '..', 'email-templates', 'verificationEmailTemplate.html');
 const LoginOTPTemplatePath = path.join(__dirname, '..', 'email-templates', 'LoginOTPTemplate.html')
-const otpGenerator = require('otp-generator')
+
 
 
 exports.signup = async (req, res) => {
@@ -166,18 +166,20 @@ exports.login = async (req, res) => {
 
 
         const options = {
+            expires: new Date(
+                Date.now() + 1000 * 60 * 60 * 24 * process.env.JWT_COOKIE_EXPIRE
+            ),
             httpOnly: true,
+            sameSite: "none",
             secure: true
-        }
+        };
 
-        return res
-            .status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
-            .json({
-                msg: "Login Successfull",
-                loggedInUser
-            })
+        res.cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options)
+
+        return res.status(200).json({
+            msg: "Login Successfull",
+            loggedInUser
+        })
     } catch (error) {
         console.log("Error in logging In :", error)
         res.status(500).send({ error: "Server error" })
@@ -265,9 +267,13 @@ exports.refreshAccessToken = async (req, res) => {
         }
 
         const options = {
+            expires: new Date(
+                Date.now() + 1000 * 60 * 60 * 24 * process.env.JWT_COOKIE_EXPIRE
+            ),
             httpOnly: true,
-            secure: true
-        }
+            secure: false,
+            sameSite: "none",
+        };
 
         const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id)
 

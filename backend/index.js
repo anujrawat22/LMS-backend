@@ -15,9 +15,16 @@ const cookieParser = require('cookie-parser')
 
 app.use(express.json())
 
+const allowedOrigin = [
+'http://139.59.10.56',
+'https://lms-2nw3.onrender.com'
+]
+
 const corsOptions = {
-    credentials: true
+    origin  : allowedOrigin,
+    credentials: true,
 };
+
 app.use(cors(corsOptions));
 
 app.use(cookieParser())
