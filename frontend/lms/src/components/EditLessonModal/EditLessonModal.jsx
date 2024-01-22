@@ -58,6 +58,7 @@ LinearProgressWithLabel.propTypes = {
 };
 
 const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCourseData, setData }) => {
+    console.log(sectionId)
     const [contentType, setContentType] = useState('text')
     const initialdata = {
         _id: Data._id || null,
@@ -344,6 +345,7 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
         setHasChanges(false)
         try {
             const response = await UpdateLesson(courseId, sectionId, { lesson: LessonData })
+            console.log(response)
             toast.dismiss(loader)
             toast.success(response.data.msg)
             fetchCourseData()

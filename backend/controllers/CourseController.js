@@ -121,11 +121,13 @@ exports.updateLesson = async (req, res) => {
     const { courseId, sectionId } = req.params;
     const { lesson } = req.body;
     try {
+        console.log(sectionId)
         const course = await Course.findById(courseId);
 
         if (!course) {
             return res.status(404).send({ error: "Course doesn't exist" });
         }
+        console.log(course)
 
         const section = course.sections.id(sectionId);
         if (!section) {

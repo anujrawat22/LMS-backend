@@ -7,6 +7,7 @@ const accessKeyId = process.env.ACCESS_KEY_ID;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 const region = process.env.REGION;
 const axios = require('axios');
+var FormData = require('form-data');
 
 
 
@@ -234,7 +235,7 @@ exports.getVideoUrl = async (req, res) => {
         res.status(200).send({ url: `https://player.vdocipher.com/v2/?otp=${otp}&playbackInfo=${playbackInfo}` })
     } catch (error) {
         console.log("Error generating the video url :", error)
-        res.status(500).server({ error: 'Server error' })
+        res.status(500).json({ error: 'Server error' })
     }
 }
 
@@ -253,6 +254,6 @@ exports.GetAuthVideoUrl = async (req, res) => {
         res.status(200).send({ url: `https://player.vdocipher.com/v2/?otp=${otp}&playbackInfo=${playbackInfo}` })
     } catch (error) {
         console.log("Error generating the video url :", error)
-        res.status(500).server({ error: 'Server error' })
+        res.status(500).send({ error: 'Server error' })
     }
 }

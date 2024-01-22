@@ -38,7 +38,7 @@ export default function CourseCard({ data }) {
         <>
             <Container >
                 <Card sx={{
-                    height: "400px",
+                    height: "430px",
                     transition: 'border-color 0.3s ease-in-out, color 0.3s ease-in-out',
                     ':hover': {
                         borderColor: 'rgb(180, 211, 59)',

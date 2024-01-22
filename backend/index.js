@@ -11,17 +11,19 @@ const app = express()
 const cors = require('cors')
 const { MediaRouter } = require('./routes/mediaRouter')
 const { UserCourseRouter } = require('./routes/UserCourseRouter')
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const { User } = require('./models/UserModel');
 
 app.use(express.json())
 
 const allowedOrigin = [
-'http://139.59.10.56',
-'https://lms-2nw3.onrender.com'
+    'http://139.59.10.56',
+    'https://lms-2nw3.onrender.com',
+    'http://localhost:3001'
 ]
 
 const corsOptions = {
-    origin  : allowedOrigin,
+    origin: allowedOrigin,
     credentials: true,
 };
 

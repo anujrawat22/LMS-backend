@@ -174,7 +174,6 @@ exports.login = async (req, res) => {
             secure: true
         };
 
-        console.log(options)
 
         res.cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options)
 
