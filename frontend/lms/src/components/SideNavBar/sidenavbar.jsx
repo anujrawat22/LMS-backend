@@ -49,7 +49,7 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 const defaultTheme = createTheme();
-const settings = ['Profile', 'Logout'];
+const settings = [ 'Logout'];
 
 
 export default function AdminSideNavBar() {

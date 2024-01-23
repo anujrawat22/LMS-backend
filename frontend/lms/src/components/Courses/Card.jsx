@@ -1,12 +1,8 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
+
 import config from '../../config.json';
 import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import { red } from '@mui/material/colors';
 import { Box, Container, Typography, } from '@mui/material';
 import { useState } from 'react';
 import { useEffect } from 'react';
@@ -39,6 +35,7 @@ export default function CourseCard({ data }) {
             <Container >
                 <Card sx={{
                     height: "430px",
+                    minWidth : "320px",
                     transition: 'border-color 0.3s ease-in-out, color 0.3s ease-in-out',
                     ':hover': {
                         borderColor: 'rgb(180, 211, 59)',
@@ -61,7 +58,10 @@ export default function CourseCard({ data }) {
                             <p style={{
                                 margin: 0,
                                 fontSize: '20px',
-                                fontWeight: 'bold'
+                                fontWeight: 'bold',
+                                height : '60px',
+                                display : 'flex',
+                                alignItems : 'center'
                             }}>
                                 {data.title}
                             </p>
@@ -73,7 +73,7 @@ export default function CourseCard({ data }) {
                             display: 'flex',
                             alignItems: 'start',
                             color: 'rgb(140,140,140)',
-                            textOverflow: 'ellipsis'
+                            textOverflow: 'ellipsis',
                         }}
                         >
                             {data.Description}

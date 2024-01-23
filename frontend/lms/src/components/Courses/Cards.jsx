@@ -92,7 +92,7 @@ export default function Courses() {
 
     return (
         <>
-            <Box sx={{ display: 'flex', alignItems: 'flex-end' }} className={styles.filters}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-end' , width : '100%' , height : '70px' }} className={styles.filters}>
                 <TextField id="input-with-sx" label="Find a product" variant="standard" value={title} onChange={(e) => setTitle(e.target.value)} />
                 <Button onClick={handleSearchcourse}><SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} /></Button>
                 <Button variant='outlined' startIcon={<ReplayIcon />} sx={{
@@ -105,26 +105,27 @@ export default function Courses() {
                     onClick={handleResetCoursesData}
                 >Reset</Button>
             </Box>
-            {
-                <Grid container sx={{ padding: '4% 7%', rowGap: '30px' }} spacing={5}>
-                    {
-                        courseData.length > 0 ? courseData.map((data) => {
-                            return <Grid item md={6} sm={6} xs={12} lg={4} key={data._id} onClick={() => handlecardClick(data._id)} >
-                                <CourseCard data={data} />
-                            </Grid>
-                        }) :
-                            <div style={{
-                                width: '100dvw',
-                                height: '100dvh',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <h1>No Courses</h1>
-                            </div>
-                    }
-                </Grid>
-            }
+                {
+                    <Grid container sx={{ padding: '0% 5%', rowGap: '30px',  boxSizing: 'border-box' , marginTop : '1%' }} spacing={5}>
+                        {
+                            courseData.length > 0 ? courseData.map((data) => {
+                                return <Grid item md={6} sm={12} xs={12} lg={4} key={data._id} onClick={() => handlecardClick(data._id)} >
+                                    <CourseCard data={data} />
+                                </Grid>
+                            }) :
+                                <div style={{
+                                    width: '100dvw',
+                                    height: '100dvh',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <h1>No Courses</h1>
+                                </div>
+                        }
+                    </Grid>
+                }
+            
             <div className={styles.pagination}><Pagination count={totalPages} page={currentPage} onChange={handlePageChange} /></div>
         </>
     );
