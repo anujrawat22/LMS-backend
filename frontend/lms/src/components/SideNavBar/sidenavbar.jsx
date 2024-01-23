@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import { handleUserLogout } from '../../services/logout';
 import { useMediaQuery } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const drawerWidth = 240;
 
@@ -49,7 +50,7 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 const defaultTheme = createTheme();
-const settings = [ 'Logout'];
+const settings = ['Logout'];
 
 
 export default function AdminSideNavBar() {
@@ -163,7 +164,11 @@ export default function AdminSideNavBar() {
                                         {settings.map((setting) => (
                                             setting === 'Logout' ?
                                                 <MenuItem key={setting} onClick={handleLogout}>
-                                                    <Typography textAlign="center">{setting}</Typography>
+                                                    <Typography sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-around'
+                                                    }}><ExitToAppIcon fontSize='small' />{setting}</Typography>
                                                 </MenuItem> : <MenuItem key={setting} onClick={handleCloseUserMenu}>
                                                     <Typography textAlign="center">{setting}</Typography>
                                                 </MenuItem>
