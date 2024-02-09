@@ -16,12 +16,12 @@ const UserSchema = new mongoose.Schema({
     refreshToken: { type: String },
     activeSessions: { type: Number, default: 0 },
     isVerified: { type: Boolean, default: false },
-    verificationToken: {
-        type: String,
-    },
     otp: {
         code: { type: String },
         expiry: { type: Date },
+        cooldown: {
+            type: Date,
+        }
     }
 })
 

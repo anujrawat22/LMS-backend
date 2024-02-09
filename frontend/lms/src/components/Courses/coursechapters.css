@@ -23,11 +23,11 @@
   cursor: pointer; /* Change the cursor to indicate interactivity */
 }
 
-.SectionsMainContainer {
-  margin-top: 120px;
+.CourseSectionsMainContainer {
   width: 70%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: auto;
+  height: auto;
+  margin-top: 3%;
 }
 
 .backbuttonDiv {
@@ -158,8 +158,8 @@
     width: 95%;
   }
 
-  .SectionsMainContainer {
-    width: 90%;
+  .CourseSectionsMainContainer {
+    width: 95%;
   }
 
   .sectionMoreoptionsDiv {

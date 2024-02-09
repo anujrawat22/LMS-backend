@@ -211,6 +211,26 @@
   margin-top: 100px;
 }
 
+.ImageDivContainer{
+  border: 1px solid greenyellow;
+}
+
+.EditImageDivMain {
+  border: 1px solid red;
+  width: 100%;
+  height: auto;
+  display: flex;
+}
+
+.editImgDivs {
+  width: 50%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid blue;
+}
+
 @media screen and (max-width: 480px) {
   .LessonMainContainer {
     width: 100%;

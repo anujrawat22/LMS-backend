@@ -47,7 +47,7 @@
   display: flex;
 }
 
-.TextmainDiv{
+.TextmainDiv {
   width: 100%;
 }
 
@@ -90,9 +90,23 @@
   width: 100%;
 }
 
+text {
+  color: rgb(145, 170, 48);
+}
 
+.EditImageDivMain {
+  display: flex;
+}
 
+.editImgDivs {
+  width: 50%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+}
 
-text{
-  color : rgb(145, 170, 48)
+.editImgDivs > img {
+  width: 95%;
+  height: 100%;
+  object-fit: contain;
 }

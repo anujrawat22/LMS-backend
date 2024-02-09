@@ -1,11 +1,7 @@
-import React, {  useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styles from './CourseDetailMainContent.module.css';
-import {  Typography } from '@mui/material';
-
-import { useParams } from 'react-router-dom';
-import { useAuth } from '../../Contexts/AuthContext';
+import { Typography } from '@mui/material';
 import { useState } from 'react';
-import { CheckUserCourses } from '../../services/checkUserCourse.service';
 import ImageVideoCarasouel from '../ImageVideoCarasouel/ImageVideoCarasouel';
 import fallbackImg from '../../assets/backimg.jpg';
 import useInterval from '../UseInterval/useInterval';
@@ -15,22 +11,9 @@ import { PresignedUrl } from '../../services/generatePresignedUrl.service';
 
 import VideoComponent from '../VideoComponent/VideoComponent';
 const s3BucketUrl = config.recurring.s3BucketUrl;
-const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
-    const { id } = useParams()
-    const { userdata } = useAuth()
-    const { token } = userdata;
-    const [userHasCourse, setUserHasCourse] = useState(false)
+const CourseDetailMainContent = ({ data, sectionId, courseId, userHasCourse }) => {
     const [modifiedImages, setModifiedImages] = useState([])
     const [bannerImg, setBannerImg] = useState('')
-    const isMobile = window.innerWidth <= 480;
-    const checkforUserCourse = async () => {
-        try {
-            const response = await CheckUserCourses(id, token)
-            setUserHasCourse(response.data.hasCourse)
-        } catch (error) {
-            console.log(error)
-        }
-    }
 
     const modifyImages = async () => {
         const updatedImages = await Promise.all(
@@ -42,7 +25,7 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                             response = await PresignedUrl(image.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
                         } else {
 
-                            response = await AuthenticatePresignedUrl(image.replace(`${s3BucketUrl}/`, ''), token);
+                            response = await AuthenticatePresignedUrl(image.replace(`${s3BucketUrl}/`, ''));
                         }
                         return response.data.fileURL;
                     } catch (error) {
@@ -68,7 +51,7 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                 if (data.isfree) {
                     response = await PresignedUrl(data.bannerimage.replace(`${s3BucketUrl}/`, ''), courseId, sectionId, data._id)
                 } else {
-                    response = await AuthenticatePresignedUrl(data.bannerimage.replace(`${s3BucketUrl}/`, ''), token);
+                    response = await AuthenticatePresignedUrl(data.bannerimage.replace(`${s3BucketUrl}/`, ''));
                 }
                 setBannerImg(response.data.fileURL)
             } catch (error) {
@@ -84,15 +67,13 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
         modifyBannerImage();
     };
 
-    useEffect(() => {
-        checkforUserCourse()
-    })
 
     useEffect(() => {
         fetchAndUpdateURLs();
     }, [data])
 
     useInterval(fetchAndUpdateURLs, 5 * 60 * 1000);
+
     if (data.isfree || userHasCourse) {
         return (
             <>
@@ -101,12 +82,8 @@ const CourseDetailMainContent = ({ data, sectionId, courseId }) => {
                     color: bannerImg ? 'white' : 'black'
                 }}>
                     <h1 className={styles.DataTitle}>{data.Title}</h1>
-
-                    {
-                        data.text.length > 0 && data.text.map((text, index) => {
-                            return <p key={index} className={styles.text}>{text}</p>
-                        })
-                    }
+                    <div dangerouslySetInnerHTML={ { __html : data.text}} className={styles.TextDiv}></div>
+                    
                 </div>
                     :
                     null}

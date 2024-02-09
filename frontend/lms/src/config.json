@@ -1,6 +1,6 @@
 {
   "recurring": {
-    "domainUrl": "http://localhost:3000/api",
+    "domainUrl": "/api",
     "s3BucketUrl": "https://lmstestbucket22.s3.ap-south-1.amazonaws.com",
     "yourCloudFrontUrl": "https://d1bhdk4epnq49c.cloudfront.net",
     "post": {
@@ -25,7 +25,8 @@
       "generateVideoUrl": "media/generate-video-url",
       "generateAuthVideoUrl": "media/generate-auth-video-url",
       "SendVerificationEmail": "users/send/verificationemail",
-      "GenerateLoginOTP": "users/generate/loginOTP"
+      "GenerateLoginOTP": "users/generate/loginOTP",
+      "resendOTP": "users/resendOTP"
     },
     "get": {
       "allstudents": "users/all",
@@ -48,7 +49,8 @@
       "deleteCourse": "courses/delete",
       "deleteSection": "courses/delete/section",
       "deleteLesson": "courses/delete/lesson",
-      "deleteMedia": "media/delete"
+      "deleteMedia": "media/delete",
+      "deleteVCvideo": "media/VCvideo"
     },
     "update": {
       "user_role_update": "users/update/role",

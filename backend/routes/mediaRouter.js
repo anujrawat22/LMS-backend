@@ -1,5 +1,5 @@
 const { Router } = require("express")
-const { GetImageUploadURl, getVideoUploadUrl, AuthenticatedPresignedUrl, PresignedUrl, deleteMedia, ThumbnailUrl, uploadVideo, GetAuthVideoUrl, getVideoUrl } = require("../controllers/MediaController")
+const { GetImageUploadURl, getVideoUploadUrl, AuthenticatedPresignedUrl, PresignedUrl, deleteMedia, ThumbnailUrl, uploadVideo, GetAuthVideoUrl, getVideoUrl, deleteVideoCipherVideo } = require("../controllers/MediaController")
 const multer = require('multer');
 const { Authenticate } = require("../middlewares/Authenticate.middleware");
 const { Authorize } = require("../middlewares/Authorization.middleware");
@@ -18,17 +18,18 @@ MediaRouter.get("/thumbnail", ThumbnailUrl)
 
 MediaRouter.post("/generate-video-url/:courseId/:sectionId/:lessonId", getVideoUrl)
 
+MediaRouter.post("/video/upload", uploadVideo)
 MediaRouter.use(Authenticate)
 
 MediaRouter.post("/generate-auth-video-url", GetAuthVideoUrl)
 
-MediaRouter.post("/video/upload", upload.single("file"), uploadVideo)
 
 MediaRouter.use('/generate-presigned-url-auth', AuthenticatedPresignedUrl)
 
 
 MediaRouter.use(Authorize(['admin', 'superadmin']))
 
+MediaRouter.delete("/VCvideo", deleteVideoCipherVideo)
 
 MediaRouter.post('/get-image-upload-url', GetImageUploadURl)
 

@@ -7,7 +7,6 @@ const accessKeyId = process.env.ACCESS_KEY_ID;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 const region = process.env.REGION;
 const axios = require('axios');
-var FormData = require('form-data');
 
 
 
@@ -160,9 +159,7 @@ exports.deleteMedia = async (req, res) => {
 
 
 exports.uploadVideo = async (req, res) => {
-
-    const file = req.file;
-    const { originalname } = file;
+    const { originalname } = req.body;
     try {
 
         const axiosConfig = {
@@ -173,26 +170,7 @@ exports.uploadVideo = async (req, res) => {
         const response = await axios.put(`${process.env.VIDEOCIPHER_URL}?title=${originalname}`, null, axiosConfig)
 
         const uploadCredentials = response.data.clientPayload;
-
-        const formData = new FormData();
-        formData.append('policy', uploadCredentials.policy);
-        formData.append('key', uploadCredentials.key);
-        formData.append('x-amz-signature', uploadCredentials['x-amz-signature']);
-        formData.append('x-amz-algorithm', uploadCredentials['x-amz-algorithm']);
-        formData.append('x-amz-date', uploadCredentials['x-amz-date']);
-        formData.append('x-amz-credential', uploadCredentials['x-amz-credential']);
-        formData.append('success_action_status', '201');
-        formData.append('success_action_redirect', '');
-
-        // Append the file to the FormData
-        formData.append('file', file.buffer, { filename: originalname, contentType: null });
-
-        const responseUploadVideo = await axios.post(uploadCredentials.uploadLink,
-            formData,
-            { headers: { ...formData.getHeaders() } }
-        );
-
-        res.status(200).send({ msg: 'Video uploaded successfully', url: response.data.videoId });
+        res.status(200).send({ msg: "Client upload credentials", uploadCredentials, videoId: response.data.videoId })
     } catch (error) {
         console.log(error)
         res.status(500).send({ error: "Server error" })
@@ -236,6 +214,26 @@ exports.getVideoUrl = async (req, res) => {
     } catch (error) {
         console.log("Error generating the video url :", error)
         res.status(500).json({ error: 'Server error' })
+    }
+}
+
+exports.deleteVideoCipherVideo = async (req, res) => {
+    const { videos } = req.body;
+    try {
+        const url = `${process.env.VIDEOCIPHER_URL}`
+
+        const axiosConfig = {
+            headers: {
+                Authorization: `Apisecret ${process.env.VIDEOCIPHER_API_SECRET}`,
+                'Content-Type': 'application/json',
+            },
+            params: { videos: videos.join(',') },
+        };
+        const response = await axios.delete(url, axiosConfig)
+        res.status(200).send({ msg: "Video deleted successfully" })
+    } catch (error) {
+        console.log("Error in deleting VideoCipher video :", error)
+        res.status(500).send({ error: "Server error" })
     }
 }
 

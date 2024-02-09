@@ -1,0 +1,173 @@
+.MuiAccordionSummary-content {
+    margin: 0px;
+  }
+  
+  .accordion-summary {
+    background: #eee;
+  }
+  
+  .MuiButtonBase-root {
+    min-height: 40px !important;
+  }
+  
+  .MuiAccordionSummary-content {
+    margin: 0 0 !important;
+    font-weight: bold;
+  }
+  
+  .css-15v22id-MuiAccordionDetails-root {
+    padding: 8px 6px !important;
+  }
+  .MuiAccordionDetails-root:hover {
+    background-color: #ddd; /* Change the background color on hover */
+    cursor: pointer; /* Change the cursor to indicate interactivity */
+  }
+  
+  .SectionsMainContainer {
+    margin-top: 120px;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .backbuttonDiv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .EditDeleteBtns {
+    width: 300px;
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .dragIcon:hover {
+    cursor: grab;
+  }
+  
+  .updateChangesdiv {
+    margin: 50px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .sectionMoreoptionsDiv {
+    display: flex;
+    justify-content: space-around;
+    width: auto;
+  }
+  
+  .TitleSwitchDiv {
+    display: flex;
+    align-items: center;
+    width: 100px;
+    justify-content: space-around;
+  }
+  
+  .droppableDiv {
+    margin: 30px 0px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    border-radius: 10px;
+    background-color: #fff;
+  }
+  
+  .sectionTitle {
+    display: flex;
+    height: 60px;
+    align-items: center;
+    border-bottom: 1px solid rgb(220, 220, 220);
+    justify-content: space-between;
+  }
+  
+  .lessonDraggableDiv {
+    border: 1px solid rgb(231, 231, 231);
+    width: 100%;
+    height: 70px;
+  }
+  
+  .lessonTitleDiv {
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+  }
+  
+  .lessonDropDiv {
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+  }
+  
+  .lessonDiv {
+    border-bottom: 1px solid rgb(232, 232, 232);
+    width: 100%;
+    display: flex;
+    padding: 0px 30px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .lessonType {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .lessonControlDiv {
+    display: flex;
+    align-items: center;
+  }
+  
+  .newLessonDiv {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    padding: 0px 50px;
+  }
+  
+  .SectionMainDiv {
+    margin-top: 120px;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .sectionDataDiv {
+    background-color: white;
+  }
+  
+  .lessonMainContainer {
+    width: 100%;
+    min-height: 10px;
+    height: auto;
+  }
+  
+  
+  
+  @media screen and (max-width: 720px) {
+    .SectionMainDiv {
+      width: 85%;
+      margin-top: 80px;
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    .SectionMainDiv {
+      width: 95%;
+    }
+  
+    .SectionsMainContainer {
+      width: 90%;
+    }
+  
+    .sectionMoreoptionsDiv {
+      width: 32%;
+    }
+  
+    .TitleSwitchDiv > h6 {
+      font-size: 15px;
+    }
+  }
+  

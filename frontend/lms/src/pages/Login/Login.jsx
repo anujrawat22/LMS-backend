@@ -1,5 +1,4 @@
 import React from 'react'
-import { Input } from '@mui/material'
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import bg from "../../assets/signin.svg";
@@ -11,7 +10,7 @@ import Avatar from "@mui/material/Avatar";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useState } from "react";
-import Stack from "@mui/material/Stack";
+
 import { Link, useNavigate } from "react-router-dom";
 import { UserLogin } from "../../services/login.service";
 import toast, { Toaster } from "react-hot-toast";
@@ -20,6 +19,7 @@ import styles from './Login.module.css';
 import { generateLoginOTP } from '../../services/generateLoginOTP.service';
 import ResponsiveMuiOtpInput from '../../components/ResponsiveMuiOtpInput/ResponsiveMuiOtpInput';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { resendOTP } from '../../services/resendOtp.service';
 
 const darkTheme = createTheme({
     palette: {
@@ -52,50 +52,85 @@ const Login = () => {
 
     const handleSignin = async (e) => {
         e.preventDefault()
+        const email = formData.email.trim(" ")
         const loader = toast.loading("Signing In")
         try {
-            const response = await UserLogin({ ...formData, otp })
-            console.log(response)
+            const response = await UserLogin({ email, otp })
             if (response.status === 200) {
                 const { name, role, avatar } = response.data.loggedInUser;
                 login(name, role, avatar)
                 toast.dismiss(loader)
-                toast.success("SignIn Successfull")
                 if (role === 'superadmin' || role === 'admin') {
                     navigate('/admin/dashboard')
                 } else if (role === 'user') {
                     navigate('/courses')
                 }
+                setIsOtpSent(false)
+                setFormData({
+                    email: ''
+                })
+                setOtp('')
+                setVerifyButtonDisabled(true)
             }
         } catch (error) {
             toast.dismiss(loader)
             toast.error(error.response.data.error)
-        } finally {
-            setIsOtpSent(false)
-            setVerifyButtonDisabled(true)
-            setFormData({
-                email: ''
-            })
-            setOtp('')
         }
     }
 
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
     const handleGenerateLoginOTP = async (e) => {
-        e.preventDefault()
-        setIsDisabled(true)
-        const toastPromise = toast.loading("Sending Login OTP")
-        try {
-            const response = await generateLoginOTP(formData)
-            toast.dismiss(toastPromise)
-            toast.success(response.data.msg)
-            setIsOtpSent(true)
-        } catch (error) {
-            toast.dismiss(toastPromise)
-            toast.error(error.response.data.error)
-        } finally {
-            setIsDisabled(false)
+        e.preventDefault();
+        const email = formData.email.trim(' ');
+        if (!isValidEmail(email)) {
+            return toast.error('Please enter a valid email address');
         }
-    }
+
+        setIsDisabled(true);
+        const toastPromise = toast.loading('Sending Login OTP');
+        try {
+            const response = await generateLoginOTP({ email });
+            toast.dismiss(toastPromise);
+            toast.success(response.data.msg);
+            setIsOtpSent(true);
+
+        } catch (error) {
+            toast.dismiss(toastPromise);
+            toast.error(error.response.data.error);
+        } finally {
+            setIsDisabled(false);
+        }
+    };
+
+    const handleresendOTP = async (e) => {
+        e.preventDefault();
+        const email = formData.email.trim(' ');
+        if (!isValidEmail(email)) {
+            return toast.error('Please enter a valid email address');
+        }
+
+
+        setIsDisabled(true);
+        const toastPromise = toast.loading('Sending Login OTP');
+        try {
+            const response = await resendOTP({ email });
+            toast.dismiss(toastPromise);
+            toast.success(response.data.msg);
+            setIsOtpSent(true);
+
+
+        } catch (error) {
+            toast.dismiss(toastPromise);
+            toast.error(error.response.data.error);
+        } finally {
+            setIsDisabled(false);
+        }
+    };
+
 
     const handleOTPChange = (newValue) => {
         if (otp.length !== 6) {
@@ -150,7 +185,7 @@ const Login = () => {
                                 {isOTPSent ? <Container>
                                     <Box height={35} />
                                     <Box sx={{ mt: 2 }}>
-                                        <ArrowBackIcon onClick={()=>setIsOtpSent(false)}/>
+                                        <ArrowBackIcon onClick={() => setIsOtpSent(false)} />
                                     </Box>
                                     <Box sx={center}>
                                         <LockOutlinedIcon />
@@ -179,6 +214,23 @@ const Login = () => {
                                                         disabled={isVerifyButtonDisabled}
                                                     >
                                                         Verify
+                                                    </Button>
+                                                </Grid>
+                                                <Grid item xs={12} sx={{ ml: "2em", mr: "2em" }} lg={8}>
+                                                    <Button
+                                                        type="submit"
+                                                        variant="contained"
+                                                        fullWidth
+                                                        size="large"
+                                                        sx={{
+                                                            mt: "10px",
+                                                            borderRadius: 28,
+                                                            color: "#ffffff",
+                                                            backgroundColor: "#FF9A01",
+                                                        }}
+                                                        onClick={handleresendOTP}
+                                                    >
+                                                        Resend OTP
                                                     </Button>
                                                 </Grid>
                                             </Grid>

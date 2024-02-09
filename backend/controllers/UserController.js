@@ -33,34 +33,22 @@ exports.signup = async (req, res) => {
             return res.status(401).send({ error: "User with this email Id already exists" })
         }
 
-        const user = await User.create({
-            name,
-            email,
-            role: 'user',
-            isVerified: false
-        })
 
-        const verificationToken = generateVerificationToken(user._id)
-
-        user.verificationToken = verificationToken
-        await user.save()
+        const verificationToken = generateVerificationToken({ email, name })
 
         const verificationLink = `${process.env.DOMAIN_URL}/api/users/verify/${verificationToken}`;
 
         const emailTemplate = fs.readFileSync(emailTemplatePath, 'utf-8');
 
         const emailBody = emailTemplate
-            .replace('{userName}', user.name)
+            .replace('{userName}', name)
             .replace('{verificationLink}', verificationLink);
 
         await sendEmail(email, 'Email Verification', emailBody)
 
-        const createdUser = await User.findById(user._id).select("-refreshToken")
-        if (!createdUser) {
-            return res.status(500).send({ error: "Something went wrong while registering the user" })
-        }
+
         res.status(201).json({
-            msg: `Verification email send to ${user.email} , Please verify to continue`
+            msg: `Verification email send to ${email} , Please verify to continue`
         })
     } catch (error) {
         console.log("Error signing up :", error);
@@ -77,12 +65,14 @@ exports.verifyUser = async (req, res) => {
             }
 
             if (decoded) {
-                const userId = decoded.userId
-                const user = await User.findById(userId)
-                user.isVerified = true;
-                await user.save()
+                const { email, name } = decoded;
+                const findExistingUser = User.findOne({ email })
+                if (!findExistingUser) {
+                    const user = new User({ email, name, isVerified: true, role: 'user' })
+                    await user.save()
+                }
                 const loginPageURL = `${process.env.DOMAIN_URL}/login`
-                res.redirect(loginPageURL);
+                return res.redirect(loginPageURL);
             } else {
                 res.status(500).send({ error: "Something went wrong" })
             }
@@ -150,6 +140,10 @@ exports.login = async (req, res) => {
             return res.status(404).send({ error: "User doesn't exist , Please signup" })
         }
 
+        if (!user.isVerified) {
+            return res.status(401).send({ error: "Please verify your email" })
+        }
+
         if (user.otp.code !== otp) {
             return res.status(401).send({ error: "Invalid OTP" });
         }
@@ -166,12 +160,11 @@ exports.login = async (req, res) => {
 
 
         const options = {
-            expiresIn: new Date(
+            expires: new Date(
                 Date.now() + 1000 * 60 * 60 * 24 * process.env.JWT_COOKIE_EXPIRE
             ),
             httpOnly: true,
-            sameSite: "none",
-            secure: true
+            secure: process.env.NODE_ENV === 'production'
         };
 
 
@@ -196,11 +189,22 @@ exports.GenerateLoginOTP = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const otpCode = generateOTP()
+        if (!user.isVerified) {
+            return res.status(401).json({ error: "Please verify your email" })
+        }
+
+        if (user.otp && user.otp.cooldown && user.otp.cooldown > new Date()) {
+            const remainingTime = Math.ceil((user.otp.cooldown - new Date()) / 1000);
+            console.log(`Please wait ${remainingTime} seconds before resending OTP`)
+            return res.status(429).json({ error: `Please wait ${remainingTime} seconds before resending OTP` });
+        }
+
+        const otpCode = generateOTP();
 
         user.otp = {
             code: otpCode,
             expiry: new Date(Date.now() + 5 * 60 * 1000), // OTP is valid for 5 minutes
+            cooldown: new Date(Date.now() + .1 * 60 * 1000), // Cooldown for resending OTP is 1 minute
         };
 
         await user.save();
@@ -214,6 +218,49 @@ exports.GenerateLoginOTP = async (req, res) => {
         await sendEmail(email, 'Login OTP', emailBody)
 
         res.status(200).send({ msg: `OTP send to ${email}` })
+    } catch (error) {
+        console.log("Error in sending otp :", error)
+        res.status(500).send({ error: 'Internal Server Error' })
+    }
+}
+
+exports.resendOTP = async (req, res) => {
+    const {email}  = req.body;
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (!user.isVerified) {
+            return res.status(401).json({ error: "Please verify your email" })
+        }
+
+        if (user.otp && user.otp.cooldown && user.otp.cooldown > new Date()) {
+            const remainingTime = Math.ceil((user.otp.cooldown - new Date()) / 1000);
+            return res.status(429).json({ error: `Please wait ${remainingTime} seconds before resending OTP` });
+        }
+
+        const otpCode = generateOTP();
+
+        user.otp = {
+            code: otpCode,
+            expiry: new Date(Date.now() + 5 * 60 * 1000), // OTP is valid for 5 minutes
+            cooldown: new Date(Date.now() + 1 * 60 * 1000), // Cooldown for resending OTP is 1 minute
+        };
+        await user.save();
+
+        const emailTemplate = fs.readFileSync(LoginOTPTemplatePath, 'utf-8')
+
+        const emailBody = emailTemplate
+            .replace('{userName}', user.name)
+            .replace('{otpCode}', otpCode);
+
+        await sendEmail(email, 'Login OTP', emailBody)
+
+        res.status(200).send({ msg: `OTP send to ${email}` })
+
     } catch (error) {
         console.log("Error in sending otp :", error)
         res.status(500).send({ error: 'Internal Server Error' })
@@ -272,8 +319,7 @@ exports.refreshAccessToken = async (req, res) => {
                 Date.now() + 1000 * 60 * 60 * 24 * process.env.JWT_COOKIE_EXPIRE
             ),
             httpOnly: true,
-            secure: false,
-            sameSite: "none",
+            secure: process.env.NODE_ENV === 'production'
         };
 
         const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id)
@@ -310,9 +356,7 @@ const calculateDateDifference = (startDate, endDate) => {
 };
 
 exports.userDetails = async (req, res) => {
-    let { page, limit, name, email } = req.query;
-    page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
+    let { name, email } = req.query;
     const filterOptions = {};
 
     if (name) {
@@ -328,8 +372,6 @@ exports.userDetails = async (req, res) => {
         const totalDocuments = await User.countDocuments(filterOptions);
         const users = await User.find(filterOptions)
             .select('name email lastLogin joined role')
-            .skip((page - 1) * limit)
-            .limit(limit)
             .exec();
 
         const today = new Date();
@@ -348,9 +390,6 @@ exports.userDetails = async (req, res) => {
         res.status(200).send({
             msg: 'User data',
             data: formattedUsers,
-            currentPage: page,
-            totalPage: Math.ceil(totalDocuments / limit),
-            totalDocuments: totalDocuments,
         });
     } catch (error) {
         console.log('Error getting users data:', error);
@@ -359,126 +398,10 @@ exports.userDetails = async (req, res) => {
 };
 
 
-exports.downloadCSV = async (req, res) => {
-    let { page, limit, name, email } = req.query;
-    page = page ? parseInt(page) : 1;
-    limit = limit ? parseInt(limit) : 10;
-
-    const filterOptions = {
-        role: 'user',
-
-    }
-    if (name) {
-        filterOptions.name = { $regex: name, $options: 'i' }; // Case-insensitive search for name
-    }
-    if (email) {
-        filterOptions.email = { $regex: email, $options: 'i' }; // Case-insensitive search for email
-    }
-    try {
-        const totalDocuments = await User.countDocuments(filterOptions);
-
-        const query = User.find(filterOptions).select('name email lastLogin , joined')
-        query.skip((page - 1) * limit).limit(limit);
-
-        const users = await query.exec()
-        const today = new Date(); // Get the current date
-        // Format the dates and calculate the time period for each user
-        const formattedUsers = users.map((user) => {
-            const lastLoginDate = user.lastLogin ? new Date(user.lastLogin) : null;
-            const joinedDate = new Date(user.joined);
-
-            let lastLoginPeriod = null;
-            let joinedPeriod = null;
-
-            if (lastLoginDate) {
-                // Calculate the difference between lastLoginDate and today
-                const yearsDiff = today.getUTCFullYear() - lastLoginDate.getUTCFullYear();
-                const monthsDiff = today.getUTCMonth() - lastLoginDate.getUTCMonth();
-                const daysDiff = today.getUTCDate() - lastLoginDate.getUTCDate();
-
-                if (daysDiff < 0) {
-                    monthsDiff--; // Decrement months if the days are negative
-                    daysDiff += new Date(today.getUTCFullYear(), today.getUTCMonth(), 0).getUTCDate(); // Add days to make it positive
-                }
-                if (monthsDiff < 0) {
-                    yearsDiff--; // Decrement years if the months are negative
-                    monthsDiff += 12; // Add 12 months to make it positive
-                }
-
-                if (yearsDiff === 0 && monthsDiff === 0) {
-                    if (daysDiff <= 1) {
-                        lastLoginPeriod = `${daysDiff} day ago`;
-                    } else {
-
-                        lastLoginPeriod = `${daysDiff} days ago`;
-                    }
-                } else {
-                    lastLoginPeriod = `${yearsDiff} years, ${monthsDiff} months, and ${daysDiff} days ago`;
-                }
-            }
-
-            if (joinedDate) {
-                // Calculate the difference between joinedDate and today
-                const yearsDiff = today.getUTCFullYear() - joinedDate.getUTCFullYear();
-                const monthsDiff = today.getUTCMonth() - joinedDate.getUTCMonth();
-                const daysDiff = today.getUTCDate() - joinedDate.getUTCDate();
-
-                if (daysDiff < 0) {
-                    monthsDiff--; // Decrement months if the days are negative
-                    daysDiff += new Date(today.getUTCFullYear(), today.getUTCMonth(), 0).getUTCDate(); // Add days to make it positive
-                }
-                if (monthsDiff < 0) {
-                    yearsDiff--; // Decrement years if the months are negative
-                    monthsDiff += 12; // Add 12 months to make it positive
-                }
-
-                if (yearsDiff === 0 && monthsDiff === 0) {
-                    if (daysDiff <= 1) {
-                        joinedPeriod = `${daysDiff} day ago`;
-                    } else {
-
-                        joinedPeriod = `${daysDiff} days ago`;
-                    }
-                } else {
-                    joinedPeriod = `${yearsDiff} years, ${monthsDiff} months, and ${daysDiff} days ago`;
-                }
-            }
-
-            return {
-                ...user.toObject(),
-                lastLogin: lastLoginPeriod,
-                joined: joinedPeriod,
-            };
-        });
-        const csvWriter = createObjectCsvWriter({
-            path: 'user_data.csv', // Define the file name
-            header: [
-                { id: '_id', title: 'ID' },
-                { id: 'name', title: 'Name' },
-                { id: 'email', title: 'Email' },
-                { id: 'lastLogin', title: 'Last Login' },
-                { id: 'joined', title: 'Joined' },
-            ],
-        });
-
-        // Write the CSV file
-        await csvWriter.writeRecords(formattedUsers);
-
-        // Serve the file for download
-        res.download('user_data.csv', (err) => {
-            if (err) {
-                console.error('Error downloading CSV:', err);
-                res.status(500).send({ error: 'Server error' });
-            }
-        });
-    } catch (error) {
-        console.log("Error getting users data :", error)
-        res.status(500).send({ error: "Server error" })
-    }
-}
 
 
 exports.userdetailsbyId = async (req, res) => {
+    4
     const { id } = req.params;
     try {
         const users = await User.find({ _id: id }).select("name email lastLogin joined role courses avatar").populate({

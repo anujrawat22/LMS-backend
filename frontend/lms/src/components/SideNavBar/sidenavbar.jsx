@@ -11,7 +11,6 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Avatar, Menu, MenuItem, Tooltip } from '@mui/material';
 import { useAuth } from '../../Contexts/AuthContext';
-import { Link } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -27,6 +26,7 @@ import { handleUserLogout } from '../../services/logout';
 import { useMediaQuery } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { NavLink } from 'react-router-dom';
 
 const drawerWidth = 240;
 
@@ -130,10 +130,18 @@ export default function AdminSideNavBar() {
                                     {userdata.role === 'user' && !isSmallScreen ?
                                         <>
                                             <Box marginRight={'15px'}>
-                                                <Link to={'/courses'} style={{ color: 'white', textDecoration: 'none' }}>All Courses</Link>
+                                                <NavLink to={'/courses'} className={({ isActive }) =>
+                                                    isActive ? `${styles.activeLink}` : `${styles.routerLink}`
+                                                }>
+                                                    All Courses
+                                                </NavLink>
                                             </Box>
                                             <Box marginRight={'15px'}>
-                                                <Link to={'/myCourses'} style={{ color: 'white', textDecoration: 'none' }}>My Courses</Link>
+                                                <NavLink to={'/myCourses'} className={({ isActive, isPending }) =>
+                                                    isActive ? `${styles.activeLink}` : `${styles.routerLink}`
+                                                }>
+                                                    My Courses
+                                                </NavLink>
                                             </Box>
                                         </>
                                         : null
@@ -178,9 +186,21 @@ export default function AdminSideNavBar() {
                                 <>
                                     <Box
                                         className={styles.Usernavigations}>
-                                        <Link to={'/courses'} style={{ color: 'white', textDecoration: 'none' }}>All Courses</Link>
-                                        <Link to={'/login'} style={{ color: 'white', textDecoration: 'none' }}>Login</Link>
-                                        <Link to={'/signup'} style={{ color: 'white', textDecoration: 'none' }}>Signup</Link>
+                                        <NavLink to={'/courses'} className={({ isActive }) =>
+                                            isActive ? `${styles.activeLink}` : `${styles.routerLink}`
+                                        }>
+                                            All Courses
+                                        </NavLink>
+                                        <NavLink to={'/signup'} className={({ isActive }) =>
+                                            isActive ? `${styles.activeLink}` : `${styles.routerLink}`
+                                        }>
+                                            Signup
+                                        </NavLink>
+                                        <NavLink to={'/login'} className={({ isActive }) =>
+                                            isActive ? `${styles.activeLink}` : `${styles.routerLink}`
+                                        }>
+                                            Login
+                                        </NavLink>
                                     </Box>
                                     <Box className={styles.UserNavs}>
                                         <IconButton sx={{

@@ -3,7 +3,6 @@ import styles from './LessonPreview.module.css';
 import { Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import toast from 'react-hot-toast';
-import ReactPlayer from 'react-player';
 import ImageVideoCarasouel from '../ImageVideoCarasouel/ImageVideoCarasouel';
 import config from '../../config.json';
 import { AuthenticatePresignedUrl } from '../../services/authenticatedPresignedUrl.service';
@@ -29,10 +28,8 @@ const LessonPreview = ({ LessonContent, setLessonContent, setPreviewOpen }) => {
         toast.success('Title Deleted')
     }
 
-    const handleTextDelete = (i) => {
-        const newText = LessonContent.text.filter((item, index) => { return index !== i }
-        )
-        setLessonContent({ ...LessonContent, text: newText })
+    const handleTextDelete = () => {    
+        setLessonContent({ ...LessonContent, text: '' })
         toast.success("Text deleted")
     }
 
@@ -157,15 +154,11 @@ const LessonPreview = ({ LessonContent, setLessonContent, setPreviewOpen }) => {
                             color: bannerImg ? `rgb(250,250,250)` : 'rgb(100,100,100)'
                         }}>
                             {
-                                LessonContent.text && LessonContent.text.map((text, index) => {
-                                    return (<div className={styles.textDiv}>
-                                        <Typography className={styles.paragraph} variant='h6' >{text}</Typography>
-                                        {isEditing ?
-                                            <span className={styles.deleteIcon}
-                                                onClick={() => handleTextDelete(index)}><DeleteIcon /></span>
-                                            : null}
-                                    </div>)
-                                })
+                                LessonContent.text && (
+                                    <div className={styles.paradiv} style={{ color: bannerImg ? `rgb(250,250,250)` : 'rgb(100,100,100)' }}>
+                                            <div dangerouslySetInnerHTML={{ __html: LessonContent.text }} />
+                                    </div>
+                                )
                             }
                         </div>
                     }
@@ -216,7 +209,6 @@ const LessonPreview = ({ LessonContent, setLessonContent, setPreviewOpen }) => {
                                 modifiedVideos.map((video) => {
                                     return <div className={styles.reactplayerDiv}>
                                         <VideoComponent url={video.url} name={video.name} />
-                                        <Typography variant='h6'>{video.name}</Typography>
                                         {isEditing ?
                                             <span className={styles.deleteIcon}
                                                 onClick={() => handleDeleteVideo(video.url)}><DeleteIcon /></span>

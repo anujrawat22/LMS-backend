@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const { login, signup, forgetPassword, resetPassword, verifyOTP, userDetails, userdetailsbyId, downloadCSV, sendEmail, updaterole, ImportCSV, addStudent, checkUserCourse, deleteUser, logout, checkAuth, refreshAccessToken, UserCourses, verifyUser, SendVerificationEmail, GenerateLoginOTP } = require('../controllers/UserController')
+const { login, signup, forgetPassword, resetPassword, verifyOTP, userDetails, userdetailsbyId, downloadCSV, sendEmail, updaterole, ImportCSV, addStudent, checkUserCourse, deleteUser, logout, checkAuth, refreshAccessToken, UserCourses, verifyUser, SendVerificationEmail, GenerateLoginOTP, resendOTP } = require('../controllers/UserController')
 const { Authorize } = require('../middlewares/Authorization.middleware')
 const { Authenticate } = require('../middlewares/Authenticate.middleware')
 const multer = require('multer')
@@ -18,9 +18,7 @@ UserRouter.post("/send/verificationemail", SendVerificationEmail)
 
 UserRouter.post("/generate/loginOTP", GenerateLoginOTP)
 
-
-
-
+UserRouter.post("/resendOTP", resendOTP)
 
 UserRouter.post("/refresh/accessToken", refreshAccessToken)
 
@@ -40,7 +38,6 @@ UserRouter.get("/all", userDetails)
 
 UserRouter.get("/detail/:id", userdetailsbyId)
 
-UserRouter.get("/download", downloadCSV)
 
 UserRouter.post("/sendEmail", sendEmail)
 

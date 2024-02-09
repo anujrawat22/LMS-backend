@@ -16,7 +16,6 @@ CourseRouter.use(Authenticate)
 CourseRouter.post("/create", CreateCourse)
 
 
-
 CourseRouter.use(Authorize(['admin', 'superadmin']))
 
 

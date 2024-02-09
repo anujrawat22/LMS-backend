@@ -13,6 +13,7 @@ import Signup from '../pages/Signup/Signup'
 import UserCourses from '../pages/UserCourses/UserCourses'
 import Profile from '../pages/Profile/Profile'
 import AuthenticatedRoute from './AuthenticatedRoute'
+import EditCourse from '../pages/EditCourse/EditCourse'
 
 const AllRoutes = () => {
     return (
@@ -22,7 +23,7 @@ const AllRoutes = () => {
                 <Route path='/courses' element={<Courses />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/signup' element={<Signup />} />
-                <Route path='/CourseDetails/:id/section/:sectionId/lesson/:lessonId' element={<CourseDetails />} />
+                <Route path='/CourseDetails/:id/:sectionId/:lessonId' element={<CourseDetails />} />
                 <Route path='/chapters/:id' element={<CourseChapters />} />
                 <Route element={<AuthenticatedRoute />}>
                     <Route path='/myCourses' element={<UserCourses />} />
@@ -32,6 +33,7 @@ const AllRoutes = () => {
                     <Route path='/admin/dashboard' element={<AdminDashboard />} />
                     <Route path='/student/:id' element={<UserDetails />} />
                     <Route path='/admin/Addcourse' element={<AddCourses />} />
+                    <Route path='/editcourse/:id' element={<EditCourse />} />
                 </Route>
             </Routes>
         </>

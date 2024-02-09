@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const LessonSchema = new mongoose.Schema({
     Title: { type: String },
-    text: [{ type: String }],
+    text: { type: String },
     images: [{ type: String }],
     videos: [{
         name: { type: String },

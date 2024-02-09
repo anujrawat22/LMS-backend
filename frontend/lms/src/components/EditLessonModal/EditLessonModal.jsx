@@ -14,13 +14,18 @@ import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import toast, { Toaster } from 'react-hot-toast';
 import PreviewEditLesson from '../PreviewEditLesson/PreviewEditLesson';
 import { UpdateLesson } from '../../services/updateLesson.service';
-import { useAuth } from '../../Contexts/AuthContext';
 import Swal from 'sweetalert2';
 import PropTypes from 'prop-types';
 import LinearProgress from '@mui/material/LinearProgress';
 import Box from '@mui/material/Box';
 import config from '../../config.json';
 import axios from 'axios'
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Editor } from "react-draft-wysiwyg";
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import { EditorState, ContentState, convertFromHTML, convertToRaw } from 'draft-js';
+import draftToHtml from 'draftjs-to-html';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -58,7 +63,6 @@ LinearProgressWithLabel.propTypes = {
 };
 
 const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCourseData, setData }) => {
-    console.log(sectionId)
     const [contentType, setContentType] = useState('text')
     const initialdata = {
         _id: Data._id || null,
@@ -68,11 +72,10 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
         images: Data.images || [],
         isfree: Data.isfree || false,
         pptUrl: Data.pptUrl || '',
-        text: Data.text || [],
+        text: Data.text || '',
         videos: Data.videos || []
     }
     const [LessonData, setLessonData] = useState(initialdata)
-    const [text, setText] = useState('')
     const [videourl, setVideoUrl] = useState({
         url: "",
         name: ''
@@ -84,24 +87,23 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
     const [preview, setPreview] = useState(false)
     const [hasChanges, setHasChanges] = useState(false);
     const [progress, setProgress] = React.useState(0);
-    const [isUploading, setIsuplaoding] = useState(false)
+    const [isUploading, setIsuploading] = useState(false)
     const [uploadController, setUploadController] = useState(null);
+    const navigate = useNavigate();
+    const [editorState, setEditorState] = useState(EditorState.createEmpty())
+
 
     const handleCancelUpload = () => {
         if (uploadController) {
             uploadController.abort();
-            setIsuplaoding(false);
+            setIsuploading(false);
             setProgress(0);
         }
     };
 
     const handleTextadd = () => {
-        if (!text) {
-            return toast.error("Please enter some text")
-        }
-        setLessonData({ ...LessonData, text: [...LessonData.text, text] })
-        toast.success("Text added")
-        setText('')
+        const htmlContent = draftToHtml(convertToRaw(editorState.getCurrentContent()));
+        setLessonData({ ...LessonData, text: htmlContent })
         setHasChanges(true)
     }
 
@@ -119,36 +121,46 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
     const handleAddVideo = async (e) => {
         const toastpromise = toast.loading("Uploading Video")
         const file = e.target.files[0];
-
         if (file) {
-
             try {
+                setIsuploading(true)
                 const url = `${config.recurring.domainUrl}/${config.recurring.post.uploadVideo}`;
+                const response = await axios.post(url, { originalname: file.name }, { withCredentials: true })
+                const videoId = response.data.videoId
+                const uploadCredentials = response.data.uploadCredentials
+
                 const formData = new FormData()
-                formData.append("file", file)
+                formData.append('policy', uploadCredentials.policy);
+                formData.append('key', uploadCredentials.key);
+                formData.append('x-amz-signature', uploadCredentials['x-amz-signature']);
+                formData.append('x-amz-algorithm', uploadCredentials['x-amz-algorithm']);
+                formData.append('x-amz-date', uploadCredentials['x-amz-date']);
+                formData.append('x-amz-credential', uploadCredentials['x-amz-credential']);
+                formData.append('success_action_status', '201');
+                formData.append('success_action_redirect', '');
+                formData.append('file', file);
+                const uploadUrl = uploadCredentials.uploadLink;
 
                 const newUploadController = new AbortController();
                 setUploadController(newUploadController);
 
-
-                setIsuplaoding(true)
                 const axiosConfig = {
                     onUploadProgress: (progressEvent) => {
                         const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-                        setProgress(progress)
+                        setProgress(progress);
                     },
                     signal: newUploadController.signal,
-                    withCredentials: true
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
                 };
 
-                const response = await axios.post(url, formData, axiosConfig)
-                console.log(response.data.url)
-                setLessonData({ ...LessonData, videos: [...LessonData.videos, { url: response.data.url, name: 'videoCipherVideoId', status: 'processing' }] })
-                toast.dismiss(toastpromise)
-                toast.success("Video Uploaded")
+                const responseUploadVideo = await axios.post(uploadUrl, formData, axiosConfig);
                 setHasChanges(true)
+                setLessonData({ ...LessonData, videos: [...LessonData.videos, { url: videoId, name: 'videoCipherVideoId' }] })
+                toast.success("Video Uploaded");
             } catch (error) {
-                if (error.name === 'CanceledError') {
+                if (error.name === 'AbortError') {
                     toast.dismiss(toastpromise);
                     toast.error('Video upload canceled');
                 } else {
@@ -156,8 +168,9 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
                     toast.error('Video upload failed');
                 }
             } finally {
-                setIsuplaoding(false);
+                toast.dismiss(toastpromise)
                 setProgress(0);
+                setIsuploading(false);
                 setUploadController(null);
             }
         }
@@ -345,7 +358,6 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
         setHasChanges(false)
         try {
             const response = await UpdateLesson(courseId, sectionId, { lesson: LessonData })
-            console.log(response)
             toast.dismiss(loader)
             toast.success(response.data.msg)
             fetchCourseData()
@@ -358,6 +370,7 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
         }
     }
 
+    
     const onClose = () => {
         setPreview(false)
     }
@@ -383,13 +396,47 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
             setData()
         }
     }
+
+    const onEditorStateChange = (newEditorState) => {
+        setEditorState(newEditorState)
+        setHasChanges(true)
+        handleTextadd()
+    }
+
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            if (hasChanges) {
+                const message = "You have unsaved changes. Are you sure you want to leave?";
+                (event || window.event).returnValue = message; // Standard
+                return message; // Legacy
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [hasChanges, navigate]);
+
+    useEffect(() => {
+        if (Data.text) {
+            const blocksFromHTML = convertFromHTML(LessonData.text);
+            const contentState = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks);
+            const editorStateFromHtml = EditorState.createWithContent(contentState);
+            setEditorState(editorStateFromHtml);
+        }
+    }, [])
+
     return (
         <div className={styles.EditLessonContainer}>
             <Toaster
                 position="top-right"
                 reverseOrder={false}
             />
-            {preview && <PreviewEditLesson onClose={onClose} setLessonData={setLessonData} LessonData={LessonData} sectionId={sectionId} courseId={courseId} />}
+            {preview && <PreviewEditLesson onClose={onClose} setLessonData={setLessonData} LessonData={LessonData} sectionId={sectionId} courseId={courseId} setHasChanges={setHasChanges} editorState={editorState} />}
             <div className={styles.LessonMainContainer}>
                 <div className={styles.BackButtonDiv}>
                     <Tooltip title="Go back">
@@ -416,12 +463,23 @@ const EditLessonModal = ({ handleCloseModel, Data, courseId, sectionId, fetchCou
                             {
                                 contentType === 'text' &&
                                 <div className={styles.addText}>
-                                    <textarea className={styles.textarea} value={text} onChange={(e) => setText(e.target.value)}></textarea>
-                                    <Button variant='outlined' sx={{
-                                        border: '1px solid rgb(145, 170, 48)',
-                                        color: 'rgb(145, 170, 48)',
-                                        '&:hover': { border: '1px solid rgb(145, 170, 48)' }
-                                    }} placeholder='Add text' onClick={handleTextadd}>Add</Button>
+                                    <Editor
+                                        // editorState={editorState}
+                                        toolbarClassName="toolbarClassName"
+                                        wrapperClassName="wrapperClassName"
+                                        editorClassName="editorClassName"
+                                        editorState={editorState}
+                                        onEditorStateChange={onEditorStateChange}
+                                        wrapperStyle={{
+                                            borderRadius: '10px',
+                                            boxShadow: 'rgba(0, 0, 0, 0.24) 0px 3px 8px',
+                                        }}
+                                        editorStyle={{
+                                            minHeight: '200px',
+                                            padding: "0px 15px"
+                                        }}
+
+                                    />
                                 </div>
                             }
                             {

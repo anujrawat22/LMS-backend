@@ -7,9 +7,7 @@ import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import ImageIcon from '@mui/icons-material/Image';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import AddToDriveIcon from '@mui/icons-material/AddToDrive';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useState } from 'react';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import toast from 'react-hot-toast';
 import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -22,9 +20,13 @@ import PropTypes from 'prop-types';
 import LinearProgress from '@mui/material/LinearProgress';
 import Box from '@mui/material/Box';
 import axios from 'axios';
+import { Editor } from "react-draft-wysiwyg";
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import { EditorState, ContentState, convertFromHTML, convertToRaw } from 'draft-js';
+import draftToHtml from 'draftjs-to-html';
+import { useEffect } from 'react';
 
 
-const label = { inputProps: { 'aria-label': 'Switch demo' } };
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
     clipPath: 'inset(50%)',
@@ -71,7 +73,7 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
     const token = userdata.token;
     const initialLessonState = Object.keys(LessonData).length > 0 ? LessonData : {
         Title: '',
-        text: [],
+        text: '',
         videos: [],
         images: [],
         pptUrl: '',
@@ -82,8 +84,7 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
     }
     const [contentType, setContentType] = useState('text')
     const [LessonContent, setLessonContent] = useState(initialLessonState)
-    const [text, setText] = useState('')
-    const [isEditingTitle, setisEditingTitle] = useState(true)
+
     const [videourl, setVideoUrl] = useState({
         name: '',
         url: ''
@@ -94,13 +95,14 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
     const [PPTurl, setPPturl] = useState('')
     const [ispreviewOpen, setPreviewOpen] = useState(false)
     const [progress, setProgress] = React.useState(0);
-    const [isUploading, setIsuplaoding] = useState(false)
+    const [isUploading, setIsuploading] = useState(false)
     const [uploadController, setUploadController] = useState(null);
+    const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
     const handleCancelUpload = () => {
         if (uploadController) {
             uploadController.abort();
-            setIsuplaoding(false);
+            setIsuploading(false);
             setProgress(0);
         }
     };
@@ -108,22 +110,8 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
         setLessonContent({ ...LessonContent, Title: e.target.value })
     }
 
-    const handleSaveTitle = () => {
-        if (LessonContent.Title === '') {
-            return toast.error("Please enter a valid title")
-        }
-        toast.success("Changes saved")
-        setisEditingTitle(false)
-    }
 
-    const handleTextAdd = () => {
-        if (text === '') {
-            return toast.error("Enter valid text")
-        }
-        setLessonContent({ ...LessonContent, text: [...LessonContent.text, text] })
-        setText('')
-        toast.success("Text added")
-    }
+
 
     const handlelessontype = () => {
         setLessonContent({ ...LessonContent, isfree: !LessonContent.isfree })
@@ -149,36 +137,53 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
         toast.success("Video Added")
     }
 
+
     const handleAddVideo = async (e) => {
         const toastpromise = toast.loading("Uploading Video")
         const file = e.target.files[0];
         if (file) {
             try {
+                setIsuploading(true)
                 const url = `${config.recurring.domainUrl}/${config.recurring.post.uploadVideo}`;
+                const response = await axios.post(url, { originalname: file.name }, { withCredentials: true })
+                const videoId = response.data.videoId
+                const uploadCredentials = response.data.uploadCredentials
+
                 const formData = new FormData()
-                formData.append("file", file)
+                formData.append('policy', uploadCredentials.policy);
+                formData.append('key', uploadCredentials.key);
+                formData.append('x-amz-signature', uploadCredentials['x-amz-signature']);
+                formData.append('x-amz-algorithm', uploadCredentials['x-amz-algorithm']);
+                formData.append('x-amz-date', uploadCredentials['x-amz-date']);
+                formData.append('x-amz-credential', uploadCredentials['x-amz-credential']);
+                formData.append('success_action_status', '201');
+                formData.append('success_action_redirect', '');
+
+
+                formData.append('file', file);
+
+                const uploadUrl = uploadCredentials.uploadLink;
 
                 const newUploadController = new AbortController();
                 setUploadController(newUploadController);
 
-
-                setIsuplaoding(true)
                 const axiosConfig = {
                     onUploadProgress: (progressEvent) => {
                         const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-                        setProgress(progress)
+                        setProgress(progress);
                     },
                     signal: newUploadController.signal,
-                    withCredentials: true
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
                 };
 
-                const response = await axios.post(url, formData, axiosConfig)
-                console.log(response.data.url)
-                setLessonContent({ ...LessonContent, videos: [...LessonContent.videos, { url: response.data.url, name: 'videoCipherVideoId', status: 'processing' }] })
-                toast.dismiss(toastpromise)
-                toast.success("Video Uploaded")
+                const responseUploadVideo = await axios.post(uploadUrl, formData, axiosConfig);
+
+                setLessonContent({ ...LessonContent, videos: [...LessonContent.videos, { url: videoId, name: 'videoCipherVideoId' }] })
+                toast.success("Video Uploaded");
             } catch (error) {
-                if (error.name === 'CanceledError') {
+                if (error.name === 'AbortError') {
                     toast.dismiss(toastpromise);
                     toast.error('Video upload canceled');
                 } else {
@@ -186,9 +191,10 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                     toast.error('Video upload failed');
                 }
             } finally {
-                setProgress(0)
-                setIsuplaoding(false)
-                setUploadController(null)
+                toast.dismiss(toastpromise)
+                setProgress(0);
+                setIsuploading(false);
+                setUploadController(null);
             }
         }
     }
@@ -234,7 +240,6 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                 toast.success("Image Uploaded");
             } catch (error) {
                 toast.dismiss(loadingToast)
-                console.log(error)
             }
         }
     }
@@ -256,9 +261,9 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
             try {
                 const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
                     method: "POST",
+                    credentials: 'include',
                     headers: {
                         "Content-type": "application/json",
-                        Authorization: `bearer ${token}`
                     }
                 })
                 const responseBody = await response.json();
@@ -306,7 +311,6 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
         const match = embedMediaUrl.match(/\/d\/(.*?)\/view/);
         const videoId = match && match[1];
         const newUrl = `https://drive.google.com/file/d/${videoId}/preview`
-        console.log(newUrl)
         setLessonContent({ ...LessonContent, embedMedia: newUrl })
         setEmbedMediaUrl('')
         toast.success('Media added')
@@ -314,25 +318,18 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
 
 
     const embedUrl = (url) => {
-        const parts = url.split('?'); // Split the URL at the question mark
-
-        // Check if the split resulted in two parts (indicating a valid URL with a query string)
+        const parts = url.split('?');
         if (parts.length === 2) {
             const baseUrl = parts[0];
             const query = parts[1];
 
-            // Create the new URL by replacing '/pub' with '/embed' in the base URL
             const newBaseUrl = baseUrl.replace('/pub', '/embed');
             const newUrl = `${newBaseUrl}?${query}`;
 
-            // Validate the new URL using the URL constructor
             try {
                 new URL(newUrl);
-                // If the URL is valid, update the slideUrl state with the new URL
                 return newUrl
             } catch (error) {
-                // Handle invalid URL (e.g., show an error message)
-                console.log(error)
                 toast.error('Invalid URL');
             }
         } else {
@@ -398,14 +395,46 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                 return section
             })
         })
-        toast.success('Lesson Updated')
         setLessonContent(initialLessonState)
         setOpen(false)
     }
+
+    const onEditorStateChange = (newEditorState) => {
+        setEditorState(newEditorState)
+        const htmlContent = draftToHtml(convertToRaw(newEditorState.getCurrentContent()));
+        setLessonContent(prevLessonContent => ({
+            ...prevLessonContent,
+            text: htmlContent,
+        }));
+    }
+
+
+
+    const handleBackButtonCLick = () => {
+        if (LessonData.LessonId) {
+            handleupdatelesson()
+        } else {
+            handleAddlesson()
+        }
+        setOpen(false)
+    }
+
+    useEffect(() => {
+        if (LessonData.LessonId && LessonData.text) {
+            const blocksFromHTML = convertFromHTML(LessonData.text);
+            const contentState = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks);
+            const editorStateFromHtml = EditorState.createWithContent(contentState);
+            setEditorState(editorStateFromHtml);
+        }
+    }, [LessonData.LessonId, LessonData.text]);
+
+
+
+
     return (
         <div className={styles.AddCourseModal}>
             <div className={styles.TitleDiv}>
-                <div className={styles.backButton} onClick={() => setOpen(false)}><ArrowBackIcon /></div>
+                <div className={styles.backButton} onClick={handleBackButtonCLick}><ArrowBackIcon /></div>
                 <div className={styles.Title}><Typography variant='h4'>Add Lesson</Typography></div>
                 <div className={styles.PreviewDiv} onClick={() => setPreviewOpen(true)}>Preview</div>
             </div>
@@ -413,22 +442,7 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                 <div className={styles.ContentDiv}>
                     <div className={styles.LessonTitleDiv}>
                         <div className={styles.TitlesubDiv}>
-                            {isEditingTitle ?
-                                <>
-                                    <TextField id="standard-basic" label="Title" variant="standard" value={LessonContent.Title} onChange={handletitleChange} />
-                                    <Button onClick={handleSaveTitle} sx={{
-                                        color: 'rgb(77,135,51)'
-                                    }}>
-                                        <CheckCircleIcon />
-                                    </Button>
-                                </>
-                                :
-                                <>
-                                    <Typography variant='h5'>Title - {LessonContent.Title}</Typography>
-                                    <Button onClick={() => setisEditingTitle(true)} sx={{
-                                        color: "rgb(77,135,51)"
-                                    }}><ModeEditIcon /></Button>
-                                </>}
+                            <TextField id="standard-basic" label="Title" variant="standard" value={LessonContent.Title} onChange={handletitleChange} />
                         </div>
                         <div className={styles.SwitchDiv}>
                             <Typography>Free</Typography>
@@ -440,11 +454,24 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
                             contentType === 'text' &&
                             <>
                                 <div className={styles.TextDiv}>
-                                    <textarea name="text" id="text" rows="3" value={text} onChange={(e) => setText(e.target.value)} className={styles.text} placeholder='Enter text'></textarea>
-                                    <Button variant='outlined' onClick={handleTextAdd} sx={{
-                                        color: 'rgb(77,135,51)',
-                                        border: '1px solid rgb(77,135,51)'
-                                    }}>Add</Button>
+                                    {/* <textarea name="text" id="text" rows="3" value={text} onChange={(e) => setText(e.target.value)} className={styles.text} placeholder='Enter text'></textarea> */}
+                                    <Editor
+                                        // editorState={editorState}
+                                        toolbarClassName="toolbarClassName"
+                                        wrapperClassName="wrapperClassName"
+                                        editorClassName="editorClassName"
+                                        editorState={editorState}
+                                        onEditorStateChange={onEditorStateChange}
+                                        wrapperStyle={{
+                                            borderRadius: '10px',
+                                            boxShadow: 'rgba(0, 0, 0, 0.24) 0px 3px 8px',
+                                        }}
+                                        editorStyle={{
+                                            minHeight: '200px',
+                                            padding: "0px 15px"
+                                        }}
+
+                                    />
                                 </div>
                             </>
                         }
@@ -658,7 +685,7 @@ const AddContent = ({ setOpen, setSections, sectionId, LessonData }) => {
             {
                 ispreviewOpen && <LessonPreview LessonContent={LessonContent} setLessonContent={setLessonContent} setPreviewOpen={setPreviewOpen} />
             }
-        </div>
+        </div >
     )
 }
 

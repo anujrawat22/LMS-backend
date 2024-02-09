@@ -12,7 +12,7 @@ const cors = require('cors')
 const { MediaRouter } = require('./routes/mediaRouter')
 const { UserCourseRouter } = require('./routes/UserCourseRouter')
 const cookieParser = require('cookie-parser');
-const { User } = require('./models/UserModel');
+const bodyParser = require('body-parser');
 
 app.use(express.json())
 
@@ -23,9 +23,12 @@ const allowedOrigin = [
 ]
 
 const corsOptions = {
-    origin: allowedOrigin,
+    // origin: allowedOrigin,  
     credentials: true,
 };
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 app.use(cors(corsOptions));
 

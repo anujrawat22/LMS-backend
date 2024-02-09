@@ -32,6 +32,7 @@ const AddCourses = () => {
     const [Description, setDescription] = useState('')
     const [isOpen, setOpen] = useState(false)
     const [LessonData, setLessonData] = useState({})
+    const [isAddingCourse, setIsAddingCourse] = useState(false)
     const handleRemoveSection = (id) => {
         const updatedSections = sections.filter((section) => section.sectionid !== id);
         setSections(updatedSections);
@@ -147,7 +148,7 @@ const AddCourses = () => {
         if (sections.length === 0) {
             return toast.error("Please add some content to the course")
         }
-
+        setIsAddingCourse(true)
         const payload = {
             title: courseTitle,
             thumbnail,
@@ -157,7 +158,6 @@ const AddCourses = () => {
         }
         try {
             const response = await AddCourse(payload, token)
-            // setAdding(false)
             setCourseTitle('')
             setSections([])
             setThumbnail('')
@@ -171,6 +171,8 @@ const AddCourses = () => {
         } catch (error) {
             console.log(error)
             toast.error("Something went wrong in creating the course")
+        } finally {
+            setIsAddingCourse(false)
         }
     }
 
@@ -286,7 +288,8 @@ const AddCourses = () => {
                             <Button style={{ marginTop: '2%' }} variant="contained" onClick={() => handleAddCourse()} sx={{
                                 backgroundColor: 'rgb(77,135,51)',
                                 border: '1px solid rgb(77,135,51)'
-                            }}>
+                            }}
+                                disabled={isAddingCourse}>
                                 Finish Adding Course
                             </Button>
                         </Paper>

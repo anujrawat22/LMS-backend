@@ -3,7 +3,6 @@ import './App.css';
 import AllRoutes from './components/AllRoutes';
 import AdminSideNavBar from './components/SideNavBar/sidenavbar';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import config from './config.json';
 import { checkUserAuth } from './services/checkUserAuth.service';
 import { useAuth } from './Contexts/AuthContext';
@@ -11,7 +10,6 @@ import { handleUserLogout } from './services/logout';
 
 
 function App() {
-  const navigate = useNavigate()
   const { login } = useAuth()
   const checkUserAuthentication = async () => {
     try {
@@ -20,11 +18,6 @@ function App() {
       if (response.status === 200) {
         const { name, role, avatar } = res.loggedInUser;
         login(name, role, avatar)
-        if (role === 'admin' || role === 'superadmin') {
-          navigate('/admin/dashboard')
-        } else {
-          navigate('/courses')
-        }
       } else if (response.status === 401) {
         refreshToken()
       } else {
@@ -50,11 +43,7 @@ function App() {
       if (res.status === 200) {
         const { name, role, avatar } = response.loggedInUser;
         login(name, role, avatar)
-        if (role === 'admin' || role === 'superadmin') {
-          navigate('/admin/dashboard')
-        } else {
-          navigate('/courses')
-        }
+        
       }
     } catch (error) {
     }

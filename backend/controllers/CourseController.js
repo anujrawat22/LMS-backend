@@ -1,5 +1,6 @@
 const { Course } = require("../models/CourseModel")
 const mongoose = require('mongoose');
+const axios = require('axios');
 
 exports.allCourses = async (req, res) => {
     let { page, limit, title } = req.query
@@ -34,7 +35,6 @@ exports.allCourses = async (req, res) => {
     }
 }
 
-
 exports.allCoursesInfo = async (req, res) => {
     try {
         const courseData = await Course.find().select("_id title")
@@ -43,9 +43,6 @@ exports.allCoursesInfo = async (req, res) => {
         res.status(500).send({ error: "Server error" })
     }
 }
-
-
-
 
 exports.CoursebyId = async (req, res) => {
     const { id } = req.params;
@@ -57,7 +54,6 @@ exports.CoursebyId = async (req, res) => {
         res.status(500).send({ error: "Server error" })
     }
 }
-
 
 exports.CreateCourse = async (req, res) => {
     const { title, thumbnail, sections, price, Description } = req.body;
@@ -87,7 +83,6 @@ exports.CreateCourse = async (req, res) => {
     }
 }
 
-
 exports.updateCourse = async (req, res) => {
     const { id } = req.params;
     const payload = req.body;
@@ -100,7 +95,6 @@ exports.updateCourse = async (req, res) => {
     }
 }
 
-
 exports.deleteCourse = async (req, res) => {
     const { id } = req.params;
     try {
@@ -108,7 +102,33 @@ exports.deleteCourse = async (req, res) => {
         if (!courseData) {
             return res.status(404).send({ error: "Course Data not found" })
         }
+
+        const videos = [];
+        courseData.sections.forEach((section) => {
+            section.subsections.forEach((lesson) => {
+                lesson.videos.forEach((video) => {
+                    if (video.name === 'videoCipherVideoId') {
+                        videos.push(video.url);
+                    }
+                });
+            });
+        });
+
+
         await Course.findByIdAndDelete(id)
+        if (videos.length > 0) {
+            const url = `${process.env.VIDEOCIPHER_URL}`
+            const axiosConfig = {
+                headers: {
+                    Authorization: `Apisecret ${process.env.VIDEOCIPHER_API_SECRET}`,
+                    'Content-Type': 'application/json',
+                },
+                params: { videos: videos.join(',') },
+            };
+
+            const response = await axios.delete(url, axiosConfig)
+        }
+
         res.status(200).send({ msg: `Course with id-${id} deleted` })
     } catch (error) {
         console.log(`Error in deleting course with id -${id} :`, error)
@@ -121,14 +141,11 @@ exports.updateLesson = async (req, res) => {
     const { courseId, sectionId } = req.params;
     const { lesson } = req.body;
     try {
-        console.log(sectionId)
         const course = await Course.findById(courseId);
 
         if (!course) {
             return res.status(404).send({ error: "Course doesn't exist" });
         }
-        console.log(course)
-
         const section = course.sections.id(sectionId);
         if (!section) {
             return res.status(404).send({ error: "Section doesn't exist in the course" });
@@ -167,9 +184,35 @@ exports.deleteSection = async (req, res) => {
             return res.status(404).send({ error: 'Section not found' });
         }
 
-        course.sections.pull({ _id: sectionId });
+        const section = course.sections[sectionIndex];
+
+        const videos = [];
+        section.subsections.forEach((lesson) => {
+            lesson.videos.forEach((video) => {
+                if (video.name === 'videoCipherVideoId') {
+                    videos.push(video.url);
+                }
+            });
+        });
+
+
+        course.sections.splice(sectionIndex, 1);
 
         await course.save();
+
+        if (videos.length > 0) {
+            const url = `${process.env.VIDEOCIPHER_URL}`
+            const axiosConfig = {
+                headers: {
+                    Authorization: `Apisecret ${process.env.VIDEOCIPHER_API_SECRET}`,
+                    'Content-Type': 'application/json',
+                },
+                params: { videos: videos.join(',') },
+            };
+
+            const response = await axios.delete(url, axiosConfig)
+        }
+
         res.status(200).send({ msg: "Section deleted", data: course })
     } catch (error) {
         console.error('Error deleting section:', error);
@@ -200,8 +243,31 @@ exports.deleteLesson = async (req, res) => {
             return res.status(404).send({ error: 'Lesson not found' });
         }
 
-        course.sections[sectionIndex].subsections.pull({ _id: lessonId });
+        const lesson = course.sections[sectionIndex].subsections[lessonIndex];
+
+
+        const videos = [];
+        lesson.videos.forEach((video) => {
+            if (video.name === 'videoCipherVideoId') {
+                videos.push(video.url);
+            }
+        });
+
+        course.sections[sectionIndex].subsections.splice(lessonIndex, 1);
         await course.save();
+
+        if (videos.length > 0) {
+            const url = `${process.env.VIDEOCIPHER_URL}`
+            const axiosConfig = {
+                headers: {
+                    Authorization: `Apisecret ${process.env.VIDEOCIPHER_API_SECRET}`,
+                    'Content-Type': 'application/json',
+                },
+                params: { videos: videos.join(',') },
+            };
+
+            const response = await axios.delete(url, axiosConfig)
+        }
 
         res.status(200).send({ msg: "Lesson deleted", data: course })
     } catch (error) {

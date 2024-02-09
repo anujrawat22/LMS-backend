@@ -3,9 +3,8 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import React, { useEffect, useState } from 'react';
 import styles from './Students.module.css';
 import { studentsData } from '../../services/studentdata.service';
-import { Autocomplete, Box, Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, Grid, IconButton, MenuItem, Paper, Select, TextField, Typography, DialogContentText, Tooltip } from '@mui/material';
-import { Link, useNavigate, redirect } from 'react-router-dom';
-import { CSVDownload } from '../../services/csvDownload.service';
+import { Autocomplete, Box, Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, Grid, IconButton, MenuItem, Paper, Select, TextField, Typography, DialogContentText } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 import { sendEmail } from '../../services/sendEmail.service';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../../Contexts/AuthContext';
@@ -17,7 +16,6 @@ import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { ImportCSV } from '../../services/addStudentsCSV.service';
 import ClearIcon from '@mui/icons-material/Clear';
-import { getCourseData } from '../../services/courseData.service';
 import { AddStudentManually } from '../../services/addStudentManually.service';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -55,10 +53,6 @@ const Students = () => {
     const [studentList, setStudentList] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(10)
-    const [totalDocuments, setTotalDocuments] = useState(0)
-    const [totalPages, setTotalPages] = useState(0)
-    const [filter, setFilter] = useState({ name: '', email: '' })
     const [checkedUsers, setCheckedUsers] = useState({});
     const [open, setOpen] = useState(false)
     const [selectedRowId, setSelectedRowId] = useState(null);
@@ -104,11 +98,9 @@ const Students = () => {
     const fetchData = async () => {
         try {
             setIsLoading(true)
-            const response = await studentsData(`page=${page}&limit=${limit}&name=${filter.name}&email=${filter.email}`, token)
-            let { totalPage, totalDocuments } = response.data;
+            const response = await studentsData()
             setStudentList(response.data.data)
-            setTotalPages(+totalPage)
-            setTotalDocuments(+totalDocuments)
+
             setIsLoading(false)
         } catch (error) {
         }
@@ -314,7 +306,7 @@ const Students = () => {
 
     useEffect(() => {
         fetchData()
-    }, [page, limit])
+    }, [])
 
     return (
         <>
@@ -371,13 +363,12 @@ const Students = () => {
                     </Backdrop> :
                         <Paper elevation={10} sx={{ padding: "10px" }}>
                             <DataGrid
-                                loading={studentList.length === 0}
+                                loading={studentList?.length === 0}
                                 disableSelectionOnClick={true}
                                 rows={rows}
                                 pagination
                                 columns={columns}
                                 page={page}
-                                pageSize={limit}
                                 paginationMode='server'
                                 onPaginationModelChange={(newPage) => setPage(newPage)}
                                 slots={{
@@ -417,7 +408,6 @@ const generateUniqueId = () => {
 };
 
 const AddStudentDialog = ({ open, onClose, fetchData, courseData }) => {
-    const [showLoader, setShowLoader] = React.useState(false);
     const [showHideSections, setShowHideSections] = React.useState(true);
     const [enrollCheckbox, setEnrollCheckbox] = React.useState(false);
     const [confirmCheckbox, setConfirmCheckbox] = React.useState(false);
@@ -638,16 +628,6 @@ const AddStudentDialog = ({ open, onClose, fetchData, courseData }) => {
                                 </Grid>
                             </Box>
                         </Grid>
-                            :
-                            <></>
-                    }
-                    {
-                        showLoader ?
-                            <Typography sx={{ mt: "2px" }}>
-                                <div style={{ display: "flex", justifyContent: "center" }}>
-                                    <CircularProgress color="primary" size={50} thickness={4} />
-                                </div>
-                            </Typography>
                             :
                             <></>
                     }

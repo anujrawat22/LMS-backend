@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-function generateVerificationToken(userId) {
+function generateVerificationToken(userdata) {
     const secretKey = process.env.VERIFICATION_TOKEN_KEY;
     const expiresIn = '1d';
 
-    const token = jwt.sign({ userId }, secretKey, { expiresIn });
+    const token = jwt.sign(userdata, secretKey, { expiresIn });
     return token;
 }
 

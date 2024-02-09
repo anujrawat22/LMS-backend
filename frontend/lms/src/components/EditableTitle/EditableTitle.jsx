@@ -1,14 +1,13 @@
 import React, { useState } from 'react'
 import styles from './EditableTitle.module.css'
-import { Box, Button, Container, Grid, Input, MenuItem, TextField, Typography, Tooltip, IconButton } from '@mui/material';
+import { Box, Button, Container, Grid, MenuItem, TextField, Typography, Tooltip, IconButton } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import config from '../../config.json';
-import { useAuth } from '../../Contexts/AuthContext';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -23,8 +22,7 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, setIsEditing, imageName, setImageName, Description, setDescription, setPrice, price }) => {
-    const { userdata } = useAuth()
-    const token = userdata.token
+
     const [thumbnailType, setthumbnailType] = useState(true)
     const [thumbnailUrl, setThumbnailUrl] = useState('')
     const currencies = [
@@ -74,14 +72,14 @@ const EditableTitle = ({ courseTitle, setCourseTitle, setThumbnail, isEditing, s
             try {
                 const response = await fetch(`${config.recurring.domainUrl}/${config.recurring.post.ImagePresignedUrl}?fileType=${fileType}`, {
                     method: "POST",
+                    credentials: 'include',
                     headers: {
                         "Content-type": "application/json",
-                        Authorization: `bearer ${token}`
+
                     }
                 })
                 const responseBody = await response.json();
                 const { uploadURL, Key } = responseBody;
-                console.log(uploadURL)
                 if (!uploadURL) {
                     return toast.error("Error in uploading image")
                 }

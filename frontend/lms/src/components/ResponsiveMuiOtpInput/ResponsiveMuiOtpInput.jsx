@@ -1,6 +1,5 @@
 import React from 'react';
 import { MuiOtpInput } from 'mui-one-time-password-input';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import styled from 'styled-components';
 
 const MuiOtpInputStyled = styled(MuiOtpInput)`
@@ -9,8 +8,20 @@ width : 100%;
 gap : 10px;
 `;
 
+
+function matchIsNumeric(text) {
+    const num = Number(text)
+    const isNumber = typeof num === 'number'
+    return isNumber
+}
+
+
+
+const validateChar = (value, index) => {
+    return matchIsNumeric(value)
+}
+
 const ResponsiveMuiOtpInput = ({ value, onChange, length, autoFocus, onComplete }) => {
-    const isSmallScreen = useMediaQuery('(max-width: 480px)');
     return (
         <MuiOtpInputStyled
             value={value}
@@ -19,7 +30,8 @@ const ResponsiveMuiOtpInput = ({ value, onChange, length, autoFocus, onComplete 
             autoFocus={autoFocus}
             onComplete={onComplete}
             containerStyle={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}
-
+            validateChar={validateChar}
+            TextFieldsProps={{ type: 'number' }}
         />
     );
 }

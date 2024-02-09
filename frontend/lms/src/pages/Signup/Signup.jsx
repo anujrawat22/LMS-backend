@@ -15,7 +15,6 @@ import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { UserSignup } from "../../services/signup.service";
 import styles from './Signup.module.css'
-import EmailModal from '../../components/EmailModal/EmailModal';
 
 const darkTheme = createTheme({
     palette: {
@@ -34,28 +33,53 @@ const center = {
     alignItems: "center"
 };
 const Signup = () => {
-    const navigate = useNavigate();
+
     const [formData, setFromData] = useState({
         name: '',
         email: '',
     })
-    const [open, setOpen] = useState(false);
+
+    const [isSigningUp, setIsSigningUp] = useState(false)
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFromData({ ...formData, [name]: value })
     }
-    const handleSubmit = async (event) => {
 
+
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const handleSubmit = async (event) => {
         event.preventDefault();
+        const name = formData.name.trim(" ")
+        const email = formData.email.trim(" ")
+        const nameRegex = /^[a-zA-Z0-9\s]+$/;
+
+        if (name === '') {
+            return toast.error("Name is required");
+        }
+
+        if (!nameRegex.test(name)) {
+            return toast.error("Name should only contain letters, numbers, or a combination of both");
+        }
+        if (!isValidEmail(email)) {
+            return toast.error("Please enter a valid email address");
+        }
+
+        setIsSigningUp(true)
 
         const loader = toast.loading("Registering user")
         try {
-            const response = await UserSignup({ ...formData, role: 'user' })
+            const response = await UserSignup({ name, email, role: 'user' })
             toast.dismiss(loader)
             toast.success(response.data.msg)
         } catch (error) {
             toast.dismiss(loader)
             return toast.error(error.response.data.error)
+        } finally {
+            setIsSigningUp(false)
         }
     };
     return (
@@ -149,6 +173,7 @@ const Signup = () => {
                                                                 minWidth: "170px",
                                                                 backgroundColor: "#FF9A01",
                                                             }}
+                                                            disabled={isSigningUp}
                                                         >
                                                             Register
                                                         </Button>
@@ -164,17 +189,6 @@ const Signup = () => {
                                                             </Grid>
                                                         </Grid>
                                                     </Grid>
-                                                    <Grid item xs={12}>
-                                                        <Grid container justifyContent="flex-end">
-                                                            <Grid item xs={12} sm={12} md={12} lg={12} sx={{ display: "flex", ml: "2em", mr: "2em", mt: "1em" }} >
-
-                                                                <Button sx={{
-                                                                    color: 'white'
-                                                                }}
-                                                                    onClick={() => setOpen(true)}>Verify Email</Button>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Grid>
                                                 </Grid>
                                             </form>
                                         </Box>
@@ -185,9 +199,6 @@ const Signup = () => {
                     </Grid>
                 </Box>
             </div>
-            {
-                open ? <EmailModal open={open} setOpen={setOpen} /> : null
-            }
         </>
     )
 }

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import styles from './PreviewEditLesson.module.css';
-import { Button, IconButton, Tooltip, Typography, TextField } from '@mui/material';
+import { Button, IconButton, Tooltip, Typography } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ReactPlayer from 'react-player';
 import ImageVideoCarasouel from '../ImageVideoCarasouel/ImageVideoCarasouel';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { useEffect } from 'react';
 import useInterval from '../UseInterval/useInterval';
 import config from '../../config.json';
@@ -13,14 +12,19 @@ import { AuthenticatePresignedUrl } from '../../services/authenticatedPresignedU
 import { useAuth } from '../../Contexts/AuthContext';
 import fallbackImg from '../../assets/backimg.jpg'
 import VideoComponent from '../VideoComponent/VideoComponent';
+import draftToHtml from 'draftjs-to-html';
+import { convertToRaw } from 'draft-js';
+
+
+
 const s3BucketUrl = config.recurring.s3BucketUrl;
-const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, courseId }) => {
+const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, courseId, setHasChanges, editorState }) => {
     const { userdata } = useAuth()
     const token = userdata.token;
     const [isEditing, setIsEditing] = useState(false)
     const [modifiedImages, setModifiedImages] = useState([])
-    const [modifiedVideos, setModifiedVideos] = useState([])
     const [bannerImg, setBannerImg] = useState('')
+    const htmlContent = draftToHtml(convertToRaw(editorState.getCurrentContent()));
     const handlePreviewClick = (e) => {
         e.stopPropagation();
     }
@@ -28,26 +32,59 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, cour
     const handleDeleteTitle = () => {
         setLessonData({ ...LessonData, Title: '' })
         toast.success("Title Deleted")
+        setHasChanges(true)
     }
 
-    const handleDeletetext = () => {
-        setLessonData({ ...LessonData, text: [] })
-        toast.success("Text Deleted")
+
+    const DeleteVCvideo = async (video) => {
+        try {
+            const url = `${config.recurring.domainUrl}/${config.recurring.delete.deleteVCvideo}`
+            const body = { videos: [video] }
+            const res = await fetch(url, {
+                method: "DELETE",
+                body: JSON.stringify(body),
+                credentials: 'include',
+                headers: {
+                    'Content-type': "Application/json"
+                }
+            })
+            const response = await res.json()
+            if (res.status === 200) {
+                return true
+            }
+            return false
+        } catch (error) {
+            return false
+        }
     }
 
-    const handleDeleteVideo = (url) => {
+    const handleDeleteVideo = async (video) => {
+        const { url, name } = video;
+        const loading = toast.loading("Deleting video")
+        let isVideoDeleted;
+        if (name === 'videoCipherVideoId') {
+            isVideoDeleted = await DeleteVCvideo(url)
+        }
+
+        if (!isVideoDeleted) {
+            return;
+        }
         setLessonData({ ...LessonData, videos: LessonData.videos.filter((video) => video.url !== url) })
+        toast.dismiss(loading)
         toast.success("Video Deleted")
+        setHasChanges(true)
     }
 
     const handleDeleteppt = () => {
         setLessonData({ ...LessonData, pptUrl: '' })
         toast.success('PPT deleted')
+        setHasChanges(true)
     }
 
-    const handleDeletevideo = () => {
+    const handleDeletegdrivevideo = () => {
         setLessonData({ ...LessonData, embedMedia: '' })
         toast.success("Video deleted")
+        setHasChanges(true)
     }
 
     const modifyImages = async () => {
@@ -58,7 +95,6 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, cour
                         const response = await AuthenticatePresignedUrl(image.replace(`${s3BucketUrl}/`, ''), token);
                         return response.data.fileURL;
                     } catch (error) {
-                        console.error('Error fetching presigned URL:', error);
                         return fallbackImg;
                     }
                 } else {
@@ -66,29 +102,9 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, cour
                 }
             })
         );
-        console.log(updatedImages)
         setModifiedImages(updatedImages.filter((image) => image !== null))
     }
 
-    const modifyVideos = async () => {
-        const UpdateVideos = await Promise.all(
-            LessonData.videos.map(async (video) => {
-                if (isS3Video(video.url)) {
-                    try {
-                        const response = await AuthenticatePresignedUrl(video.url.replace(`${s3BucketUrl}/`, ''), token);
-                        return { url: response.data.fileURL, name: video.name };
-                    } catch (error) {
-                        console.error('Error fetching presigned URL:', error);
-                        return { url: null, name: null };
-                    }
-                } else {
-                    return video;
-                }
-            })
-        );
-        const videos = UpdateVideos.filter(video => video.url !== null)
-        setModifiedVideos(videos)
-    }
 
     const modifyBannerImage = async () => {
         if (isS3Image(LessonData.bannerimage)) {
@@ -96,16 +112,27 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, cour
                 const response = await AuthenticatePresignedUrl(LessonData.bannerimage.replace(`${s3BucketUrl}/`, ''), token);
                 setBannerImg(response.data.fileURL)
             } catch (error) {
-                console.log(error)
             }
         } else {
             setBannerImg(LessonData.bannerimage)
         }
     }
 
+    const handleDeleteImages = (i) => {
+        const updatedImages = [...modifiedImages];
+        updatedImages.splice(i, 1);
+        setModifiedImages(updatedImages);
+
+        const updatedLessonImages = [...LessonData.images];
+        updatedLessonImages.splice(i, 1);
+        setLessonData({ ...LessonData, images: updatedLessonImages });
+
+        setHasChanges(true);
+        toast.success("Image deleted");
+    };
+
     const fetchAndUpdateURLs = async () => {
         modifyImages();
-        modifyVideos();
         modifyBannerImage();
     };
 
@@ -128,7 +155,10 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, cour
                 <div className={styles.ContentPreview}>
                     <div style={{
                         backgroundImage: LessonData.bannerimage ? `url(${bannerImg})` : null,
-                        color: bannerImg ? 'white' : 'black'
+                        color: bannerImg ? 'white' : 'black',
+                        backgroundRepeat: "no-repeat",
+                        backgroundSize : 'cover',
+                        backgroundPosition : 'center'
                     }} className={styles.TitleContainer}>
                         {LessonData.Title &&
                             <div className={styles.TitleDiv}>
@@ -147,32 +177,29 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, cour
                             </div>
                         }
                         {
-                            LessonData.text.length > 0 &&
+                            htmlContent &&
                             <div className={styles.textDiv}>
-                                <div className={styles.TextmainDiv}>
-                                    {
-                                        LessonData.text.map((text) => {
-                                            return <p className={styles.Para}>{text}</p>
-                                        })
-                                    }
+                                <div className={styles.TextmainDiv} dangerouslySetInnerHTML={{ __html: htmlContent }}>
                                 </div>
-
-                                {isEditing &&
-                                    <Tooltip title='Delete'>
-                                        <IconButton onClick={handleDeletetext}>
-                                            <DeleteIcon sx={{
-                                                color: 'rgb(77,135,51)'
-                                            }} />
-                                        </IconButton>
-                                    </Tooltip>
-                                }
                             </div>
                         }
                     </div>
                     {
                         modifiedImages.length > 0 && <div className={styles.ImageDivContainer}>
                             {
-                                isEditing ? <div className={styles.ImageDiv}>
+                                isEditing ? <div className={styles.EditImageDivMain}>{
+                                    modifiedImages.map((img, index) => {
+                                        return <div className={styles.editImgDivs}>
+                                            <img src={img} alt="editimg" />
+                                            <Tooltip
+                                                title='Delete'
+                                            >
+                                                <DeleteIcon sx={{
+                                                    cursor: 'pointer'
+                                                }} onClick={() => handleDeleteImages(index)} />
+                                            </Tooltip>
+                                        </div>
+                                    })}
                                 </div> : <div className={styles.ImageCarousalDiv}>
                                     <ImageVideoCarasouel allImages={[...modifiedImages]} />
                                 </div>
@@ -180,16 +207,16 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, cour
                         </div>
                     }
                     {
-                        modifiedVideos.length > 0 &&
+                        LessonData.videos.length > 0 &&
                         <div className={styles.VideoDiv}>
                             {
-                                modifiedVideos.map((video) => {
+                                LessonData.videos.map((video) => {
                                     return <div className={styles.PlayerDiv}>
                                         <VideoComponent url={video.url} name={video.name} sectionId={sectionId} courseId={courseId} data={LessonData} />
 
                                         {isEditing &&
                                             <Tooltip title='Delete video'>
-                                                <IconButton onClick={() => handleDeleteVideo(video.url)}>
+                                                <IconButton onClick={() => handleDeleteVideo(video)}>
                                                     <DeleteIcon sx={{
                                                         color: "rgb(77, 135, 51)"
                                                     }} />
@@ -222,7 +249,7 @@ const PreviewEditLesson = ({ LessonData, onClose, setLessonData, sectionId, cour
                             <iframe src={LessonData.embedMedia} frameborder="0" className={styles.embedMedia} title='embedMedia'></iframe>
                             {isEditing &&
                                 <Tooltip title='Delete Video'>
-                                    <IconButton onClick={handleDeletevideo}>
+                                    <IconButton onClick={handleDeletegdrivevideo}>
                                         <DeleteIcon sx={{
                                             color: "rgb(77, 135, 51)"
                                         }} />

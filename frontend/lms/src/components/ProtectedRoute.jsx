@@ -4,6 +4,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 
 const ProtectedRoute = ({ children, roles }) => {
     const { userdata } = useAuth()
+    const {isAuthenticated} = userdata;
     
     const hasPermission = () => {   
             return roles.includes(userdata.role)
@@ -12,7 +13,7 @@ const ProtectedRoute = ({ children, roles }) => {
     return (
         <>
             {
-                hasPermission() ? <Outlet /> : <Navigate to='/login' />
+                hasPermission() ? <Outlet /> : <Navigate to={isAuthenticated ? '/courses' : '/login'} />
             }
         </>
     )

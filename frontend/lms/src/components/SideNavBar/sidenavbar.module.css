@@ -5,20 +5,32 @@
 }
 
 .Usernavigations {
-  width: 15%;
+  width: 26%;
   display: flex;
   align-items: center;
   justify-content: space-around;
   color: white;
+  font-size: 17px
 }
 
 .UserNavs {
   display: none;
 }
 
+.routerLink {
+  text-decoration: none;
+  color: white;
+}
+
+.activeLink {
+  text-decoration: none;
+  color: rgb(180, 211, 59);
+  font-size: 19px;
+}
+
 @media screen and (max-width: 1020px) {
   .Usernavigations {
-    width: 25%;
+    width: 40%;
   }
 }
 

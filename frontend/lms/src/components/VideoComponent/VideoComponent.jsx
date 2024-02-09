@@ -4,7 +4,6 @@ import { getVideoUrl } from '../../services/generateVideoUrl.service';
 import { generateAuthVideoUrl } from '../../services/generateAuthvideoUrl.service';
 
 const VideoComponent = ({ url, name, data, courseId, sectionId }) => {
-    console.log(url)
     const [videoUrl, setVideoUrl] = useState('')
     const [isVideoCipherVideo, setIsVideoCipherVideo] = useState(false);
 

@@ -1,5 +1,5 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import { Accordion, AccordionDetails, AccordionSummary, Grid, IconButton, Tooltip, Typography, useMediaQuery } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import styles from './courseDetails.module.css';
 import { GridMenuIcon } from '@mui/x-data-grid';
@@ -13,6 +13,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { grey } from '@mui/material/colors';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import NotesIcon from '@mui/icons-material/Notes';
+import { MuiBackdrop } from '../MuiBackdrop';
+import { CheckUserCourses } from '../../services/checkUserCourse.service';
 
 const drawerBleeding = -100;
 
@@ -40,6 +42,16 @@ export default function CourseDetails() {
     const [toggleSwapbleDrawer, setToggleSwapbleDrawer] = useState(false)
     const [Lessondata, setLessonData] = useState({})
     const [selectedLessonId, setSelectedLessonId] = useState(null);
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const [userHasCourse, setUserHasCourse] = useState(false)
+    const checkforUserCourse = async () => {
+        try {
+            const response = await CheckUserCourses(id)
+            setUserHasCourse(response.data.hasCourse)
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
 
     const fetchData = async () => {
@@ -50,20 +62,22 @@ export default function CourseDetails() {
             const LessonSection = Sections.find(section => section._id === sectionId)
             const lessonData = LessonSection.subsections.find(lesson => lesson._id === lessonId)
             setLessonData(lessonData)
+            setIsDataLoading(false)
         } catch (error) {
             console.log(error);
         }
     }
 
     const handleLessonClick = async (sectionId, lessonId) => {
+        setIsDataLoading(true)
         try {
-
             const response = await GetCourseDetails(id);
             const Sections = response.data.data.sections;
             const LessonSection = Sections.find(section => section._id === sectionId);
             const newLessonData = LessonSection.subsections.find(subsection => subsection._id === lessonId);
             setLessonData(newLessonData);
-            navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`);
+            navigate(`/CourseDetails/${id}/${sectionId}/${lessonId}`);
+            setIsDataLoading(false)
         } catch (error) {
             console.log(error);
         }
@@ -78,69 +92,80 @@ export default function CourseDetails() {
         setSelectedLessonId(lessonId);
     }, [lessonId, sectionId, id])
 
+    useEffect(() => {
+        checkforUserCourse()
+    }, [])
+
+
+
 
 
 
     return (
-        <Grid container className={styles.MainGridContainer} >
-            <div className={styles.DrawerIcon}>
-                <Tooltip title='Lessons'>
-                    <IconButton onClick={() => setToggleSwapbleDrawer(!toggleSwapbleDrawer)}>
-                        <GridMenuIcon />
-                    </IconButton>
-                </Tooltip>
-            </div>
-            <Grid className={`${styles.coursesectionssidenavbar} ${isSidebarOpen ? 'open' : ''}`} item xs={12} sm={12} md={3} sx={{ background: "#f9fbfd", paddingLeft: "8px", paddingRight: "8px" }}>
-                <Tooltip title="Go Back" arrow placement="right">
-                    <IconButton>
-                        <ArrowBackIosIcon onClick={handleNavigateToCourseDetails} />
-                    </IconButton>
-                </Tooltip>
-                {
-                    courseData.sections.length > 0 && courseData.sections.map((sections, index) => {
-                        return <Accordion key={index} expanded={true} sx={{ background: "transparent" }} >
-                            <AccordionSummary
-                                aria-controls="panel1a-content"
-                                sx={{ background: "transparent" }}
-                            >
-                                <Typography variant='h6' sx={{ background: "transparent" }} > {sections.sectionTitle}</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails id={`section-${sections._id}`}>
-                                {
-                                    sections.subsections.length > 0 && sections.subsections.map((subsection, index) => {
-                                        return <div className={styles.LessonAccordance}
-                                            key={subsection._id}
-                                            onClick={() => handleLessonClick(sections._id, subsection._id, subsection)}
-                                            id={`lesson-${subsection._id}`}
-                                            style={{
-                                                backgroundColor: subsection._id === selectedLessonId ? 'rgb(180, 211, 59)' : 'transparent',
-                                                color: subsection._id === selectedLessonId ? 'white' : 'black',
-                                            }}><NotesIcon fontSize='small' sx={{
-                                                marginRight: '10px'
-                                            }} />{subsection.Title}</div>
-                                    })
-                                }
-                            </AccordionDetails>
-                        </Accordion>
-                    })
-                }
-                {/* </Paper> */}
+        <> isDataLoading ?
+            <MuiBackdrop open={isDataLoading} setOpen={setIsDataLoading} />
+            :
+            <Grid container className={styles.MainGridContainer} >
+                <div className={styles.DrawerIcon}>
+                    <Tooltip title='Lessons'>
+                        <IconButton onClick={() => setToggleSwapbleDrawer(!toggleSwapbleDrawer)}>
+                            <GridMenuIcon />
+                        </IconButton>
+                    </Tooltip>
+                </div>
+                <Grid className={`${styles.coursesectionssidenavbar} ${isSidebarOpen ? 'open' : ''}`} item xs={12} sm={12} md={3} sx={{ background: "#f9fbfd", paddingLeft: "8px", paddingRight: "8px" }}>
+                    <Tooltip title="Go Back" arrow placement="right">
+                        <IconButton>
+                            <ArrowBackIosIcon onClick={handleNavigateToCourseDetails} />
+                        </IconButton>
+                    </Tooltip>
+                    {
+                        courseData.sections.length > 0 && courseData.sections.map((sections, index) => {
+                            return <Accordion key={index} expanded={true} sx={{ background: "transparent" }} >
+                                <AccordionSummary
+                                    aria-controls="panel1a-content"
+                                    sx={{ background: "transparent" }}
+                                >
+                                    <Typography variant='h6' sx={{ background: "transparent" }} > {sections.sectionTitle}</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails id={`section-${sections._id}`}>
+                                    {
+                                        sections.subsections.length > 0 && sections.subsections.map((subsection, index) => {
+                                            return <div className={styles.LessonAccordance}
+                                                key={subsection._id}
+                                                onClick={() => handleLessonClick(sections._id, subsection._id, subsection)}
+                                                id={`lesson-${subsection._id}`}
+                                                style={{
+                                                    backgroundColor: subsection._id === selectedLessonId ? 'rgb(180, 211, 59)' : 'transparent',
+                                                    color: subsection._id === selectedLessonId ? 'white' : 'black',
+                                                }}><NotesIcon fontSize='small' sx={{
+                                                    marginRight: '10px'
+                                                }} />{subsection.Title}</div>
+                                        })
+                                    }
+                                </AccordionDetails>
+                            </Accordion>
+                        })
+                    }
+                    {/* </Paper> */}
+                </Grid>
+                <Grid item xs={12} sm={12} md={9} className={styles.maincontent} >
+                    {
+                        Object.keys(Lessondata).length > 0 ?
+                            <CourseDetailMainContent data={Lessondata} courseId={id} sectionId={sectionId}
+                                userHasCourse={userHasCourse} />
+                            :
+                            null
+                    }
+                </Grid>
+                {toggleSwapbleDrawer ? <SwipeableEdgeDrawer open={toggleSwapbleDrawer} setOpen={setToggleSwapbleDrawer} courseData={courseData} setLessonData={setLessonData} selectedLessonId={selectedLessonId} id={id} sectionId={sectionId} lessonId={lessonId} setIsDataLoading={setIsDataLoading} /> : null}
             </Grid>
-            <Grid item xs={12} sm={12} md={9} className={styles.maincontent} >
-                {
-                    Object.keys(Lessondata).length > 0 ?
-                        <CourseDetailMainContent data={Lessondata} courseId={id} sectionId={sectionId} />
-                        :
-                        null
-                }
-            </Grid>
-            {toggleSwapbleDrawer ? <SwipeableEdgeDrawer open={toggleSwapbleDrawer} setOpen={setToggleSwapbleDrawer} courseData={courseData} setLessonData={setLessonData} selectedLessonId={selectedLessonId} id={id} sectionId={sectionId} lessonId={lessonId} /> : null}
-        </Grid>
+        </>
     )
 }
 
 
-function SwipeableEdgeDrawer({ open, setOpen, courseData, setLessonData, selectedLessonId, id }) {
+function SwipeableEdgeDrawer({ open, setOpen, courseData, setLessonData, selectedLessonId, id, setIsDataLoading }) {
 
     const navigate = useNavigate()
     const toggleDrawer = (newOpen) => () => {
@@ -149,13 +174,15 @@ function SwipeableEdgeDrawer({ open, setOpen, courseData, setLessonData, selecte
 
 
     const handleLessonClick = async (sectionId, lessonId) => {
+        setIsDataLoading(true)
         try {
             const response = await GetCourseDetails(id);
             const Sections = response.data.data.sections;
             const LessonSection = Sections.find(section => section._id === sectionId);
             const newLessonData = LessonSection.subsections.find(subsection => subsection._id === lessonId);
             setLessonData(newLessonData);
-            navigate(`/CourseDetails/${id}/section/${sectionId}/lesson/${lessonId}`);
+            navigate(`/CourseDetails/${id}/${sectionId}/${lessonId}`);
+            setIsDataLoading(false)
         } catch (error) {
             console.log(error);
         }
@@ -202,7 +229,9 @@ function SwipeableEdgeDrawer({ open, setOpen, courseData, setLessonData, selecte
                                                     backgroundColor: subsection._id === selectedLessonId ? 'rgb(180, 211, 59)' : 'transparent',
                                                     color: subsection._id === selectedLessonId ? 'white' : 'black',
                                                     display: 'flex',
-                                                    alignItems: 'center'
+                                                    alignItems: 'center',
+                                                    cursor: 'pointer',
+                                                    margin: '20px 0px'
                                                 }}
                                             ><NotesIcon fontSize='small' sx={{
                                                 marginRight: '10px'

@@ -14,6 +14,9 @@ import Button from '@mui/material/Button';
 import styles from './Cards.module.css'
 import { authAllcourses } from '../../services/authAllcoursee.service';
 import ReplayIcon from '@mui/icons-material/Replay';
+import { MuiBackdrop } from '../MuiBackdrop';
+import toast, { Toaster } from "react-hot-toast";
+
 export default function Courses() {
 
     const { userdata } = useAuth()
@@ -22,6 +25,7 @@ export default function Courses() {
     const [totalPages, setTotalPages] = useState(1);
     const [title, setTitle] = useState('')
     const navigate = useNavigate()
+    const [isLoading, setIsLoading] = useState(true)
 
     const fetchData = async (page = 1, title = '') => {
         try {
@@ -31,6 +35,8 @@ export default function Courses() {
             setTotalPages(response.data.data.total_pages);
         } catch (error) {
             console.log(error)
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -44,11 +50,16 @@ export default function Courses() {
             }
         } catch (error) {
             console.log(error)
+        } finally {
+            setIsLoading(false)
         }
     }
 
 
     const handlecardClick = (id) => {
+        if (userdata.role === 'admin' || userdata.role === 'superadmin') {
+            return navigate(`/editcourse/${id}`)
+        }
         navigate(`/chapters/${id}`)
     }
 
@@ -57,16 +68,21 @@ export default function Courses() {
     };
 
     const handleSearchcourse = async () => {
-        if (title === '') return;
+        const searchTitle = title.trim(" ")
+        if (searchTitle === '') {
+            return toast.error("Enter a valid title")
+        }
+        setIsLoading(true)
         if (userdata.isAuthenticated) {
-            await fetchUserCourseData(1, title)
+            await fetchUserCourseData(1, searchTitle)
         } else {
-            fetchData(1, title);
+            fetchData(1, searchTitle);
         }
     }
 
     const handleResetCoursesData = async () => {
         setTitle('')
+        setIsLoading(true)
         if (userdata.isAuthenticated) {
             await fetchUserCourseData(1, '')
         } else {
@@ -85,6 +101,7 @@ export default function Courses() {
             } catch (error) {
                 console.error(error);
             }
+
         };
         fetchDataAndUserCourses();
     }, []);
@@ -92,7 +109,12 @@ export default function Courses() {
 
     return (
         <>
-            <Box sx={{ display: 'flex', alignItems: 'flex-end' , width : '100%' , height : '70px' }} className={styles.filters}>
+            <Toaster
+                position="top-right"
+                reverseOrder={false}
+            />
+            <Box sx={{ display: 'flex', alignItems: 'flex-end', width: '100%', height: '70px' }} className={styles.filters}>
+
                 <TextField id="input-with-sx" label="Find a product" variant="standard" value={title} onChange={(e) => setTitle(e.target.value)} />
                 <Button onClick={handleSearchcourse}><SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} /></Button>
                 <Button variant='outlined' startIcon={<ReplayIcon />} sx={{
@@ -105,27 +127,28 @@ export default function Courses() {
                     onClick={handleResetCoursesData}
                 >Reset</Button>
             </Box>
-                {
-                    <Grid container sx={{ padding: '0% 5%', rowGap: '30px',  boxSizing: 'border-box' , marginTop : '1%' }} spacing={5}>
-                        {
-                            courseData.length > 0 ? courseData.map((data) => {
-                                return <Grid item md={6} sm={12} xs={12} lg={4} key={data._id} onClick={() => handlecardClick(data._id)} >
-                                    <CourseCard data={data} />
-                                </Grid>
-                            }) :
-                                <div style={{
-                                    width: '100dvw',
-                                    height: '100dvh',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <h1>No Courses</h1>
-                                </div>
-                        }
-                    </Grid>
-                }
-            
+
+            {isLoading ? <MuiBackdrop open={isLoading} setOpen={setIsLoading} /> :
+                <Grid container sx={{ padding: '0% 5%', rowGap: '30px', boxSizing: 'border-box', marginTop: '1%' }} spacing={5}>
+                    {
+                        courseData.length > 0 ? courseData.map((data) => {
+                            return <Grid item md={6} sm={12} xs={12} lg={4} key={data._id} onClick={() => handlecardClick(data._id)} >
+                                <CourseCard data={data} />
+                            </Grid>
+                        }) :
+                            <div style={{
+                                width: '100dvw',
+                                height: '100dvh',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <h1>No Courses</h1>
+                            </div>
+                    }
+                </Grid>
+            }
+
             <div className={styles.pagination}><Pagination count={totalPages} page={currentPage} onChange={handlePageChange} /></div>
         </>
     );
