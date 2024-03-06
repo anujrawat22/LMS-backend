@@ -43,10 +43,10 @@ app.use("/api/media", MediaRouter)
 
 app.use("/api/usercourses", Authenticate, UserCourseRouter)
 
-app.use(express.static(path.join(__dirname, '../frontend/lms/build')));
+app.use(express.static('./build'));
 
 app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend/lms/build/index.html'));
+    res.sendFile(path.resolve('./build'));
 });
 
 
