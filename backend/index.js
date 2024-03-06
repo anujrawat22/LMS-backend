@@ -19,11 +19,12 @@ app.use(express.json())
 const allowedOrigin = [
     'http://139.59.10.56',
     'https://lms-2nw3.onrender.com',
-    'http://localhost:3001'
+    'http://localhost:3001',
+    'https://lms-backend-seven-tau.vercel.app/Z'
 ]
 
 const corsOptions = {
-    // origin: allowedOrigin,  
+    origin: allowedOrigin,
     credentials: true,
 };
 
