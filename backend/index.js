@@ -24,7 +24,7 @@ const allowedOrigin = [
 ]
 
 const corsOptions = {
-    // origin: allowedOrigin,
+    origin: allowedOrigin,
     credentials: true,
 };
 
@@ -43,11 +43,11 @@ app.use("/api/media", MediaRouter)
 
 app.use("/api/usercourses", Authenticate, UserCourseRouter)
 
-app.use(express.static('./build'));
+// app.use(express.static(path.join(__dirname, '../frontend/lms/build')));
 
-app.get("*", (req, res) => {
-    res.sendFile(path.resolve('./build'));
-});
+// app.get("*", (req, res) => {
+//     res.sendFile(path.resolve(__dirname, '../frontend/lms/build/index.html'));
+// });
 
 
 app.listen(port, async () => {

@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import Login from '../pages/Login/Login'
 import AdminDashboard from '../pages/AdminDashboard/AdminDashboard'
 import AddCourses from './AddCourses/AddCourses'
@@ -19,7 +19,7 @@ const AllRoutes = () => {
     return (
         <>
             <Routes>
-                <Route path='/' element={<Courses />} />
+                <Route path='/' element={<Navigate to='/courses' />} />
                 <Route path='/courses' element={<Courses />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/signup' element={<Signup />} />
