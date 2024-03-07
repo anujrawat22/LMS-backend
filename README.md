@@ -1,0 +1,30 @@
+
+
+
+### Learning Managment System with features like DRM protection , admin dashboard , course CRUD , user CRUD.
+### It was an individual project and was completed in the internship period by me
+
+
+
+### I have used React.js , Node.js ,Express.js , MongoDB , AWS , Digital Ocean , Material UI creating the LMS.
+
+## Homepage
+
+<img width="934" alt="home_page" src="https://user-images.githubusercontent.com/51295793/217571503-af56812a-5a81-470b-bd17-c98b6758b449.png">
+
+## StayPage
+<img width="935" alt="stay_page" src="https://user-images.githubusercontent.com/51295793/217571232-fddb9ddf-dec4-4c5b-b233-9fe95e265150.png">
+
+## FlightPage
+<img width="895" alt="f_page" src="https://user-images.githubusercontent.com/51295793/217571965-f20a7d45-da1e-47e8-8a3a-03c630cf3f51.png">
+
+## AdminPage
+<img width="932" alt="Admin_page" src="https://user-images.githubusercontent.com/51295793/217572511-1e407306-6c9f-43b1-9c4e-e21e8b699b93.png">
+
+
+
+
+
+### client side :-https://mellow-moonbeam-a459bf.netlify.app/ 
+### admin side :- https://fabulous-biscotti-99e4f3.netlify.app/
+
